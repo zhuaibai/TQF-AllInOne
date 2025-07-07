@@ -587,7 +587,7 @@ namespace WpfApp1.Services
         public static byte[] getCRC(byte[] data)
         {
             byte[] CRC = new byte[2];
-            int value = xmodem_crc16_ccitt(data);//从数据包中获取校验码
+            int value = cal_crc_half(data,data.Length);//从数据包中获取校验码
             CRC[0] = U16_MSB(value);//获取高位校验码
             CRC[1] = U16_LSB(value);//获取地位校验码
             return CRC;

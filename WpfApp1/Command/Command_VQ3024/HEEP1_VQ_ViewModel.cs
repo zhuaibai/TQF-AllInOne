@@ -307,7 +307,7 @@ namespace WpfApp1.Command.Command_VQ3024
 
         #endregion
 
-        #region 锁机电压
+        #region 低电锁机电压
 
         //低电锁机电压
         private string _LowPowerLock;
