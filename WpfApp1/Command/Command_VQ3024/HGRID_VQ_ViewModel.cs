@@ -567,6 +567,12 @@ namespace WpfApp1.Command.Command_VQ3024
                 ReceiveException("空");
                 return;
             }
+            if (value.Substring(0, 2) == "-1")
+            {
+                ReceiveException("CRC校验异常");
+                AddLog(value);
+                return;
+            }
             string[] Values = value.Split(" ");
             try
             {
@@ -589,6 +595,7 @@ namespace WpfApp1.Command.Command_VQ3024
             catch (Exception ex)
             {
                 ReceiveException("HGRID异常");
+                AddLog($"{command}返回数据：{value}解析异常");
             }
         }
 

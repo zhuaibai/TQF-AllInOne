@@ -2811,6 +2811,12 @@ namespace WpfApp1.Command.Comand_GB3024
             {
                 return;
             }
+            if (value.Substring(0, 2) == "-1")
+            {
+                ReceiveException("CRC校验异常");
+                AddLog(value);
+                return;
+            }
             string[] Values = value.Split(" ");
             try
             {
@@ -2868,7 +2874,8 @@ namespace WpfApp1.Command.Comand_GB3024
             catch (Exception ex)
             {
                 //异常
-                return;
+                ReceiveException("HEEP1异常");
+                AddLog($"{command}返回数据：{value}解析异常");
             }
 
         }
@@ -3039,6 +3046,65 @@ namespace WpfApp1.Command.Comand_GB3024
 
             }
         }
+
+        /// <summary>
+        /// 接收异常使用方法
+        /// </summary>
+        /// <param name="exceptionDescription"></param>
+        private void ReceiveException(string exceptionDescription)
+        {
+            //工作模式
+            WorkingMode = exceptionDescription;
+            //总充电流
+            TotalChargeCurrent = exceptionDescription;
+            //市电总充电流
+            AC_ChargingCurrent = exceptionDescription;
+            //输入范围
+            AC_InputRange = exceptionDescription;
+            //PV馈能优先级
+            PV_FeedPriority = exceptionDescription;
+            //PV并网协议
+            PV_GridConnectionProtocol = exceptionDescription;
+            //过载重启
+            OverloadRestart = exceptionDescription;
+            //过温重启
+            OverTemperatureRestart = exceptionDescription;
+            //电池类型
+            BatteryType = exceptionDescription;
+            //系统频率
+            OutputSettingFrequency = exceptionDescription;
+            //充电优先顺序(充电模式)
+            ChargingPriority = exceptionDescription;
+            //蜂鸣器状态
+            BuzzerStatus = exceptionDescription;
+            //LCD背光
+            LCD_Backlight = exceptionDescription;
+            //过载转接旁路
+            OverloadByPassFunction = exceptionDescription;
+            //输出模式
+            OutputMode = exceptionDescription;
+            //BMS通讯控制功能
+            BMS_CommunicationControlFunction = exceptionDescription;
+            //BMS锁机电池容量
+            BMS_LowPower_SOC = exceptionDescription;
+            //BMS返回市电模式SOC(AC充电电池容量)
+            BMSreturns_to_AC_mode_SOC = exceptionDescription;
+            //恢复电池放电电池容量
+            BMS_returns_to_battery_mode_SOC = exceptionDescription;
+            //BMS低电压自动开机(逆变开机电池容量)
+            BMS_automatically_turns_on_after_low_power_SOC = exceptionDescription;
+            //强充电压
+            StrongChargeVoltage = exceptionDescription;
+            //浮充电压
+            FloatChargeVolage = exceptionDescription;
+            //低电锁机电压
+            LowPowerLock = exceptionDescription;
+            //并网电流
+            GridCurrent = exceptionDescription;
+            //并网功能
+            GridConnectedFunction = exceptionDescription;
+        }
+
 
         #endregion
     }

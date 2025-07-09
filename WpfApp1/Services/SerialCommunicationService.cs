@@ -381,7 +381,8 @@ namespace WpfApp1.Services
                     {
                         //CRC校验不通过
                         
-                        return "-1   "+ Encoding.ASCII.GetString(origin) + $"收到的CRC:{crcori[0]},{crcori[1]};校验值:{build[0]},{build[1]}";
+                        return "-1   "+ Encoding.ASCII.GetString(origin) + $"接收长度{origin.Length},期待长度{returnCount};\r收到的CRC:{crcori[0]},{crcori[1]};校验值:{build[0]},{build[1]}";
+                        
                     }
                 }
 

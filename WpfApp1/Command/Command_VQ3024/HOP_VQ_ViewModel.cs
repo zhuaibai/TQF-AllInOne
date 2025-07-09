@@ -743,6 +743,12 @@ namespace WpfApp1.Command.Command_VQ3024
             {
                 return;
             }
+            if (value.Substring(0, 2) == "-1")
+            {
+                ReceiveException("CRC校验异常");
+                AddLog(value);
+                return;
+            }
             string[] Values = value.Split(" ");
             try
             {
@@ -764,8 +770,30 @@ namespace WpfApp1.Command.Command_VQ3024
             }
             catch (Exception ex)
             {
-
+                ReceiveException("HOP异常");
+                AddLog($"{command}返回数据：{value}解析异常");
             }
+        }
+        /// <summary>
+        /// 接收异常使用方法
+        /// </summary>
+        /// <param name="exceptionDescription"></param>
+        private void ReceiveException(string exceptionDescription)
+        {
+            //输出电压
+            OutputVoltage = exceptionDescription;
+            //输出频率
+            OutputFrequency = exceptionDescription;
+            //无功功率
+            ReactivePower = exceptionDescription;
+            //有功功率
+            ActivePower = exceptionDescription;
+            //负载百分比
+            PercentageOfLoad = exceptionDescription;
+            ////逆变电流
+            //InverterCurrent = Values[7];
+            ////Mos管电流
+            //MOS_TubeCurrent = Values[8];
         }
     }
 }

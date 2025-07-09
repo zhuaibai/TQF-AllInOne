@@ -1537,6 +1537,8 @@ namespace WpfApp1.Command.Comand_GB3024
             if(value == "-1")
             {
                 ReceiveException("CRC异常");
+                AddLog(value);
+                return;
             }
             string[] Values = value.Split(" ");
             try
@@ -1582,7 +1584,8 @@ namespace WpfApp1.Command.Comand_GB3024
             }
             catch (Exception ex)
             {
-                return;
+                ReceiveException("HEEP2异常");
+                AddLog($"{command}返回数据：{value}解析异常");
             }
 
         }

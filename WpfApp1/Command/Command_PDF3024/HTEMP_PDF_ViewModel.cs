@@ -519,6 +519,7 @@ namespace WpfApp1.Command.Command_PDF3024
             if(value == "-1")
             {
                 ReceiveException("CRC异常");
+                AddLog(value);
                 return;
             }
             string[] Values = value.Split(" ");
@@ -544,6 +545,7 @@ namespace WpfApp1.Command.Command_PDF3024
             catch (Exception ex)
             {
                 ReceiveException("HTEMP异常");
+                AddLog($"{command}返回数据：{value}解析异常");
             }
         }
 

@@ -356,6 +356,7 @@ namespace WpfApp1.Command.Command_PDF3024
             if (value == "-1")
             {
                 ReceiveException("HIMSG2CRC异常");
+                AddLog(value);
                 return;
             }
             string[] Values = value.Split(" ");
@@ -373,7 +374,7 @@ namespace WpfApp1.Command.Command_PDF3024
             catch (Exception ex)
             {
                 ReceiveException("HIMSG2解析异常");
-                AddLog("HIMSG2解析异常"+ex.ToString());
+                AddLog($"{command}返回数据：{value}解析异常");
             }
         }
 

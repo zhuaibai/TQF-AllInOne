@@ -530,6 +530,12 @@ namespace WpfApp1.Command.Command_VQ3024
                 ReceiveException("空");
                 return;
             }
+            if (value == "-1")
+            {
+                ReceiveException("CRC异常");
+                AddLog(value);
+                return;
+            }
             string[] Values = value.Split(" ");
 
             try
@@ -561,6 +567,7 @@ namespace WpfApp1.Command.Command_VQ3024
             catch (Exception ex)
             {
                 ReceiveException("HBAT解析异常");
+                AddLog($"{command}返回数据：{value}解析异常");
             }
         }
 

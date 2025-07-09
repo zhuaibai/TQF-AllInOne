@@ -300,6 +300,7 @@ namespace WpfApp1.Command.Command_PDF3024
             if(value == "-1")
             {
                 ReceiveException("CRC异常");
+                AddLog(value);
                 return;
             }
             try
@@ -313,6 +314,7 @@ namespace WpfApp1.Command.Command_PDF3024
             catch (Exception ex)
             {
                 ReceiveException("HEEP3异常");
+                AddLog($"{command}返回数据：{value}解析异常");
             }
         }
 
