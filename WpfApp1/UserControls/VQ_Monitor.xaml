@@ -1410,7 +1410,7 @@
                             <TextBox
                                 Grid.Row="18"
                                 Grid.Column="2"
-                                ToolTip="暂无"
+                                ToolTip="00.0"
                                 Style="{StaticResource InputBox}"
                                 Text="{Binding HEEP2.BattLowAlarmVolt_Inputs, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
@@ -1476,7 +1476,7 @@
                             <TextBox
                                 Grid.Row="21"
                                 Grid.Column="2"
-                                ToolTip="00.0"
+                                ToolTip="00.00"
                                 Style="{StaticResource InputBox}"
                                 Text="{Binding HEEP2.BatteryBalancingVoltage_Inputs, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
@@ -1756,7 +1756,7 @@
                                 Grid.Row="6"
                                 Grid.Column="2"
                                 ItemsSource="{Binding HEEP1_VQ.BatteryTypeOptions}"
-                                SelectedItem="{Binding HEEP1_VQ.BatteryType_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                SelectedItem="{Binding HEEP1_VQ.BatteryTypeSelectedOption, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
                                 Grid.Row="6"

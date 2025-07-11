@@ -453,8 +453,14 @@ namespace WpfApp1.Command.Comand_GB3024
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("设置指令", BattLowAlarmVolt_Inputs);
-
+                    string receive = SerialCommunicationService.SendSettingCommand("PSLV", BattLowAlarmVolt_Inputs);
+                    if (receive.StartsWith("(ACK"))
+                    {
+                        AddLog("低电告警电压设置成功！");
+                    }else
+                    {
+                        AddLog("低电告警电压设置失败！");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -824,7 +830,14 @@ namespace WpfApp1.Command.Comand_GB3024
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
                     string receive = SerialCommunicationService.SendSettingCommand("PBEQV", BatteryBalancingVoltage_Inputs);
-
+                    if (receive.StartsWith("(ACK"))
+                    {
+                        AddLog("设置电池均衡电压成功！");
+                    }
+                    else
+                    {
+                        AddLog("设置电池均衡电压失败！");
+                    }
                 })
                 , timeoutCts.Token);
             }

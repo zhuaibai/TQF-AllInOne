@@ -47,10 +47,10 @@
     <s:String x:Key="第二输出的电池电压">第二输出的电池电压</s:String>
     <s:String x:Key="市电输入范围">市电输入范围</s:String>
     <s:String x:Key="充电模式">充电模式</s:String>
-    <s:String x:Key="BMS锁机电池容量">BMS锁机电池容量</s:String>
-    <s:String x:Key="AC充电电池容量">AC充电电池容量</s:String>
-    <s:String x:Key="电池放电电池容量">电池放电电池容量</s:String>
-    <s:String x:Key="逆变开机电池容量">逆变开机电池容量</s:String>
+    <s:String x:Key="BMS锁机电池容量">低电锁机SOC(BMS)</s:String>
+    <s:String x:Key="AC充电电池容量">返回市电模式SOC(BMS)</s:String>
+    <s:String x:Key="电池放电电池容量">返回电池模式SOC(BMS)</s:String>
+    <s:String x:Key="逆变开机电池容量">恢复重启SOC(BMS)</s:String>
     <s:String x:Key="市电过载转旁路">市电过载转旁路</s:String>
     <s:String x:Key="系统频率">系统频率</s:String>
     <s:String x:Key="并网电流">并网电流</s:String>

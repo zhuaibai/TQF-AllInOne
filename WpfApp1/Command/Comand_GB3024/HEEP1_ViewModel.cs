@@ -643,7 +643,14 @@ namespace WpfApp1.Command.Comand_GB3024
                     //执行设置指令
                     Thread.Sleep(1000);
                     string receive = SerialCommunicationService.SendSettingCommand("PBFT", FloatChargeVolage_Inputs);
-
+                    if (receive.StartsWith("(ACK"))
+                    {
+                        AddLog("设置浮充电压成功！");
+                    }
+                    else
+                    {
+                        AddLog("设置浮充电压失败！");
+                    }
                 })
                 , timeoutCts.Token);
             }

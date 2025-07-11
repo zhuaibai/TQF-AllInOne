@@ -54,11 +54,7 @@ namespace WpfApp1.Command.Command_VQ3024
                 execute: () => AC_ChargingCurrentOperation(),
                 canExecute: () => Validate(nameof(AC_ChargingCurrent_Inputs)) && !AC_ChargingCurrent_IsWorking
             );
-            //强充电压
-            Command_SetStrongChargeVoltage = new RelayCommand(
-                execute: () => StrongChargeVoltageOperation(),
-                canExecute: () => Validate(nameof(StrongChargeVoltage_Inputs)) && !StrongChargeVoltage_IsWorking
-            );
+           
             //强充电压
             Command_SetStrongChargeVoltage = new RelayCommand(
                 execute: () => StrongChargeVoltageOperation(),
@@ -568,7 +564,14 @@ namespace WpfApp1.Command.Command_VQ3024
                     //执行设置指令
                     Thread.Sleep(1000);
                     string receive = SerialCommunicationService.SendSettingCommand("PCVV", StrongChargeVoltage_Inputs);
-
+                    if (receive.StartsWith("(ACK"))
+                    {
+                        AddLog("设置强充电压成功！");
+                    }
+                    else
+                    {
+                        AddLog("设置强充电压失败！");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -657,12 +660,19 @@ namespace WpfApp1.Command.Command_VQ3024
                     //执行设置指令
                     Thread.Sleep(1000);
                     string receive = SerialCommunicationService.SendSettingCommand("PBFT", FloatChargeVolage_Inputs);
-
+                    if (receive.StartsWith("(ACK"))
+                    {
+                        AddLog("设置浮充电压成功！");
+                    }
+                    else
+                    {
+                        AddLog("设置浮充电压失败！");
+                    }
                 })
                 , timeoutCts.Token);
             }
-            catch (OperationCanceledException)
-            {
+            catch (OperationCanceledException) { 
+            
                 AddLog("特殊操作执行超时");
             }
             finally
