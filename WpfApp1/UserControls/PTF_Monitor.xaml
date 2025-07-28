@@ -1112,6 +1112,7 @@
                                 Grid.Row="1"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"
+                                
                                 Text="{Binding HEEP1_PDF.GridCurrent_Inputs, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
                                 Grid.Row="1"

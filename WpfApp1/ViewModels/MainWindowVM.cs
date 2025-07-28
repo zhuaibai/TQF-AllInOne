@@ -369,7 +369,7 @@ namespace WpfApp1.ViewModels
         private bool AutoSelectedMachineType(out string machine)
         {
             string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
-            if (receive_MachineType == "")
+            if (receive_MachineType.Length>=2 && receive_MachineType.StartsWith("-1"))
             {
                 //判断抗干扰是否打开
                 if (IsChecked)
@@ -921,6 +921,11 @@ namespace WpfApp1.ViewModels
                 {
 
                 }
+                finally
+                {
+                    ChangeComIcon(false);
+                    comStateColor(false);
+                }
             }
             else
             {
@@ -1313,14 +1318,16 @@ namespace WpfApp1.ViewModels
                     {
                         //GB6042通讯
                         CommunicationWithGB6042(token);
+
                     }
                     else if (SelectedMachineItem == "HPVINV06")
                     {
                         //GB6042通讯
                         CommunicationWithGB_HPVINV06(token);
+
                     }
                     // 模拟常规通信
-                    await Task.Delay(0, token);
+                    await Task.Delay(1000, token);
                     //AddLog($"[后台] 常规通信: {DateTime.Now:HH:mm:ss.fff}");
                 }
             }
@@ -1377,7 +1384,7 @@ namespace WpfApp1.ViewModels
                 SerialCommunicationService.OpenReceiveCRC(false);
             }
 
-            Thread.Sleep(200);
+            //Thread.Sleep(200);
             //获取机器型号
             _pauseEvent.Wait(token);
             string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
@@ -1398,14 +1405,14 @@ namespace WpfApp1.ViewModels
                 SerialCommunicationService.MachineType = receive_MachineType;
             }
 
-            Thread.Sleep(200);
+            //Thread.Sleep(200);
             //发送HIMSG2N指令
             _pauseEvent.Wait(token);
             receive = SerialCommunicationService.SendCommand(HIGSG2_PDF.Command, 50);
             HIGSG2_PDF.AnalysisStringToElement(receive);
             ShowError(receive, "HIMSG2");
 
-            Thread.Sleep(200);
+            //Thread.Sleep(200);
             // 等待暂停或取消信号
             _pauseEvent.Wait(token);
             //发送HGRID指令
@@ -1418,7 +1425,7 @@ namespace WpfApp1.ViewModels
             ACTotalPwr = CountPercent(HGRID_PDF.ACPower, HIGSG2_PDF.ACTotalPwr);
             ShowError(receive, "HGRID");
 
-            Thread.Sleep(200);
+            //Thread.Sleep(200);
             // 等待暂停或取消信号
             _pauseEvent.Wait(token);
             //发送HOP指令
@@ -1429,7 +1436,7 @@ namespace WpfApp1.ViewModels
             InvTotalPwr = StringToIntConversion(HOP_PDF.LoadPercent);
             ShowError(receive, "HOP");
 
-            Thread.Sleep(200);
+            //Thread.Sleep(200);
             // 等待暂停或取消信号
             _pauseEvent.Wait(token);
             //发送HBAT指令
@@ -1438,7 +1445,7 @@ namespace WpfApp1.ViewModels
             HBAT_PDF.AnalysisStringToElement(receive);
             ShowError(receive, "HBAT");
 
-            Thread.Sleep(200);
+            //Thread.Sleep(200);
             _pauseEvent.Wait(token); // 等待暂停或取消信号
             //发送HEEP1指令
             receive = SerialCommunicationService.SendCommand(HEEP1_PDF.Command, 80);
@@ -1446,7 +1453,7 @@ namespace WpfApp1.ViewModels
             HEEP1_PDF.AnalyseStringToElement(receive);
             ShowError(receive, "HEEP1");
 
-            Thread.Sleep(200);
+            //Thread.Sleep(200);
             _pauseEvent.Wait(token); // 等待暂停或取消信号
             //发送HEEP2指令
             receive = SerialCommunicationService.SendCommand(HEEP2.Command, 80);
@@ -1454,21 +1461,21 @@ namespace WpfApp1.ViewModels
             HEEP2.AnalyseStringToElement(receive);
             ShowError(receive, "HEEP2");
 
-            Thread.Sleep(200);
+           // Thread.Sleep(200);
             //发送HEEP3指令
             _pauseEvent.Wait(token);
             receive = SerialCommunicationService.SendCommand(HEEP3_PDF.Command, 80);
             HEEP3_PDF.AnalysisStringToElement(receive);
             ShowError(receive, "HEEP3");
 
-            Thread.Sleep(200);
+            //Thread.Sleep(200);
             //发送HIMSG1指令
             _pauseEvent.Wait(token);
             receive = SerialCommunicationService.SendCommand(HIMSG1.Command, 21);
             HIMSG1.AnalysisStringToElement(receive);
             ShowError(receive, "HIMSG1");
 
-            Thread.Sleep(200);
+            //Thread.Sleep(200);
             //发送HPV指令
             _pauseEvent.Wait(token);
             receive = SerialCommunicationService.SendCommand(HPV_PDF.Command, 50);
@@ -1477,21 +1484,21 @@ namespace WpfApp1.ViewModels
             MPPTTotalPwr = CountPercent(HPV_PDF.PVPwr, HIGSG2_PDF.MPPTTotalPwr);
             ShowError(receive, "HPV");
 
-            Thread.Sleep(200);
+            //Thread.Sleep(200);
             //发送HTEMP指令
             _pauseEvent.Wait(token);
             receive = SerialCommunicationService.SendCommand(HTEMP_PDF.Command, 50);
             HTEMP_PDF.AnalysisStringToElement(receive);
             ShowError(receive, "HTEMP");
 
-            Thread.Sleep(200);
+           // Thread.Sleep(200);
             //发送HCTMSG1指令
             _pauseEvent.Wait(token);
             receive = SerialCommunicationService.SendCommand(HCTMSG1_PDF.Command, 80);
             HCTMSG1_PDF.AnalysisStringToElement(receive);
             ShowError(receive, "HCTMSG1");
 
-            Thread.Sleep(200);
+            //Thread.Sleep(200);
             //发送HGEN指令
             _pauseEvent.Wait(token);
             receive = SerialCommunicationService.SendCommand(HGEN.Command, 60);
@@ -1510,14 +1517,16 @@ namespace WpfApp1.ViewModels
         /// <param name="name"></param>
         private void ShowError(string value, string name)
         {
-            if (value.Substring(0,2) == "-1")
-            {
-                AddLog($"{name}CRC异常:{value}");
-            }
-            else if (string.IsNullOrEmpty(value))
+            if (string.IsNullOrEmpty(value))
             {
                 AddLog($"{name}返回超时");
             }
+            else if (value.Length>=2&&value.Substring(0,2) == "-1")
+            {
+                AddLog($"{name}CRC异常:{value}");
+            }
+           
+            
         }
         /// <summary>
         /// GB3024通讯

@@ -5,6 +5,7 @@
 
     <s:String x:Key="开启">开启</s:String>
     <s:String x:Key="关闭">关闭</s:String>
+    <s:String x:Key="异常!">异常!</s:String>
     <s:String x:Key="功能选项">功能选项</s:String>
     <s:String x:Key="串口设置">串口设置</s:String>
     <s:String x:Key="打开串口">打开串口</s:String>

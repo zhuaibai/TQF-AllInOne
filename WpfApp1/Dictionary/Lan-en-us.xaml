@@ -5,6 +5,7 @@
 
     <s:String x:Key="开启">On</s:String>
     <s:String x:Key="关闭">Off</s:String>
+    <s:String x:Key="异常!">Exception!</s:String>
     <s:String x:Key="启动时间">Time:</s:String>
     <s:String x:Key="功能选项">FunctionOptions</s:String>
     <s:String x:Key="串口设置">SerialConfig</s:String>
