@@ -57,7 +57,7 @@ namespace WpfApp1.ViewModels
             SpecialCommand = new Special_Command(_pauseEvent, _semaphore, AddLog, UpdateState);
             HPVB_GB = new HPVB_GB_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             
-            //初始化  VQ   VIew
+            //初始化  VQ   ViewModel
             HOP_VQ = new HOP_VQ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             HBMS1_VQ = new HBMS1_VQ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             HBAT_VQ = new HBAT_GB_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
@@ -307,7 +307,8 @@ namespace WpfApp1.ViewModels
         "HPVINV04",
         "HPVINV06",
         "HPVINV07",
-        "LPVINV02"
+        "LPVINV02",
+        "CYJ"
          };
 
         //切换指令
@@ -358,6 +359,14 @@ namespace WpfApp1.ViewModels
                 case "HPVINV07":
                     ContentUC = new PTF_Monitor();
                     SelectedMachineItem = "HPVINV07";
+                    break;
+                case "CYJ":
+                    ContentUC = new CYJ_MonitorUC();
+                    SelectedMachineItem = "CYJ";
+                    break;
+                case "LB6":
+                    ContentUC = new CYJ_MonitorUC();
+                    SelectedMachineItem = "LB6";
                     break;
             }
 
@@ -441,6 +450,20 @@ namespace WpfApp1.ViewModels
                 else if (receive_MachineType.Substring(0, 9) == "(HPVINV06")
                 {
                     SwitchViewToVQorGB("HPVINV06");
+                    //判断抗干扰是否打开
+                    if (IsChecked)
+                    {
+                        IsChecked = false;
+                        OnceOpenCRC = false;
+                        SerialCommunicationService.OpenReceiveCRC(false);
+                    }
+                    //返回机器类型
+                    machine = receive_MachineType;
+                    return true;
+                }
+                else if (receive_MachineType.Substring(0, 9) == "CYJ")
+                {
+                    SwitchViewToVQorGB("CYJ");
                     //判断抗干扰是否打开
                     if (IsChecked)
                     {
@@ -893,11 +916,14 @@ namespace WpfApp1.ViewModels
             return new SerialPortSettings();
         }
 
+
         /// <summary>
         /// 打开串口(已打开则关闭串口)
         /// </summary>
-        public void openCom()
+        public async void openCom()
         {
+            
+
             if (SerialCommunicationService.IsOpen())
             {
 
@@ -906,7 +932,16 @@ namespace WpfApp1.ViewModels
                     AddLog("准备关闭通信");
                     //停止后台通信(如果有)
                     StopBackgroundThread();
-
+                    // 等待通讯线程结束
+                    var WaitFinish = Task.Run(() => {
+                        while (IsRunning)
+                        {
+                            // 可以添加短暂延迟避免CPU占用过高
+                            Task.Delay(30).Wait();
+                        }
+                    });
+                    //等待后台通讯停止
+                    await Task.WhenAny(WaitFinish, Task.Delay(1000));
                     //关闭串口
                     SerialCommunicationService.CloseCom();
                     AddLog("串口已关闭");
@@ -1309,8 +1344,7 @@ namespace WpfApp1.ViewModels
                     }
                     else if (SelectedMachineItem == "HPVINV07")
                     {
-                        //处理选中状态
-
+                        
                         //PTF通讯
                         CommunicationWithPTF3024(token);
                     }
@@ -1325,6 +1359,9 @@ namespace WpfApp1.ViewModels
                         //GB6042通讯
                         CommunicationWithGB_HPVINV06(token);
 
+                    }else if(SelectedMachineItem == "CYJ")
+                    {
+                        
                     }
                     // 模拟常规通信
                     await Task.Delay(1000, token);
@@ -1521,7 +1558,7 @@ namespace WpfApp1.ViewModels
             {
                 AddLog($"{name}返回超时");
             }
-            else if (value.Length>=2&&value.Substring(0,2) == "-1")
+            else if (value.Length>=2&&value.StartsWith("-1"))
             {
                 AddLog($"{name}CRC异常:{value}");
             }
@@ -1908,6 +1945,19 @@ namespace WpfApp1.ViewModels
 
         }
 
+        private void CommunicationWith_CYJ(CancellationToken token)
+        {
+            string receive = string.Empty;
+            // 等待暂停或取消信号
+            _pauseEvent.Wait(token);
+            //发送查询机器指令
+            string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
+            MachineType = receive_MachineType.Substring(1, 8);
+            //解析指令
+            SerialCommunicationService.MachineType = receive_MachineType;
+
+
+        }
 
 
         /// <summary>
