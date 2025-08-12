@@ -6,6 +6,7 @@
     <s:String x:Key="开启">开启</s:String>
     <s:String x:Key="关闭">关闭</s:String>
     <s:String x:Key="异常!">异常!</s:String>
+    <s:String x:Key="电池">电池</s:String>
     <s:String x:Key="功能选项">功能选项</s:String>
     <s:String x:Key="串口设置">串口设置</s:String>
     <s:String x:Key="打开串口">打开串口</s:String>
@@ -204,9 +205,22 @@
     <s:String x:Key="BMS电流">电池电流</s:String>
     <s:String x:Key="机器类型">机器类型</s:String>
     <s:String x:Key="机器型号">机器型号</s:String>
+    <s:String x:Key="自动开机使能">自动开机</s:String>
+    <s:String x:Key="定时关机">定时关机</s:String>
+    <s:String x:Key="电池高压锁机电压">电池高压锁机电压</s:String>
+    <s:String x:Key="强充时间">强充时间</s:String>
+    <s:String x:Key="逆变时间">逆变时间</s:String>
+    <s:String x:Key="带载时间">带载时间</s:String>
+    <s:String x:Key="满载有功功率">满载有功功率</s:String>
+    <s:String x:Key="输出视在功率">输出视在功率</s:String>
+    <s:String x:Key="输出有功功率">输出有功功率</s:String>
    
     
-    
-    
+
+
+
+
+
+
 
 </ResourceDictionary>

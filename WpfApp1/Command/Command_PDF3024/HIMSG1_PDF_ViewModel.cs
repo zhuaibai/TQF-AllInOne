@@ -8,7 +8,7 @@ using WpfApp1.ViewModels;
 
 namespace WpfApp1.Command.Command_PDF3024
 {
-    public class HIMSG1_PDF_ViewModel:BaseViewModel
+    public class HIMSG1_PDF_ViewModel : BaseViewModel
     {
         //指令
         private string command = "HIMSG1\r";
@@ -235,12 +235,13 @@ namespace WpfApp1.Command.Command_PDF3024
             get { return _SWIntegrity; }
             set
             {
-                if (value=="1")
+                if (value == "1")
                 {
                     _SWIntegrity = "完整";
-                }else if (value == "0") { _SWIntegrity = "不完整"; }
+                }
+                else if (value == "0") { _SWIntegrity = "不完整"; }
                 else
-                _SWIntegrity = value;
+                    _SWIntegrity = value;
                 this.RaiseProperChanged(nameof(SWIntegrity));
             }
         }
@@ -359,7 +360,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 ReceiveException("空");
                 return;
             }
-            if(value == "-1")
+            if (value.StartsWith("-1"))
             {
                 ReceiveException("CRC异常");
                 AddLog(value);
@@ -370,11 +371,11 @@ namespace WpfApp1.Command.Command_PDF3024
             try
             {
                 //版本号
-                Version = Values[0].Substring(1,7);
+                Version = Values[0].Substring(1, 7);
                 //发布日期
                 ReleaseDate = Values[1];
                 //程序完整性
-                SWIntegrity=Values[2].Substring(0,1);
+                SWIntegrity = Values[2].Substring(0, 1);
 
             }
             catch (Exception ex)

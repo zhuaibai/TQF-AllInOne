@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WpfApp1.Convert;
-using WpfApp1.Services;
 using WpfApp1.ViewModels;
 
-namespace WpfApp1.Command.GB_General
+namespace WpfApp1.Command.Command_CYJ
 {
-    public class HSTS_GB_ViewModel:BaseViewModel
+    public class HSTS_CYJ_ViewModel : BaseViewModel
     {
         //指令
         private string command = "HSTS\r"; //返回40字节 (00 L010100000000 11211001000L002000000
@@ -23,7 +21,7 @@ namespace WpfApp1.Command.GB_General
         Action<string> AddLog;           //添加日志委托
         Action<string> UpdateState;      //更新状态日志
 
-        public HSTS_GB_ViewModel(ManualResetEventSlim pauseEvent, SemaphoreSlim semaphore, Action<string> addLog, Action<string> _updateState)
+        public HSTS_CYJ_ViewModel(ManualResetEventSlim pauseEvent, SemaphoreSlim semaphore, Action<string> addLog, Action<string> _updateState)
         {
             _pauseEvent = pauseEvent;
             _semaphore = semaphore;
@@ -97,14 +95,16 @@ namespace WpfApp1.Command.GB_General
             get { return _PVToLoadAC; }
             set
             {
-                if(value == "0")
+                if (value == "0")
                 {
                     _PVToLoadAC = "无";
-                }else if(value == "1")
+                }
+                else if (value == "1")
                 {
                     _PVToLoadAC = "有";
-                }else
-                _PVToLoadAC = value;
+                }
+                else
+                    _PVToLoadAC = value;
                 this.RaiseProperChanged(nameof(PVToLoadAC));
             }
         }
@@ -282,17 +282,20 @@ namespace WpfApp1.Command.GB_General
             get { return _GridTieFlag; }
             set
             {
-                if(value == "0")
+                if (value == "0")
                 {
                     _GridTieFlag = "离网";
-                }else if(value == "1")
+                }
+                else if (value == "1")
                 {
                     _GridTieFlag = "等待并网";
-                }else if (value == "2")
+                }
+                else if (value == "2")
                 {
                     _GridTieFlag = "正在并网";
-                }else
-                _GridTieFlag = value;
+                }
+                else
+                    _GridTieFlag = value;
                 this.RaiseProperChanged(nameof(GridTieFlag));
             }
         }
@@ -340,14 +343,16 @@ namespace WpfApp1.Command.GB_General
             get { return _SecOutStat; }
             set
             {
-                if(value == "0")
+                if (value == "0")
                 {
                     _SecOutStat = "关闭";
-                }else if(value == "1")
+                }
+                else if (value == "1")
                 {
                     _SecOutStat = "开启";
-                }else
-                _SecOutStat = value;
+                }
+                else
+                    _SecOutStat = value;
                 this.RaiseProperChanged(nameof(SecOutStat));
             }
         }
@@ -444,7 +449,9 @@ namespace WpfApp1.Command.GB_General
             if (value == "0")
             {
                 return "否";
-            } else if (value == "1") {
+            }
+            else if (value == "1")
+            {
                 return "是";
             }
             else
@@ -472,7 +479,7 @@ namespace WpfApp1.Command.GB_General
                 return "常亮";
             }
             else if (value == "2")
-            {   
+            {
                 return "闪烁";
             }
             else
@@ -525,7 +532,7 @@ namespace WpfApp1.Command.GB_General
                 ReceiveException("空");
                 return;
             }
-            if (value == "-1")
+            if (value.StartsWith( "-1"))
             {
                 ReceiveException("CRC异常");
                 AddLog(value);
@@ -537,53 +544,53 @@ namespace WpfApp1.Command.GB_General
                 //故障代码
                 FaultCode = Values[0].Substring(1, 2);
                 //模式
-                Mode = Values[1].Substring(0,1);
+                Mode = Values[1].Substring(0, 1);
                 //AC状态下PV馈能到负载
-                PVToLoadAC = Values[1].Substring(1,1);
+                PVToLoadAC = Values[1].Substring(1, 1);
                 //机器是否有输出
-                OutputStatus = Values[1].Substring(2,1);
+                OutputStatus = Values[1].Substring(2, 1);
                 //电池低电报警
-                BattLowAlarm = Values[1].Substring(3,1);
+                BattLowAlarm = Values[1].Substring(3, 1);
                 //电池未接
-                BattDisconnected = Values[1].Substring(4,1);
+                BattDisconnected = Values[1].Substring(4, 1);
                 //输出过载
-                OutputOverload = Values[1].Substring(5,1);
+                OutputOverload = Values[1].Substring(5, 1);
                 //机器过温
-                OverTemp = Values[1].Substring(6,1);
+                OverTemp = Values[1].Substring(6, 1);
                 //EEPROM数据异常
-                EEPROM_DataErr = Values[1].Substring(7,1);
+                EEPROM_DataErr = Values[1].Substring(7, 1);
                 //EEPROM读写异常
-                EEPROM_IOErr = Values[1].Substring(8,1);
+                EEPROM_IOErr = Values[1].Substring(8, 1);
                 //PV功率过低异常
-                PVLowPwrFault = Values[1].Substring(9,1);
+                //PVLowPwrFault = Values[1].Substring(9, 1);
                 //输入电压过高
-                InputOV = Values[1].Substring(10,1);
+                InputOV = Values[1].Substring(9, 1);
                 //电池电压过高
-                BattOV = Values[1].Substring(11,1);
+                BattOV = Values[1].Substring(10, 1);
                 //风扇转速异常
-                FanSpeedFault = Values[1].Substring(12,1);
-                //并机系统里机器的总数
-                ParallelUnits = Values[2].Substring(0,1);
-                //并网标志
-                GridTieFlag = Values[2].Substring(1,1);
-                //并机系统中角色
-                ParallelRole = Values[2].Substring(2,1);
-                //主输出继电器状态
-                MainRelayStat = Values[2].Substring(3,1);
-                //第二输出当前状态
-                SecOutStat = Values[2].Substring(4,1);
-                //BMS通讯异常
-                BMS_ComFault = Values[2].Substring(5,1);
-                //温度传感器异常
-                TempSensorFault = Values[2].Substring(6,1);
-                //市电灯状态
-                ACLED = Values[2].Substring(7,1);
-                //逆变灯状态
-                InvLED = Values[2].Substring(8,1);
-                //充电灯状态
-                ChgLED = Values[2].Substring(9,1);
-                //报警灯状态
-                AlarmLED = Values[2].Substring(10,1);
+                FanSpeedFault = Values[1].Substring(11, 1);
+                ////并机系统里机器的总数
+                //ParallelUnits = Values[2].Substring(0, 1);
+                ////并网标志
+                //GridTieFlag = Values[2].Substring(1, 1);
+                ////并机系统中角色
+                //ParallelRole = Values[2].Substring(2, 1);
+                ////主输出继电器状态
+                //MainRelayStat = Values[2].Substring(3, 1);
+                ////第二输出当前状态
+                //SecOutStat = Values[2].Substring(4, 1);
+                ////BMS通讯异常
+                //BMS_ComFault = Values[2].Substring(5, 1);
+                ////温度传感器异常
+                //TempSensorFault = Values[2].Substring(6, 1);
+                ////市电灯状态
+                //ACLED = Values[2].Substring(7, 1);
+                ////逆变灯状态
+                //InvLED = Values[2].Substring(8, 1);
+                ////充电灯状态
+                //ChgLED = Values[2].Substring(9, 1);
+                ////报警灯状态
+                //AlarmLED = Values[2].Substring(10, 1);
 
 
 
@@ -684,4 +691,5 @@ namespace WpfApp1.Command.GB_General
 
         }
     }
+
 }

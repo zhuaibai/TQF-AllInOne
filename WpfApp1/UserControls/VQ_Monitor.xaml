@@ -686,7 +686,7 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Bottom"
                             FontSize="10"
-                            Text="w" />
+                            Text="%" />
                     </StackPanel>
                 </Grid>
                 <!--  居民用电（右下）  -->

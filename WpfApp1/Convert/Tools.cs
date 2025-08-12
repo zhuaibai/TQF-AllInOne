@@ -86,7 +86,52 @@ namespace WpfApp1.Convert
             }
         }
 
-        
+        /// <summary>
+        /// 三位数补零【60/6 → 060】
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public static string PadToThreeDigits(string input)
+        {
+            if (int.TryParse(input, out int number))
+            {
+                return number.ToString("D3"); // D3格式 = 三位数补零
+            }
+            return "";
+            //throw new ArgumentException("输入必须是有效数字字符串");
+        }
+
+        /// <summary>
+        /// 格式化为两位整数+一位小数【 XX/X → XX.X】
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public static string FormatToXxx(string input)
+        {
+            // 处理整数输入（X 或 XX）
+            if (int.TryParse(input, out int integerValue))
+            {
+                return (integerValue).ToString("F1", System.Globalization.CultureInfo.InvariantCulture)
+                       .PadLeft(4, '0'); // 统一补零至XX.X格式
+            }
+
+            // 处理带小数点的输入（如1.2）
+            if (input.Contains('.'))
+            {
+                string[] parts = input.Split('.');
+                if (parts.Length == 2 &&
+                    int.TryParse(parts[0], out int whole) &&
+                    int.TryParse(parts[1], out int fraction))
+                {
+                    return $"{whole:D2}.{fraction}0".Substring(0, 4); // 格式化为XX.X
+                }
+            }
+            return "";
+            //throw new ArgumentException("输入格式无效，示例：'5'→'05.0', '1.2'→'01.2'");
+        }
+
 
     }
     public static class WatermarkService

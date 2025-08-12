@@ -5,6 +5,7 @@
 
     <s:String x:Key="开启">On</s:String>
     <s:String x:Key="关闭">Off</s:String>
+    <s:String x:Key="电池">Battery</s:String>
     <s:String x:Key="异常!">Exception!</s:String>
     <s:String x:Key="启动时间">Time:</s:String>
     <s:String x:Key="功能选项">FunctionOptions</s:String>
@@ -202,4 +203,13 @@
     <s:String x:Key="BMS电流">BMS_Curr</s:String>
     <s:String x:Key="机器类型">MachineType</s:String>
     <s:String x:Key="机器型号">MachineModel</s:String>
+    <s:String x:Key="自动开机使能">AutoStartEnable</s:String>
+    <s:String x:Key="电池高压锁机电压">BattHvLockVolt</s:String>
+    <s:String x:Key="强充时间">BoostTime</s:String>
+    <s:String x:Key="逆变时间">InvTime</s:String>
+    <s:String x:Key="带载时间">LoadTime</s:String>
+    <s:String x:Key="满载有功功率">FullLoadActivePwr</s:String>
+    <s:String x:Key="输出视在功率">OutApparentPwr</s:String>
+    <s:String x:Key="输出有功功率">OutActivePwr</s:String>
+    <s:String x:Key="定时关机">TimerPowerOff</s:String>
 </ResourceDictionary>

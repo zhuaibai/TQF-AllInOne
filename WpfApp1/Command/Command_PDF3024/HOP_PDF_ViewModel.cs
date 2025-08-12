@@ -936,7 +936,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 //电感功率
                 case "InductorPwr_Inputs":
                     return !string.IsNullOrWhiteSpace(InductorPwr_Inputs);
-                //电感功率
+                //电感电流
                 case "InductorCurr_Inputs":
                     return !string.IsNullOrWhiteSpace(InductorCurr_Inputs);
 
@@ -958,7 +958,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 ReceiveException("空");
                 return;
             }
-            if(value == "-1")
+            if(value.StartsWith("-1"))
             {
                 ReceiveException("CRC异常");
                 AddLog(value);
