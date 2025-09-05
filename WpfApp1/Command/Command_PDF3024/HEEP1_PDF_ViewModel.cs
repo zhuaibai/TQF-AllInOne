@@ -208,8 +208,8 @@ namespace WpfApp1.Command.Command_PDF3024
                 }
                 else if (SerialCommunicationService.MachineType == "B" || SerialCommunicationService.MachineType == "D")
                 {
-                    if (value == "1") { _WorkingMode = "PV"; }
-                    else if (value == "0") { _WorkingMode = "VOLTAGE"; }
+                    if (value == "1") { _WorkingMode = "SBU"; }
+                    else if (value == "0") { _WorkingMode = "SUB"; }
                 }
                 else
                     _WorkingMode = value;
@@ -221,7 +221,7 @@ namespace WpfApp1.Command.Command_PDF3024
         /// <summary>
         /// 工作模式可选项
         /// </summary>
-        private List<string> _WorkingModeOptions = new List<string> { "PV", "VOLTAGE" };
+        private List<string> _WorkingModeOptions = new List<string> { "SUB", "SBU" };
 
         public List<string> WorkingModeOptions
         {
@@ -1784,7 +1784,7 @@ namespace WpfApp1.Command.Command_PDF3024
                     }
                     else if (value == "1") { _ChargingPriority = "SUN"; }
                     else if (value == "2") { _ChargingPriority = "OSO"; }
-                    else if (value == "3") { _ChargingPriority = "OSO"; }
+                    
                     else { _ChargingPriority = value; }
                 }
 
@@ -3403,11 +3403,11 @@ namespace WpfApp1.Command.Command_PDF3024
                         {
                             return string.Empty;
                         }
-                        else if (WorkingModeSelectedOption == "PV")
+                        else if (WorkingModeSelectedOption == "SBU")
                         {
                             return "01";
                         }
-                        else if (WorkingModeSelectedOption == "VOLTAGE") { return "00"; }
+                        else if (WorkingModeSelectedOption == "SUB") { return "00"; }
                     }
                     return "";
                 //设置电池类型

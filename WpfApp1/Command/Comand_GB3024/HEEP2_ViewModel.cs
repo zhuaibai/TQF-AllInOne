@@ -225,7 +225,7 @@ namespace WpfApp1.Command.Comand_GB3024
             get { return _ParallelModeShutdownVoltage; }
             set
             {
-                _ParallelModeShutdownVoltage = value;
+                _ParallelModeShutdownVoltage = Tools.RemoveLeadingZeros(value) + "V";
                 RaiseProperChanged(nameof(ParallelModeShutdownVoltage));
             }
         }
@@ -277,7 +277,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("PDSDV", ParallelModeShutdownVoltage_Inputs);
+                    string receive = SerialCommunicationService.SendSettingCommand("PDSDV",Tools.FormatToXxx(ParallelModeShutdownVoltage_Inputs));
 
                 })
                 , timeoutCts.Token);
@@ -313,7 +313,7 @@ namespace WpfApp1.Command.Comand_GB3024
             get { return _ParallelModeShutdownSOC; }
             set
             {
-                _ParallelModeShutdownSOC = value;
+                _ParallelModeShutdownSOC = Tools.RemoveLeadingZeros(value) + "%";
                 RaiseProperChanged(nameof(ParallelModeShutdownSOC));
             }
         }
@@ -365,7 +365,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("PDSDS", ParallelModeShutdownSOC_Inputs);
+                    string receive = SerialCommunicationService.SendSettingCommand("PDSDS", Tools.PadToThreeDigits(ParallelModeShutdownSOC_Inputs));
 
                 })
                 , timeoutCts.Token);
@@ -401,7 +401,7 @@ namespace WpfApp1.Command.Comand_GB3024
             get { return _BattLowAlarmVolt; }
             set
             {
-                _BattLowAlarmVolt = Tools.RemoveLeadingZeros(value);
+                _BattLowAlarmVolt = Tools.RemoveLeadingZeros(value)+"V";
                 this.RaiseProperChanged(nameof(BattLowAlarmVolt));
             }
         }
@@ -453,7 +453,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("PSLV", BattLowAlarmVolt_Inputs);
+                    string receive = SerialCommunicationService.SendSettingCommand("PSLV", Tools.FormatToXxx(BattLowAlarmVolt_Inputs));
                     if (receive.StartsWith("(ACK"))
                     {
                         AddLog("低电告警电压设置成功！");
@@ -496,7 +496,7 @@ namespace WpfApp1.Command.Comand_GB3024
             get { return _ReturnMainsBatteryVoltage; }
             set
             {
-                _ReturnMainsBatteryVoltage = value;
+                _ReturnMainsBatteryVoltage = Tools.RemoveLeadingZeros(value) + "V";
                 RaiseProperChanged(nameof(ReturnMainsBatteryVoltage));
             }
         }
@@ -547,8 +547,8 @@ namespace WpfApp1.Command.Comand_GB3024
                 await Task.Run(new Action(() =>
                 {
                     //执行设置指令
-                    //Thread.Sleep(2000);
-                    string receive = SerialCommunicationService.SendSettingCommand("PBCV", ReturnMainsBatteryVoltage_Inputs);
+                    Thread.Sleep(2000);
+                    string receive = SerialCommunicationService.SendSettingCommand("PBCV",Tools.FormatToXxx(ReturnMainsBatteryVoltage_Inputs));
 
                 })
                 , timeoutCts.Token);
@@ -585,7 +585,7 @@ namespace WpfApp1.Command.Comand_GB3024
             get { return _ReturnBatteryModeVoltage; }
             set
             {
-                _ReturnBatteryModeVoltage = value;
+                _ReturnBatteryModeVoltage = Tools.RemoveLeadingZeros(value) + "V";
                 RaiseProperChanged(nameof(ReturnBatteryModeVoltage));
             }
         }
@@ -637,7 +637,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 {
                     //执行设置指令
                     Thread.Sleep(1000);
-                    string receive = SerialCommunicationService.SendSettingCommand("PBDV", ReturnBatteryModeVoltage_Inputs);
+                    string receive = SerialCommunicationService.SendSettingCommand("PBDV", Tools.FormatToXxx(ReturnBatteryModeVoltage_Inputs));
 
                 })
                 , timeoutCts.Token);
@@ -777,7 +777,7 @@ namespace WpfApp1.Command.Comand_GB3024
             get { return _BatteryBalancingVoltage; }
             set
             {
-                _BatteryBalancingVoltage = value;
+                _BatteryBalancingVoltage = Tools.RemoveLeadingZeros(value) + "V";
                 RaiseProperChanged(nameof(BatteryBalancingVoltage));
             }
         }
@@ -829,7 +829,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("PBEQV", BatteryBalancingVoltage_Inputs);
+                    string receive = SerialCommunicationService.SendSettingCommand("PBEQV", Tools.FormatToXxx(BatteryBalancingVoltage_Inputs));
                     if (receive.StartsWith("(ACK"))
                     {
                         AddLog("设置电池均衡电压成功！");
@@ -873,7 +873,7 @@ namespace WpfApp1.Command.Comand_GB3024
             get { return _BatteryBalancingTime; }
             set
             {
-                _BatteryBalancingTime = value;
+                _BatteryBalancingTime = Tools.RemoveLeadingZeros(value) + "min";
                 RaiseProperChanged(nameof(BatteryBalancingTime));
             }
         }
@@ -925,7 +925,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("PBEQT", BatteryBalancingTime_Inputs);
+                    string receive = SerialCommunicationService.SendSettingCommand("PBEQT",Tools.PadToThreeDigits(BatteryBalancingTime_Inputs));
 
                 })
                 , timeoutCts.Token);
@@ -962,7 +962,7 @@ namespace WpfApp1.Command.Comand_GB3024
             get { return _BatteryBalancingTimeoutValue; }
             set
             {
-                _BatteryBalancingTimeoutValue = value;
+                _BatteryBalancingTimeoutValue = Tools.RemoveLeadingZeros(value) + "min";
                 RaiseProperChanged(nameof(BatteryBalancingTimeoutValue));
             }
         }
@@ -1014,7 +1014,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("PBEQOT", BatteryBalancingTimeoutValue_Inputs);
+                    string receive = SerialCommunicationService.SendSettingCommand("PBEQOT", Tools.PadToThreeDigits(BatteryBalancingTimeoutValue_Inputs));
 
                 })
                 , timeoutCts.Token);
@@ -1050,7 +1050,7 @@ namespace WpfApp1.Command.Comand_GB3024
             get { return _BatteryBalancingInterval; }
             set
             {
-                _BatteryBalancingInterval = value;
+                _BatteryBalancingInterval = Tools.RemoveLeadingZeros(value) + "day";
                 RaiseProperChanged(nameof(BatteryBalancingInterval));
             }
         }
@@ -1102,7 +1102,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("PBEQP", BatteryBalancingInterval_Inputs);
+                    string receive = SerialCommunicationService.SendSettingCommand("PBEQP", Tools.PadToThreeDigits(BatteryBalancingInterval_Inputs));
 
                 })
                 , timeoutCts.Token);
@@ -1139,7 +1139,7 @@ namespace WpfApp1.Command.Comand_GB3024
             get { return _SecondOutputDischargeTime; }
             set
             {
-                _SecondOutputDischargeTime = value;
+                _SecondOutputDischargeTime = Tools.RemoveLeadingZeros(value) + "min";
                 RaiseProperChanged(nameof(SecondOutputDischargeTime));
             }
         }
@@ -1191,7 +1191,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("PDDCGT", SecondOutputDischargeTime_Inputs);
+                    string receive = SerialCommunicationService.SendSettingCommand("PDDCGT", Tools.PadToTwoDigits(SecondOutputDischargeTime_Inputs));
 
                 })
                 , timeoutCts.Token);
@@ -1228,7 +1228,7 @@ namespace WpfApp1.Command.Comand_GB3024
             get { return _DelayTimeToRestoreTheSecondOutput; }
             set
             {
-                _DelayTimeToRestoreTheSecondOutput = value;
+                _DelayTimeToRestoreTheSecondOutput = Tools.RemoveLeadingZeros(value) + "min";
                 RaiseProperChanged(nameof(DelayTimeToRestoreTheSecondOutput));
             }
         }
@@ -1280,7 +1280,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("PDDLYT", DelayTimeToRestoreTheSecondOutput_Inputs);
+                    string receive = SerialCommunicationService.SendSettingCommand("PDDLYT", Tools.PadToThreeDigits(DelayTimeToRestoreTheSecondOutput_Inputs));
 
                 })
                 , timeoutCts.Token);
@@ -1318,7 +1318,7 @@ namespace WpfApp1.Command.Comand_GB3024
             get { return _RestoreBatteryVoltageOfSecondOutput; }
             set
             {
-                _RestoreBatteryVoltageOfSecondOutput = value;
+                _RestoreBatteryVoltageOfSecondOutput = Tools.RemoveLeadingZeros(value) + "V";
                 RaiseProperChanged(nameof(RestoreBatteryVoltageOfSecondOutput));
             }
         }
@@ -1370,7 +1370,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("PDSRV", RestoreBatteryVoltageOfSecondOutput_Inputs);
+                    string receive = SerialCommunicationService.SendSettingCommand("PDSRV", Tools.FormatToXxx(RestoreBatteryVoltageOfSecondOutput_Inputs));
 
                 })
                 , timeoutCts.Token);
@@ -1407,7 +1407,7 @@ namespace WpfApp1.Command.Comand_GB3024
             get { return _RestoreBatteryCapacityOfSecondOutput; }
             set
             {
-                _RestoreBatteryCapacityOfSecondOutput = value;
+                _RestoreBatteryCapacityOfSecondOutput = Tools.RemoveLeadingZeros(value) + "%";
                 RaiseProperChanged(nameof(RestoreBatteryCapacityOfSecondOutput));
             }
         }
@@ -1459,7 +1459,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("PDSRS", RestoreBatteryCapacityOfSecondOutput_Inputs);
+                    string receive = SerialCommunicationService.SendSettingCommand("PDSRS", Tools.PadToThreeDigits(RestoreBatteryCapacityOfSecondOutput_Inputs));
 
                 })
                 , timeoutCts.Token);

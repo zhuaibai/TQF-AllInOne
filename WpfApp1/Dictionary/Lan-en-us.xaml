@@ -212,4 +212,5 @@
     <s:String x:Key="输出视在功率">OutApparentPwr</s:String>
     <s:String x:Key="输出有功功率">OutActivePwr</s:String>
     <s:String x:Key="定时关机">TimerPowerOff</s:String>
+    <s:String x:Key="充电阶段">ChgStage</s:String>
 </ResourceDictionary>

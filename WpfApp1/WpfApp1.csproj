@@ -11,6 +11,8 @@
     <Product>General App</Product>
     <SignAssembly>False</SignAssembly>
     <AssemblyName>TQF AllinOne</AssemblyName>
+    <AssemblyVersion>1.0.2.0</AssemblyVersion>
+    <FileVersion>1.0.2.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

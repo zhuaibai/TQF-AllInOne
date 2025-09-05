@@ -297,7 +297,12 @@ namespace WpfApp1.Command.Command_VQ3024
             get { return _BMS_AvgTemp; }
             set
             {
-                _BMS_AvgTemp = Tools.RemoveLeadingZeros(value);
+                if (int.TryParse(Tools.RemoveLeadingZeros(value), out int result))
+                {
+                    _BMS_AvgTemp = (((double)result - 2731.5)/10).ToString("0.0");
+                } else
+                    _BMS_AvgTemp = "0.0";
+                
                 this.RaiseProperChanged(nameof(BMS_AvgTemp));
             }
         }

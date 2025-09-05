@@ -103,6 +103,22 @@ namespace WpfApp1.Convert
         }
 
         /// <summary>
+        /// 2位数补零【60/6 → 60/06】
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public static string PadToTwoDigits(string input)
+        {
+            if (int.TryParse(input, out int number))
+            {
+                return number.ToString("D2"); // D3格式 = 三位数补零
+            }
+            return "";
+            //throw new ArgumentException("输入必须是有效数字字符串");
+        }
+
+        /// <summary>
         /// 格式化为两位整数+一位小数【 XX/X → XX.X】
         /// </summary>
         /// <param name="input"></param>

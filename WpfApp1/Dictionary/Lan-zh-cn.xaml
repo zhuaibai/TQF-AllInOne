@@ -214,7 +214,8 @@
     <s:String x:Key="满载有功功率">满载有功功率</s:String>
     <s:String x:Key="输出视在功率">输出视在功率</s:String>
     <s:String x:Key="输出有功功率">输出有功功率</s:String>
-   
+    <s:String x:Key="充电阶段">充电阶段</s:String>
+    
     
 
 

@@ -11,7 +11,7 @@ namespace WpfApp1.Command.GB_General
     public class HPVB_GB_ViewModel : BaseViewModel
     {
         //指令
-        private string command = "HGRID\r";
+        private string command = "HPVB\r";
         public string Command { get { return command; } }
 
         public string MachineType;

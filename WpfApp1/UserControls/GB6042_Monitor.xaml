@@ -1291,7 +1291,7 @@
                             Grid.Row="8"
                             Grid.Column="1"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding HBMS1_VQ.BMS_ChgVoltLimit}" />
+                            Text="{Binding HBMS1_VQ.BMS_ChgVoltLimit, StringFormat={}{0}V}" />
                         <!--  BMS放电电压限制  -->
                         <TextBlock
                             Grid.Row="8"
@@ -1302,7 +1302,7 @@
                             Grid.Row="8"
                             Grid.Column="3"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding HBMS1_VQ.BMS_DisVoltLimit}" />
+                            Text="{Binding HBMS1_VQ.BMS_DisVoltLimit, StringFormat={}{0}V}" />
                         <!--  BMS充电电流限制  -->
                         <TextBlock
                             Grid.Row="6"
@@ -1313,7 +1313,7 @@
                             Grid.Row="6"
                             Grid.Column="1"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding HBMS1_VQ.BMS_ChgCurrLimit}" />
+                            Text="{Binding HBMS1_VQ.BMS_ChgCurrLimit, StringFormat={}{0}A}" />
                         <!--  BMS当前SOC  -->
                         <TextBlock
                             Grid.Row="6"
@@ -1324,7 +1324,7 @@
                             Grid.Row="6"
                             Grid.Column="3"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding HBMS1_VQ.BMS_SOC}" />
+                            Text="{Binding HBMS1_VQ.BMS_SOC, StringFormat={}{0}%}" />
                         <!--  BMS充电电流  -->
                         <!--
                         <TextBlock
@@ -1425,7 +1425,7 @@
                         Grid.Row="0"
                         Grid.Column="3"
                         Style="{StaticResource ContentText}"
-                        Text="{Binding HBAT_VQ.BattVolt}" />
+                        Text="{Binding HBAT_VQ.BattVolt, StringFormat={}{0}V}" />
                     <!--  电池容量  -->
                     <TextBlock
                         Grid.Row="1"
@@ -1446,7 +1446,7 @@
                         Grid.Row="1"
                         Grid.Column="3"
                         Style="{StaticResource ContentText}"
-                        Text="{Binding HBAT_VQ.BusVolt}" />
+                        Text="{Binding HBAT_VQ.BusVolt, StringFormat={}{0}}" />
 
                     <!--  电池放电电流  -->
                     <!--
@@ -1623,6 +1623,14 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
 
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
@@ -1654,6 +1662,7 @@
 
 
                             <!--  输出设定频率  -->
+                            <!--
                             <TextBlock
                                 Grid.Row="1"
                                 Style="{StaticResource ContentText}"
@@ -1662,18 +1671,18 @@
                                 Grid.Row="1"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.OutputSettingFrequency2}" />
+                                Text="{Binding HEEP1_HPVINV02.OutputSettingFrequency2}" />
                             <TextBox
                                 Grid.Row="1"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"
-                                Text="{Binding HEEP1_PDF.OutputSettingFrequency_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                                Text="{Binding HEEP1_HPVINV02.OutputSettingFrequency_Inputs, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
                                 Grid.Row="1"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetOutputSettingFrequency, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetOutputSettingFrequency, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
-                                Style="{StaticResource ActionButton}" />
+                                Style="{StaticResource ActionButton}" />-->
                             <!--  输出设定电压  -->
                             <TextBlock
                                 Grid.Row="2"
@@ -1683,16 +1692,16 @@
                                 Grid.Row="2"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.OutSetVolt}" />
+                                Text="{Binding HEEP1_HPVINV02.OutSetVolt}" />
                             <TextBox
                                 Grid.Row="2"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"
-                                Text="{Binding HEEP1_PDF.OutSetVolt_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                                Text="{Binding HEEP1_HPVINV02.OutSetVolt_Inputs, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
                                 Grid.Row="2"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetOutSetVolt, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetOutSetVolt, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  强充电压  -->
@@ -1704,16 +1713,16 @@
                                 Grid.Row="3"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.StrongChargeVoltage}" />
+                                Text="{Binding HEEP1_HPVINV02.StrongChargeVoltage}" />
                             <TextBox
                                 Grid.Row="3"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"
-                                Text="{Binding HEEP1_PDF.StrongChargeVoltage_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                                Text="{Binding HEEP1_HPVINV02.StrongChargeVoltage_Inputs, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
                                 Grid.Row="3"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetStrongChargeVoltage, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetStrongChargeVoltage, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  浮充电压  -->
@@ -1725,16 +1734,16 @@
                                 Grid.Row="4"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.FloatChargeVolage}" />
+                                Text="{Binding HEEP1_HPVINV02.FloatChargeVolage}" />
                             <TextBox
                                 Grid.Row="4"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"
-                                Text="{Binding HEEP1_PDF.FloatChargeVolage_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                                Text="{Binding HEEP1_HPVINV02.FloatChargeVolage_Inputs, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
                                 Grid.Row="4"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetFloatChargeVolage, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetFloatChargeVolage, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  低电锁机电压  -->
@@ -1746,16 +1755,16 @@
                                 Grid.Row="6"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.LowPowerLock}" />
+                                Text="{Binding HEEP1_HPVINV02.LowPowerLock}" />
                             <TextBox
                                 Grid.Row="6"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"
-                                Text="{Binding HEEP1_PDF.LowPowerLock_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                                Text="{Binding HEEP1_HPVINV02.LowPowerLock_Inputs, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
                                 Grid.Row="6"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetLowPowerLock, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetLowPowerLock, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
 
@@ -1768,16 +1777,16 @@
                                 Grid.Row="5"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.TotalChargeCurrent}" />
+                                Text="{Binding HEEP1_HPVINV02.TotalChargeCurrent}" />
                             <TextBox
                                 Grid.Row="5"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"
-                                Text="{Binding HEEP1_PDF.TotalChargeCurrent_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                                Text="{Binding HEEP1_HPVINV02.TotalChargeCurrent_Inputs, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
                                 Grid.Row="5"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetTotalChargeCurrent, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetTotalChargeCurrent, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
 
@@ -1790,16 +1799,16 @@
                                 Grid.Row="7"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.AC_ChargingCurrent}" />
+                                Text="{Binding HEEP1_HPVINV02.AC_ChargingCurrent}" />
                             <TextBox
                                 Grid.Row="7"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"
-                                Text="{Binding HEEP1_PDF.AC_ChargingCurrent_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                                Text="{Binding HEEP1_HPVINV02.AC_ChargingCurrent_Inputs, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
                                 Grid.Row="7"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetAC_ChargingCurrent, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetAC_ChargingCurrent, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
 
@@ -1812,16 +1821,16 @@
                                 Grid.Row="8"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.BMSreturns_to_AC_mode_SOC}" />
+                                Text="{Binding HEEP1_HPVINV02.BMSreturns_to_AC_mode_SOC}" />
                             <TextBox
                                 Grid.Row="8"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"
-                                Text="{Binding HEEP1_PDF.BMSreturns_to_AC_mode_SOC_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                                Text="{Binding HEEP1_HPVINV02.BMSreturns_to_AC_mode_SOC_Inputs, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
                                 Grid.Row="8"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetBMSreturns_to_AC_mode_SOC, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetBMSreturns_to_AC_mode_SOC, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  BMS锁机电池容量  -->
@@ -1833,16 +1842,16 @@
                                 Grid.Row="9"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.BMS_LowPower_SOC}" />
+                                Text="{Binding HEEP1_HPVINV02.BMS_LowPower_SOC}" />
                             <TextBox
                                 Grid.Row="9"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"
-                                Text="{Binding HEEP1_PDF.BMS_LowPower_SOC_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                                Text="{Binding HEEP1_HPVINV02.BMS_LowPower_SOC_Inputs, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
                                 Grid.Row="9"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetBMS_LowPower_SOC, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetBMS_LowPower_SOC, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
 
@@ -1855,16 +1864,16 @@
                                 Grid.Row="13"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.BMS_returns_to_battery_mode_SOC}" />
+                                Text="{Binding HEEP1_HPVINV02.BMS_returns_to_battery_mode_SOC}" />
                             <TextBox
                                 Grid.Row="13"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"
-                                Text="{Binding HEEP1_PDF.BMS_returns_to_battery_mode_SOC_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                                Text="{Binding HEEP1_HPVINV02.BMS_returns_to_battery_mode_SOC_Inputs, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
                                 Grid.Row="13"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetBMS_returns_to_battery_mode_SOC, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetBMS_returns_to_battery_mode_SOC, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
 
@@ -1877,16 +1886,16 @@
                                 Grid.Row="14"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.BMS_automatically_turns_on_after_low_power_SOC}" />
+                                Text="{Binding HEEP1_HPVINV02.BMS_automatically_turns_on_after_low_power_SOC}" />
                             <TextBox
                                 Grid.Row="14"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"
-                                Text="{Binding HEEP1_PDF.BMS_automatically_turns_on_after_low_power_SOC_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                                Text="{Binding HEEP1_HPVINV02.BMS_automatically_turns_on_after_low_power_SOC_Inputs, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
                                 Grid.Row="14 "
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetBMS_automatically_turns_on_after_low_power_SOC, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetBMS_automatically_turns_on_after_low_power_SOC, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
 
@@ -2039,8 +2048,138 @@
                                 Style="{StaticResource ActionButton}" />
 
 
+                            <!--  第二输出放电时间  -->
+                            <TextBlock
+                                Grid.Row="25"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 第二输出的放电时间}" />
+                            <TextBlock
+                                Grid.Row="25"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP2.SecondOutputDischargeTime}" />
+                            <TextBox
+                                Grid.Row="25"
+                                Grid.Column="2"
+                                Style="{StaticResource InputBox}"
+                                Text="{Binding HEEP2.SecondOutputDischargeTime_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button
+                                Grid.Row="25"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP2.Command_SetSecondOutputDischargeTime, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Cursor="Hand"
+                                Style="{StaticResource ActionButton}" />
+                            <!--  恢复第二输出的延时时间  -->
+                            <TextBlock
+                                Grid.Row="26"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 第二输出的延时时间}" />
+                            <TextBlock
+                                Grid.Row="26"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP2.DelayTimeToRestoreTheSecondOutput}" />
+                            <TextBox
+                                Grid.Row="26"
+                                Grid.Column="2"
+                                Style="{StaticResource InputBox}"
+                                Text="{Binding HEEP2.DelayTimeToRestoreTheSecondOutput_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button
+                                Grid.Row="26"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP2.Command_SetDelayTimeToRestoreTheSecondOutput, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Cursor="Hand"
+                                Style="{StaticResource ActionButton}" />
+                            <!--  恢复第二输出的电池容量  -->
+                            <TextBlock
+                                Grid.Row="27"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 第二输出的电池容量}" />
+                            <TextBlock
+                                Grid.Row="27"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP2.RestoreBatteryCapacityOfSecondOutput}" />
+                            <TextBox
+                                Grid.Row="27"
+                                Grid.Column="2"
+                                Style="{StaticResource InputBox}"
+                                Text="{Binding HEEP2.RestoreBatteryCapacityOfSecondOutput_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button
+                                Grid.Row="27"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP2.Command_SetRestoreBatteryCapacityOfSecondOutput, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Cursor="Hand"
+                                Style="{StaticResource ActionButton}" />
+                            <!--  恢复第二输出的电池电压  -->
+                            <TextBlock
+                                Grid.Row="28"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 第二输出的电池电压}" />
+                            <TextBlock
+                                Grid.Row="28"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP2.RestoreBatteryVoltageOfSecondOutput}" />
+                            <TextBox
+                                Grid.Row="28"
+                                Grid.Column="2"
+                                Style="{StaticResource InputBox}"
+                                Text="{Binding HEEP2.RestoreBatteryVoltageOfSecondOutput_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button
+                                Grid.Row="28"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP2.Command_SetRestoreBatteryVoltageOfSecondOutput, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Cursor="Hand"
+                                Style="{StaticResource ActionButton}" />
 
-
+                            <!--  第二输出关闭电压值(并机模式关闭电压值)  -->
+                            <TextBlock
+                                Grid.Row="29"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 第二输出关闭电压值}" />
+                            <TextBlock
+                                Grid.Row="29"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP2.ParallelModeShutdownVoltage}" />
+                            <TextBox
+                                Grid.Row="29"
+                                Grid.Column="2"
+                                Style="{StaticResource InputBox}"
+                                Text="{Binding HEEP2.ParallelModeShutdownVoltage_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button
+                                Grid.Row="29"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP2.Command_SetParallelModeShutdownVoltage, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Style="{StaticResource ActionButton}" />
+                            <!--  第二输出关闭电池SOC(并机模式关闭SOC)  -->
+                            <TextBlock
+                                Grid.Row="30"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 第二输出关闭电池SOC}" />
+                            <TextBlock
+                                Grid.Row="30"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP2.ParallelModeShutdownSOC}" />
+                            <TextBox
+                                Grid.Row="30"
+                                Grid.Column="2"
+                                Style="{StaticResource InputBox}"
+                                Text="{Binding HEEP2.ParallelModeShutdownSOC_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button
+                                Grid.Row="30"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP2.Command_SetParallelModeShutdownSOC, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Cursor="Hand"
+                                Style="{StaticResource ActionButton}" />
 
 
 
@@ -2073,6 +2212,11 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
@@ -2126,17 +2270,17 @@
                                 Grid.Row="1"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.WorkingMode}" />
+                                Text="{Binding HEEP1_HPVINV02.WorkingMode}" />
                             <ComboBox
                                 Grid.Row="1"
                                 Grid.Column="2"
-                                ItemsSource="{Binding HEEP1_PDF.WorkingModeOptions}"
-                                SelectedItem="{Binding HEEP1_PDF.WorkingModeSelectedOption}"
+                                ItemsSource="{Binding HEEP1_HPVINV02.WorkingModeOptions}"
+                                SelectedItem="{Binding HEEP1_HPVINV02.WorkingModeSelectedOption}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
                                 Grid.Row="1"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetWorkingMode, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetWorkingMode, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  过载重启  -->
@@ -2148,17 +2292,17 @@
                                 Grid.Row="2"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.OverloadRestart}" />
+                                Text="{Binding HEEP1_HPVINV02.OverloadRestart}" />
                             <ComboBox
                                 Grid.Row="2"
                                 Grid.Column="2"
-                                ItemsSource="{Binding HEEP1_PDF.OverloadRestartOptions}"
-                                SelectedItem="{Binding HEEP1_PDF.OverloadRestart_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                ItemsSource="{Binding HEEP1_HPVINV02.OverloadRestartOptions}"
+                                SelectedItem="{Binding HEEP1_HPVINV02.OverloadRestart_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
                                 Grid.Row="2"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetOverloadRestart, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetOverloadRestart, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  过温重启  -->
@@ -2170,17 +2314,17 @@
                                 Grid.Row="3"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.OverTemperatureRestart}" />
+                                Text="{Binding HEEP1_HPVINV02.OverTemperatureRestart}" />
                             <ComboBox
                                 Grid.Row="3"
                                 Grid.Column="2"
-                                ItemsSource="{Binding HEEP1_PDF.OverTemperatureRestartOptions}"
-                                SelectedItem="{Binding HEEP1_PDF.OverTemperatureRestart_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                ItemsSource="{Binding HEEP1_HPVINV02.OverTemperatureRestartOptions}"
+                                SelectedItem="{Binding HEEP1_HPVINV02.OverTemperatureRestart_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
                                 Grid.Row="3"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetOverTemperatureRestart, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetOverTemperatureRestart, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  LCD背光  -->
@@ -2192,17 +2336,17 @@
                                 Grid.Row="4"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.LCD_Backlight}" />
+                                Text="{Binding HEEP1_HPVINV02.LCD_Backlight}" />
                             <ComboBox
                                 Grid.Row="4"
                                 Grid.Column="2"
-                                ItemsSource="{Binding HEEP1_PDF.LCD_BacklightOptions}"
-                                SelectedItem="{Binding HEEP1_PDF.LCD_Backlight_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                ItemsSource="{Binding HEEP1_HPVINV02.LCD_BacklightOptions}"
+                                SelectedItem="{Binding HEEP1_HPVINV02.LCD_Backlight_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
                                 Grid.Row="4"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetLCD_Backlight, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetLCD_Backlight, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
 
@@ -2215,17 +2359,17 @@
                                 Grid.Row="5"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.OutputSettingFrequency2}" />
+                                Text="{Binding HEEP1_HPVINV02.OutputSettingFrequency2}" />
                             <ComboBox
                                 Grid.Row="5"
                                 Grid.Column="2"
-                                ItemsSource="{Binding HEEP1_PDF.OutputSettingFrequencyOptions}"
-                                SelectedItem="{Binding HEEP1_PDF.OutputSettingFrequency_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                ItemsSource="{Binding HEEP1_HPVINV02.OutputSettingFrequencyOptions}"
+                                SelectedItem="{Binding HEEP1_HPVINV02.OutputSettingFrequency_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
                                 Grid.Row="5"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetOutputSettingFrequency, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetOutputSettingFrequency, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  电池类型  -->
@@ -2237,17 +2381,17 @@
                                 Grid.Row="6"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.BatteryType}" />
+                                Text="{Binding HEEP1_HPVINV02.BatteryType}" />
                             <ComboBox
                                 Grid.Row="6"
                                 Grid.Column="2"
-                                ItemsSource="{Binding HEEP1_PDF.BatteryTypeOptions}"
-                                SelectedItem="{Binding HEEP1_PDF.BatteryType_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                ItemsSource="{Binding HEEP1_HPVINV02.BatteryTypeOptions}"
+                                SelectedItem="{Binding HEEP1_HPVINV02.BatteryTypeSelectedOption, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
                                 Grid.Row="6"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetBatteryType, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetBatteryType, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  充电模式  -->
@@ -2259,20 +2403,21 @@
                                 Grid.Row="7"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.ChargingPriority}" />
+                                Text="{Binding HEEP1_HPVINV02.ChargingPriority}" />
                             <ComboBox
                                 Grid.Row="7"
                                 Grid.Column="2"
-                                ItemsSource="{Binding HEEP1_PDF.ChargingPriorityOptions}"
-                                SelectedItem="{Binding HEEP1_PDF.ChargingPriority_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                ItemsSource="{Binding HEEP1_HPVINV02.ChargingPriorityOptions}"
+                                SelectedItem="{Binding HEEP1_HPVINV02.ChargingPriority_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
                                 Grid.Row="7"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetChargingPriority, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetChargingPriority, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  故障记录  -->
+                            <!--
                             <TextBlock
                                 Grid.Row="8"
                                 Style="{StaticResource ContentText}"
@@ -2281,19 +2426,19 @@
                                 Grid.Row="8"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.FaultLog}" />
+                                Text="{Binding HEEP1_HPVINV02.FaultLog}" />
                             <ComboBox
                                 Grid.Row="8"
                                 Grid.Column="2"
-                                ItemsSource="{Binding HEEP1_PDF.FaultLogOptions}"
-                                SelectedItem="{Binding HEEP1_PDF.FaultLog_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                ItemsSource="{Binding HEEP1_HPVINV02.FaultLogOptions}"
+                                SelectedItem="{Binding HEEP1_HPVINV02.FaultLog_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
                                 Grid.Row="8"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetFaultLog, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetFaultLog, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
-                                Style="{StaticResource ActionButton}" />
+                                Style="{StaticResource ActionButton}" />-->
                             <!--  BMS通信控制功能  -->
                             <TextBlock
                                 Grid.Row="9"
@@ -2303,17 +2448,17 @@
                                 Grid.Row="9"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.BMS_CommunicationControlFunction}" />
+                                Text="{Binding HEEP1_HPVINV02.BMS_CommunicationControlFunction}" />
                             <ComboBox
                                 Grid.Row="9"
                                 Grid.Column="2"
-                                ItemsSource="{Binding HEEP1_PDF.BMS_CommunicationControlFunctionOptions}"
-                                SelectedItem="{Binding HEEP1_PDF.BMS_CommunicationControlFunction_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                ItemsSource="{Binding HEEP1_HPVINV02.BMS_CommunicationControlFunctionOptions}"
+                                SelectedItem="{Binding HEEP1_HPVINV02.BMS_CommunicationControlFunction_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
                                 Grid.Row="9"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetBMS_CommunicationControlFunction, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetBMS_CommunicationControlFunction, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
 
@@ -2326,17 +2471,17 @@
                                 Grid.Row="10"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.BuzzerStatus}" />
+                                Text="{Binding HEEP1_HPVINV02.BuzzerStatus}" />
                             <ComboBox
                                 Grid.Row="10"
                                 Grid.Column="2"
-                                ItemsSource="{Binding HEEP1_PDF.BuzzerStatusOptions}"
-                                SelectedItem="{Binding HEEP1_PDF.BuzzerStatus_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                ItemsSource="{Binding HEEP1_HPVINV02.BuzzerStatusOptions}"
+                                SelectedItem="{Binding HEEP1_HPVINV02.BuzzerStatus_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
                                 Grid.Row="10"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetBuzzerStatus, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetBuzzerStatus, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  输入源提示  -->
@@ -2348,17 +2493,17 @@
                                 Grid.Row="11"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.InputPrompt}" />
+                                Text="{Binding HEEP1_HPVINV02.InputPrompt}" />
                             <ComboBox
                                 Grid.Row="11"
                                 Grid.Column="2"
-                                ItemsSource="{Binding HEEP1_PDF.InputPromptOptions}"
-                                SelectedItem="{Binding HEEP1_PDF.InputPrompt_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                ItemsSource="{Binding HEEP1_HPVINV02.InputPromptOptions}"
+                                SelectedItem="{Binding HEEP1_HPVINV02.InputPrompt_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
                                 Grid.Row="11"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetInputPrompt, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetInputPrompt, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  自动返回首页  -->
@@ -2370,17 +2515,17 @@
                                 Grid.Row="12"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.AutoReturnHome}" />
+                                Text="{Binding HEEP1_HPVINV02.AutoReturnHome}" />
                             <ComboBox
                                 Grid.Row="12"
                                 Grid.Column="2"
-                                ItemsSource="{Binding HEEP1_PDF.AutoReturnHomeOptions}"
-                                SelectedItem="{Binding HEEP1_PDF.AutoReturnHome_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                ItemsSource="{Binding HEEP1_HPVINV02.AutoReturnHomeOptions}"
+                                SelectedItem="{Binding HEEP1_HPVINV02.AutoReturnHome_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
                                 Grid.Row="12"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetAutoReturnHome, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetAutoReturnHome, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
 
@@ -2395,17 +2540,17 @@
                                 Grid.Row="13"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_PDF.AC_InputRange}" />
+                                Text="{Binding HEEP1_HPVINV02.AC_InputRange}" />
                             <ComboBox
                                 Grid.Row="13"
                                 Grid.Column="2"
-                                ItemsSource="{Binding HEEP1_PDF.AC_InputRangeOptions}"
-                                SelectedItem="{Binding HEEP1_PDF.AC_InputRange_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                ItemsSource="{Binding HEEP1_HPVINV02.AC_InputRangeOptions}"
+                                SelectedItem="{Binding HEEP1_HPVINV02.AC_InputRange_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
                                 Grid.Row="13"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_PDF.Command_SetAC_InputRange, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetAC_InputRange, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
 
@@ -2431,29 +2576,140 @@
                                 Command="{Binding DataContext.HEEP2.Command_SetBatteryBalancingMmode, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
-                            <!--  系统时间  -->
+                            <!--  双输出模式  -->
                             <TextBlock
                                 Grid.Row="15"
                                 Style="{StaticResource ContentText}"
-                                Text="{DynamicResource 系统时间}" />
+                                Text="{DynamicResource 双输出模式}" />
                             <TextBlock
                                 Grid.Row="15"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP2.DualOutputMode}" />
+                            <ComboBox
+                                Grid.Row="15"
+                                Grid.Column="2"
+                                ItemsSource="{Binding HEEP2.DualOutputModeOptions}"
+                                SelectedItem="{Binding HEEP2.DualOutputMode_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{StaticResource SelectBox}" />
+                            <Button
+                                Grid.Row="15"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP2.Command_SetDualOutputMode, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Style="{StaticResource ActionButton}" />
+
+
+                            <!--  并网功能  -->
+                            <TextBlock
+                                Grid.Row="16"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 并网功能}" />
+                            <TextBlock
+                                Grid.Row="16"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP1_HPVINV02.GridConnectedFunction}" />
+                            <ComboBox
+                                Grid.Row="16"
+                                Grid.Column="2"
+                                ItemsSource="{Binding HEEP1_HPVINV02.GridConnectedFunctionOptions}"
+                                SelectedItem="{Binding HEEP1_HPVINV02.GridConnectedFunction_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{StaticResource SelectBox}" />
+                            <Button
+                                Grid.Row="16"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetGridConnectedFunction, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Style="{StaticResource ActionButton}" />
+                            <!--  并网电流  -->
+                            <TextBlock
+                                Grid.Row="17"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 并网电流}" />
+                            <TextBlock
+                                Grid.Row="17"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP1_HPVINV02.GridCurrent}" />
+                            <TextBox
+                                Grid.Row="17"
+                                Grid.Column="2"
+                                Style="{StaticResource InputBox}"
+                                Text="{Binding HEEP1_HPVINV02.GridCurrent_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button
+                                Grid.Row="17"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetGridCurrent, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Style="{StaticResource ActionButton}" />
+                            <!--  并网协议  -->
+                            <TextBlock
+                                Grid.Row="18"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 并网协议}" />
+                            <TextBlock
+                                Grid.Row="18"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP1_HPVINV02.PV_GridConnectionProtocol}" />
+                            <ComboBox
+                                Grid.Row="18"
+                                Grid.Column="2"
+                                ItemsSource="{Binding HEEP1_HPVINV02.PV_GridConnectionProtocolOptions}"
+                                SelectedItem="{Binding HEEP1_HPVINV02.PV_GridConnectionProtocol_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{StaticResource SelectBox}" />
+                            <Button
+                                Grid.Row="18"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetPV_GridConnectionProtocol, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Style="{StaticResource ActionButton}" />
+                            <!--  PV馈能优先级  -->
+                            <TextBlock
+                                Grid.Row="19"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource PV馈能优先级}" />
+                            <TextBlock
+                                Grid.Row="19"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP1_HPVINV02.PV_FeedPriority}" />
+                            <ComboBox
+                                Grid.Row="19"
+                                Grid.Column="2"
+                                ItemsSource="{Binding HEEP1_HPVINV02.PV_FeedPriorityOptions}"
+                                SelectedItem="{Binding HEEP1_HPVINV02.PV_FeedPriority_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{StaticResource SelectBox}" />
+                            <Button
+                                Grid.Row="19"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetPV_FeedPriority, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Style="{StaticResource ActionButton}" />
+                            <!--  系统时间  -->
+                            <TextBlock
+                                Grid.Row="20"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 系统时间}" />
+                            <TextBlock
+                                Grid.Row="20"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
                                 Text="{Binding HGEN.SystemTime}" />
                             <TextBlock
-                                Grid.Row="15"
+                                Grid.Row="20"
                                 Grid.Column="2"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding Clock.CurrentTime, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
-                                Grid.Row="15"
+                                Grid.Row="20"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HGEN.Command_SetSystemTime, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
                             <UniformGrid
-                                Grid.Row="16"
+                                Grid.Row="21"
                                 Grid.ColumnSpan="4"
                                 Margin="0,20"
                                 Columns="2">
