@@ -585,7 +585,14 @@ namespace WpfApp1.Command.Comand_GB3024
             get { return _ReturnBatteryModeVoltage; }
             set
             {
-                _ReturnBatteryModeVoltage = Tools.RemoveLeadingZeros(value) + "V";
+                
+                if (Tools.RemoveLeadingZeros(value) == "0.0")
+                {
+                    value = "FULL";
+                    _ReturnBatteryModeVoltage = value;
+                }
+                else
+                    _ReturnBatteryModeVoltage = Tools.RemoveLeadingZeros(value) + "V";
                 RaiseProperChanged(nameof(ReturnBatteryModeVoltage));
             }
         }
@@ -1191,7 +1198,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("PDDCGT", Tools.PadToTwoDigits(SecondOutputDischargeTime_Inputs));
+                    string receive = SerialCommunicationService.SendSettingCommand("PDDCGT", Tools.PadToFourDigits(SecondOutputDischargeTime_Inputs));
 
                 })
                 , timeoutCts.Token);

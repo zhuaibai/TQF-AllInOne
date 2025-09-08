@@ -48,6 +48,7 @@ namespace WpfApp1.Services
                     else if (value == "(HPVINV02" || value == "(HPVINV05") _MachineType = "B";
                     else if (value == "(HPVINV03") _MachineType = "C";
                     else if (value == "(HPVINV04") _MachineType = "D";
+                    else if (value == "(HPVINV08") _MachineType = "F";
                 }
                 else
                 _MachineType = value; }

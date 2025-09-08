@@ -103,6 +103,38 @@ namespace WpfApp1.Convert
         }
 
         /// <summary>
+        /// 四位数补零【60/6 → 0060/0006】
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public static string PadToFourDigits(string input)
+        {
+            if (int.TryParse(input, out int number))
+            {
+                return number.ToString("D4"); // D3格式 = 三位数补零
+            }
+            return "";
+            //throw new ArgumentException("输入必须是有效数字字符串");
+        }
+
+        /// <summary>
+        /// 五位数补零【60/6 → 00060/00006】
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public static string PadToFiveDigits(string input)
+        {
+            if (int.TryParse(input, out int number))
+            {
+                return number.ToString("D5"); // D3格式 = 三位数补零
+            }
+            return "";
+            //throw new ArgumentException("输入必须是有效数字字符串");
+        }
+
+        /// <summary>
         /// 2位数补零【60/6 → 60/06】
         /// </summary>
         /// <param name="input"></param>

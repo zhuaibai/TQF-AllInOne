@@ -745,8 +745,9 @@
                             Text="w" />
                     </StackPanel>
                 </Grid>
-                <!--  中左  -->
+                <!--  光伏发电到逆变器箭头  -->
                 <Grid Grid.Row="1">
+
 
                     <TextBlock
                         HorizontalAlignment="Center"
@@ -754,14 +755,8 @@
                         FontFamily="../Resource/Fonts/#iconfont"
                         FontSize="15"
                         Foreground="#FF1BD0E4"
-                        Text="&#xe62f;" />
-                    <TextBlock
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Bottom"
-                        FontFamily="../Resource/Fonts/#iconfont"
-                        FontSize="15"
-                        Foreground="#FF1BD0E4"
-                        Text="&#xec64;" />
+                        Text="&#xe62f;"
+                        Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
 
                     <StackPanel
                         HorizontalAlignment="Right"
@@ -802,17 +797,75 @@
 
                 </Grid>
 
-                <!--  中间  -->
-                <StackPanel
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center">
+                <!--  电池到逆变器箭头  -->
+                <Grid Grid.Row="2" Grid.Column="1">
 
-
+                    <!--  向下的箭头  -->
                     <StackPanel
-                        Margin="10"
                         HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        Orientation="Vertical">
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xe62f;"
+                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xe62f;"
+                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xe62f;"
+                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xe62f;"
+                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+
+                    </StackPanel>
+                    <!--  向上的箭头  -->
+                    <StackPanel
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        Orientation="Vertical">
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec64;"
+                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec64;"
+                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec64;"
+                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec64;"
+                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+
+                    </StackPanel>
+                    <!--  向右的箭头  -->
+                    <StackPanel
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
                         Orientation="Horizontal">
 
                         <TextBlock
@@ -840,55 +893,275 @@
                             Foreground="#FF1BD0E4"
                             Text="&#xec62;" />
                         <TextBlock
-                            Margin="10,0"
-                            FontFamily="../Resource/Fonts/#iconfont"
-                            FontSize="30"
-                            Text="&#xe6af;" />
-                        <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec63;" />
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            FontFamily="../Resource/Fonts/#iconfont"
-                            FontSize="15"
-                            Foreground="#FF1BD0E4"
-                            Text="&#xec63;" />
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            FontFamily="../Resource/Fonts/#iconfont"
-                            FontSize="15"
-                            Foreground="#FF1BD0E4"
-                            Text="&#xec63;" />
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            FontFamily="../Resource/Fonts/#iconfont"
-                            FontSize="15"
-                            Foreground="#FF1BD0E4"
-                            Text="&#xec63;" />
+                            Text="&#xec62;" />
+                    </StackPanel>
+                    <!--  向左的箭头  -->
+                    <StackPanel
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
 
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec63;" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec63;" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec63;" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec63;" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec63;" />
                     </StackPanel>
 
-                </StackPanel>
-                <!--  中右  -->
+                </Grid>
+
+                <!--  逆变器到市电箭头  -->
+                <Grid Grid.Row="0" Grid.Column="1">
+
+                    <!--  向下的箭头  -->
+                    <StackPanel
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        Orientation="Vertical">
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xe62f;"
+                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xe62f;"
+                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xe62f;"
+                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xe62f;"
+                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+
+                    </StackPanel>
+                    <!--  向上的箭头  -->
+                    <StackPanel
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        Orientation="Vertical">
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec64;"
+                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec64;"
+                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec64;"
+                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec64;"
+                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+
+                    </StackPanel>
+                    <!--  向右的箭头  -->
+                    <StackPanel
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec62;" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec62;" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec62;" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec62;" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec62;" />
+                    </StackPanel>
+                    <!--  向左的箭头  -->
+                    <StackPanel
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec63;" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec63;" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec63;" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec63;" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec63;" />
+                    </StackPanel>
+
+                </Grid>
+
+                <!--  中间（逆变器图标和箭头）  -->
+                <Grid Grid.Row="1" Grid.Column="1">
+                    <!--  太阳能发电到逆变器（向右）  -->
+                    <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+                        <!--  右滑箭头  -->
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec62;" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec62;" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec62;" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec62;" />
+
+                    </StackPanel>
+                    <!--  中间逆变器图标  -->
+                    <StackPanel HorizontalAlignment="Center">
+
+                        <TextBlock
+                            Margin="0,0"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="50"
+                            Text="&#xe605;" />
+                    </StackPanel>
+                    <!--  逆变器到负载图标（向右）  -->
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                        <!--  右滑箭头  -->
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec62;" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec62;" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec62;" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec62;" />
+                    </StackPanel>
+
+                </Grid>
+                <!--  逆变器到负载箭头（向下）  -->
                 <Grid Grid.Row="1" Grid.Column="2">
 
-                    <TextBlock
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Top"
-                        FontFamily="../Resource/Fonts/#iconfont"
-                        FontSize="15"
-                        Foreground="#FF1BD0E4"
-                        Text="&#xe62f;" />
                     <TextBlock
                         HorizontalAlignment="Center"
                         VerticalAlignment="Bottom"
                         FontFamily="../Resource/Fonts/#iconfont"
                         FontSize="15"
                         Foreground="#FF1BD0E4"
-                        Text="&#xec64;" />
+                        Text="&#xe62f;" />
+
 
                     <StackPanel
                         HorizontalAlignment="Left"
@@ -1378,7 +1651,7 @@
             </ScrollViewer>
 
             <!--  电池  -->
-            <GroupBox Grid.Row="1" Header="电池">
+            <GroupBox Grid.Row="1" Header="{DynamicResource 电池}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="2*" />
@@ -1704,87 +1977,23 @@
                                 Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetOutSetVolt, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
-                            <!--  强充电压  -->
-                            <TextBlock
-                                Grid.Row="3"
-                                Style="{StaticResource ContentText}"
-                                Text="{DynamicResource 强充电压}" />
-                            <TextBlock
-                                Grid.Row="3"
-                                Grid.Column="1"
-                                Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_HPVINV02.StrongChargeVoltage}" />
-                            <TextBox
-                                Grid.Row="3"
-                                Grid.Column="2"
-                                Style="{StaticResource InputBox}"
-                                Text="{Binding HEEP1_HPVINV02.StrongChargeVoltage_Inputs, UpdateSourceTrigger=PropertyChanged}" />
-                            <Button
-                                Grid.Row="3"
-                                Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetStrongChargeVoltage, RelativeSource={RelativeSource AncestorType=Window}}"
-                                Content="{DynamicResource 设置}"
-                                Style="{StaticResource ActionButton}" />
-                            <!--  浮充电压  -->
-                            <TextBlock
-                                Grid.Row="4"
-                                Style="{StaticResource ContentText}"
-                                Text="{DynamicResource 浮充电压}" />
-                            <TextBlock
-                                Grid.Row="4"
-                                Grid.Column="1"
-                                Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_HPVINV02.FloatChargeVolage}" />
-                            <TextBox
-                                Grid.Row="4"
-                                Grid.Column="2"
-                                Style="{StaticResource InputBox}"
-                                Text="{Binding HEEP1_HPVINV02.FloatChargeVolage_Inputs, UpdateSourceTrigger=PropertyChanged}" />
-                            <Button
-                                Grid.Row="4"
-                                Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetFloatChargeVolage, RelativeSource={RelativeSource AncestorType=Window}}"
-                                Content="{DynamicResource 设置}"
-                                Style="{StaticResource ActionButton}" />
-                            <!--  低电锁机电压  -->
-                            <TextBlock
-                                Grid.Row="6"
-                                Style="{StaticResource ContentText}"
-                                Text="{DynamicResource 锁机电压}" />
-                            <TextBlock
-                                Grid.Row="6"
-                                Grid.Column="1"
-                                Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_HPVINV02.LowPowerLock}" />
-                            <TextBox
-                                Grid.Row="6"
-                                Grid.Column="2"
-                                Style="{StaticResource InputBox}"
-                                Text="{Binding HEEP1_HPVINV02.LowPowerLock_Inputs, UpdateSourceTrigger=PropertyChanged}" />
-                            <Button
-                                Grid.Row="6"
-                                Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetLowPowerLock, RelativeSource={RelativeSource AncestorType=Window}}"
-                                Content="{DynamicResource 设置}"
-                                Style="{StaticResource ActionButton}" />
-
                             <!--  最大总充电电流  -->
                             <TextBlock
-                                Grid.Row="5"
+                                Grid.Row="3"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource 总充电电流}" />
                             <TextBlock
-                                Grid.Row="5"
+                                Grid.Row="3"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding HEEP1_HPVINV02.TotalChargeCurrent}" />
                             <TextBox
-                                Grid.Row="5"
+                                Grid.Row="3"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"
                                 Text="{Binding HEEP1_HPVINV02.TotalChargeCurrent_Inputs, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
-                                Grid.Row="5"
+                                Grid.Row="3"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetTotalChargeCurrent, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
@@ -1792,25 +2001,90 @@
 
                             <!--  市电充电电流  -->
                             <TextBlock
-                                Grid.Row="7"
+                                Grid.Row="4"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource 市电充电电流}" />
                             <TextBlock
-                                Grid.Row="7"
+                                Grid.Row="4"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding HEEP1_HPVINV02.AC_ChargingCurrent}" />
                             <TextBox
-                                Grid.Row="7"
+                                Grid.Row="4"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"
                                 Text="{Binding HEEP1_HPVINV02.AC_ChargingCurrent_Inputs, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
-                                Grid.Row="7"
+                                Grid.Row="4"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetAC_ChargingCurrent, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
+                            <!--  强充电压  -->
+                            <TextBlock
+                                Grid.Row="5"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 强充电压}" />
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP1_HPVINV02.StrongChargeVoltage}" />
+                            <TextBox
+                                Grid.Row="5"
+                                Grid.Column="2"
+                                Style="{StaticResource InputBox}"
+                                Text="{Binding HEEP1_HPVINV02.StrongChargeVoltage_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button
+                                Grid.Row="5"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetStrongChargeVoltage, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Style="{StaticResource ActionButton}" />
+                            <!--  浮充电压  -->
+                            <TextBlock
+                                Grid.Row="6"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 浮充电压}" />
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP1_HPVINV02.FloatChargeVolage}" />
+                            <TextBox
+                                Grid.Row="6"
+                                Grid.Column="2"
+                                Style="{StaticResource InputBox}"
+                                Text="{Binding HEEP1_HPVINV02.FloatChargeVolage_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button
+                                Grid.Row="6"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetFloatChargeVolage, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Style="{StaticResource ActionButton}" />
+                            <!--  低电锁机电压  -->
+                            <TextBlock
+                                Grid.Row="7"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 锁机电压}" />
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP1_HPVINV02.LowPowerLock}" />
+                            <TextBox
+                                Grid.Row="7"
+                                Grid.Column="2"
+                                Style="{StaticResource InputBox}"
+                                Text="{Binding HEEP1_HPVINV02.LowPowerLock_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button
+                                Grid.Row="7"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetLowPowerLock, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Style="{StaticResource ActionButton}" />
+
+
 
                             <!--  AC充电电池容量  -->
                             <TextBlock
@@ -2265,7 +2539,7 @@
                             <TextBlock
                                 Grid.Row="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{DynamicResource 输出模式}" />
+                                Text="{DynamicResource 工作模式}" />
                             <TextBlock
                                 Grid.Row="1"
                                 Grid.Column="1"
@@ -2439,6 +2713,28 @@
                                 Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetFaultLog, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />-->
+                            <!--  并机模式  -->
+                            <TextBlock
+                                Grid.Row="8"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 并机模式}" />
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP2.DualOutputMode}" />
+                            <ComboBox
+                                Grid.Row="8"
+                                Grid.Column="2"
+                                ItemsSource="{Binding HEEP2.DualOutputModeOptions}"
+                                SelectedItem="{Binding HEEP2.DualOutputMode_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{StaticResource SelectBox}" />
+                            <Button
+                                Grid.Row="8"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP2.Command_SetDualOutputMode, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Style="{StaticResource ActionButton}" />
                             <!--  BMS通信控制功能  -->
                             <TextBlock
                                 Grid.Row="9"
@@ -2687,33 +2983,66 @@
                                 Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetPV_FeedPriority, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
-                            <!--  系统时间  -->
+                            <!--  输出模式  -->
                             <TextBlock
                                 Grid.Row="20"
                                 Style="{StaticResource ContentText}"
-                                Text="{DynamicResource 系统时间}" />
+                                Text="{DynamicResource 输出模式}" />
                             <TextBlock
                                 Grid.Row="20"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP1_HPVINV02.OutputMode}" />
+                            <ComboBox
+                                Grid.Row="20"
+                                Grid.Column="2"
+                                ItemsSource="{Binding HEEP1_HPVINV02.OutputModeOptions}"
+                                SelectedItem="{Binding HEEP1_HPVINV02.OutputMode_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{StaticResource SelectBox}" />
+                            <Button
+                                Grid.Row="20"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetOutputMode, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Style="{StaticResource ActionButton}" />
+
+                            <!--  系统时间  -->
+                            <TextBlock
+                                Grid.Row="21"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 系统时间}" />
+                            <TextBlock
+                                Grid.Row="21"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
                                 Text="{Binding HGEN.SystemTime}" />
                             <TextBlock
-                                Grid.Row="20"
+                                Grid.Row="21"
                                 Grid.Column="2"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding Clock.CurrentTime, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
-                                Grid.Row="20"
+                                Grid.Row="21"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HGEN.Command_SetSystemTime, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
+
                             <UniformGrid
-                                Grid.Row="21"
+                                Grid.Row="22"
                                 Grid.ColumnSpan="4"
-                                Margin="0,20"
                                 Columns="2">
-                                <Grid>
+                                <Button
+                                    Height="30"
+                                    Command="{Binding DataContext.SpecialCommand.Command_SetAuxiliaryOutputOn, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    Content="{DynamicResource 副输出开}"
+                                    Style="{StaticResource ActionButton}" />
+                                <Button
+                                    Height="30"
+                                    Command="{Binding DataContext.SpecialCommand.Command_SetAuxiliaryOutputShutdown, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    Content="{DynamicResource 副输出关}"
+                                    Style="{StaticResource ActionButton}" />
+                                <!--<Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition />
                                         <RowDefinition />
@@ -2722,7 +3051,9 @@
                                         <ColumnDefinition />
                                         <ColumnDefinition Width="auto" />
                                     </Grid.ColumnDefinitions>
-                                    <!--  逆变电压提高  -->
+                                -->
+                                <!--  逆变电压提高  -->
+                                <!--
                                     <Button
                                         Height="30"
                                         Command="{Binding DataContext.SpecialCommand.Command_SetInvVoltDetectAdjInc, RelativeSource={RelativeSource AncestorType=Window}}"
@@ -2734,7 +3065,9 @@
                                         ItemsSource="{Binding SpecialCommand.InvVoltDetectAdjIncOptions}"
                                         SelectedItem="{Binding SpecialCommand.InvVoltDetectAdjInc_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                         Style="{StaticResource SelectBox}" />
-                                    <!--  逆变电压降低  -->
+                                -->
+                                <!--  逆变电压降低  -->
+                                <!--
                                     <Button
                                         Grid.Row="1"
                                         Height="30"
@@ -2749,8 +3082,36 @@
                                         ItemsSource="{Binding SpecialCommand.InvVoltDetectAdjDecOptions}"
                                         SelectedItem="{Binding SpecialCommand.InvVoltDetectAdjDec_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                         Style="{StaticResource SelectBox}" />
-                                </Grid>
+                                </Grid>-->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="auto" />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        Command="{Binding DataContext.SpecialCommand.Command_SetInvVoltDetectAdjDec, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Content="-"
+                                        Style="{StaticResource ActionButton}" />
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Center"
+                                        Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource ContentText}" Text="逆变电压：" />
+                                        <TextBlock Style="{StaticResource ContentText}" Text="虚拟" />
+                                    </StackPanel>
 
+                                    <Button
+                                        Grid.Column="2"
+                                        Width="50"
+                                        Height="30"
+                                        HorizontalAlignment="Right"
+                                        Command="{Binding DataContext.SpecialCommand.Command_SetInvVoltDetectAdjInc, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Content="+"
+                                        Style="{StaticResource ActionButton}" />
+                                </Grid>
 
                                 <Grid>
                                     <Grid.RowDefinitions>
@@ -2769,17 +3130,18 @@
                                             Content="{DynamicResource 清除发电量}"
                                             Style="{StaticResource ActionButton}" />
                                     </UniformGrid>
-                                    <!--  保存设置参数  -->
-                                    <Button
-                                        Grid.Row="1"
-                                        Height="30"
-                                        Command="{Binding DataContext.SpecialCommand.Command_SetSaveConfig, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        Content="{DynamicResource 保存设置参数}"
-                                        Style="{StaticResource ActionButton2}" />
+
                                 </Grid>
 
                             </UniformGrid>
-
+                            <!--  保存设置参数  -->
+                            <Button
+                                Grid.Row="23"
+                                Grid.ColumnSpan="4"
+                                Height="30"
+                                Command="{Binding DataContext.SpecialCommand.Command_SetSaveConfig, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 保存设置参数}"
+                                Style="{StaticResource ActionButton2}" />
                         </Grid>
                     </Border>
 

@@ -116,7 +116,7 @@
     <s:String x:Key="CT功能开关">CT功能开关</s:String>
     <s:String x:Key="逆变器逆变电压检测值降低n个单位">逆变电压检测值降低n个单位</s:String>
     <s:String x:Key="逆变器逆变电压检测值提高n个单位">逆变电压检测值提高n个单位</s:String>
-    <s:String x:Key="保存设置参数">保存设置参数</s:String>
+    <s:String x:Key="保存设置参数">保存校准参数</s:String>
     <s:String x:Key="输入源提示">输入源提示</s:String>
     <s:String x:Key="自动返回首页">自动返回首页</s:String>
     <s:String x:Key="历史故障保存打开">历史故障保存打开</s:String>
@@ -215,8 +215,23 @@
     <s:String x:Key="输出视在功率">输出视在功率</s:String>
     <s:String x:Key="输出有功功率">输出有功功率</s:String>
     <s:String x:Key="充电阶段">充电阶段</s:String>
-    
-    
+    <s:String x:Key="并机模式">第二输出开关</s:String>
+    <s:String x:Key="逆变输出">逆变输出</s:String>
+    <s:String x:Key="能量供给负载">能量供给负载</s:String>
+    <s:String x:Key="电池充电标志">电池充电标志</s:String>
+    <s:String x:Key="电池放电标志">电池放电标志</s:String>
+    <s:String x:Key="逆变器工作状态">逆变器工作状态</s:String>
+    <s:String x:Key="PV电压状态">PV电压状态</s:String>
+    <s:String x:Key="逆变桥状态">逆变桥状态</s:String>
+    <s:String x:Key="MPPT状态">MPPT状态</s:String>
+    <s:String x:Key="锁相环状态">锁相环状态</s:String>
+    <s:String x:Key="逆变输出时间">AC输出时间</s:String>
+    <s:String x:Key="并网功率">并网功率</s:String>
+    <s:String x:Key="电池放电电流限制">电池放电电流限制</s:String>
+    <s:String x:Key="逆变电压">逆变电压</s:String>
+
+
+
 
 
 

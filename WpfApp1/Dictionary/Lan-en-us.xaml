@@ -213,4 +213,18 @@
     <s:String x:Key="输出有功功率">OutActivePwr</s:String>
     <s:String x:Key="定时关机">TimerPowerOff</s:String>
     <s:String x:Key="充电阶段">ChgStage</s:String>
+    <s:String x:Key="并机模式">ParallelMode</s:String>
+    <s:String x:Key="逆变输出">InvOutput</s:String>
+    <s:String x:Key="能量供给负载">EnergyToLoad</s:String>
+    <s:String x:Key="电池充电标志">BattChgFlag</s:String>
+    <s:String x:Key="电池放电标志">BattDisFlag</s:String>
+    <s:String x:Key="逆变器工作状态">InvStatus</s:String>
+    <s:String x:Key="PV电压状态">PVVoltStatus</s:String>
+    <s:String x:Key="逆变桥状态">InvBridgeStatus</s:String>
+    <s:String x:Key="MPPT状态">MPPTStatus</s:String>
+    <s:String x:Key="锁相环状态">PLLStatus</s:String>
+    <s:String x:Key="逆变输出时间">ACOutputTime</s:String>
+    <s:String x:Key="并网功率">GridPwr</s:String>
+    <s:String x:Key="电池放电电流限制">BattDisCurrLimit</s:String>
+    <s:String x:Key="逆变电压">InvVolt</s:String>
 </ResourceDictionary>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WpfApp1.Command;
+using WpfApp1.Convert;
 using WpfApp1.Services;
 using WpfApp1.ViewModels;
 
@@ -49,7 +50,26 @@ namespace WpfApp1.Command.Comand_GB3024
             //AC充电时间
             Command_SetAC_Charging_Time = new RelayCommand(
                execute: () => AC_Charging_TimeOperation(),
-               canExecute: () => Validate(nameof(AC_Charging_Time_Inputs)) && !AC_Charging_Time_IsWorking // 增加处理状态检查
+               canExecute: () =>
+               {
+                   if (int.TryParse(AC_Charging_Time_Inputs, out int start) && int.TryParse(AC_Charging_Time_InputsEnd, out int end) && !AC_Charging_Time_IsWorking)
+                   {
+                       return start < end;
+                   }
+                   return false;
+               }
+            );
+            //逆变输出时间
+            Command_SetInvOutputTime = new RelayCommand(
+                execute: () => InvOutputTimeOperation(),
+                canExecute: () =>
+                {   
+                    if(int.TryParse(InvOutputTime_Inputs,out int start)&& int.TryParse(InvOutputTime_InputsEnd,out int end)&&!InvOutputTime_IsWorking)
+                    {
+                        return start < end;
+                    }
+                    return false;
+                }
             );
             //系统复位
             Command_SetSystemReset = new RelayCommand(
@@ -99,6 +119,19 @@ namespace WpfApp1.Command.Comand_GB3024
                 canExecute: () =>
                 !FaultHistorySaveOff_IsWorking // 增加处理状态检查
              );
+            //并网功率
+            Command_SetGridPwr = new RelayCommand(
+                execute: () => GridPwrOperation(),
+                canExecute: () =>
+                !GridPwr_IsWorking &&Validate(nameof(GridPwr_Inputs))  // 增加处理状态检查
+             );
+            //电池放电电流限制
+            Command_SetBattDisCurrLimit = new RelayCommand(
+                execute: () => BattDisCurrLimitOperation(),
+                canExecute: () =>
+                !BattDisCurrLimit_IsWorking && Validate(nameof(BattDisCurrLimit_Inputs))  // 增加处理状态检查
+             );
+            //
             ////抗干扰开关
             //Command_SetAntiJamMode = new RelayCommand(
             //    execute: () => AntiJamModeOperation(),
@@ -538,6 +571,46 @@ namespace WpfApp1.Command.Comand_GB3024
             }
         }
 
+        //设置值
+        private string _AC_Charging_Time_InputsEnd;
+
+        public string AC_Charging_Time_InputsEnd
+        {
+            get { return _AC_Charging_Time_InputsEnd; }
+            set
+            {
+                _AC_Charging_Time_InputsEnd = value;
+                RaiseProperChanged(nameof(AC_Charging_Time_InputsEnd));
+                Command_SetAC_Charging_Time.RaiseCanExecuteChanged();
+            }
+        }
+
+        //下拉选项
+        private List<string> _AC_Charging_TimeOptions = new List<string> { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24" };
+
+        public List<string> AC_Charging_TimeOptions
+        {
+            get { return _AC_Charging_TimeOptions; }
+            set
+            {
+                _AC_Charging_TimeOptions = value;
+                this.RaiseProperChanged(nameof(AC_Charging_TimeOptions));
+            }
+        }
+
+        //下拉选项
+        private List<string> _AC_Charging_TimeOptionsEnd= new List<string> { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24" };
+
+        public List<string> AC_Charging_TimeOptionsEnd
+        {
+            get { return _AC_Charging_TimeOptionsEnd; }
+            set
+            {
+                _AC_Charging_TimeOptionsEnd = value;
+                this.RaiseProperChanged(nameof(AC_Charging_TimeOptionsEnd));
+            }
+        }
+
 
         public RelayCommand Command_SetAC_Charging_Time { get; }
 
@@ -567,7 +640,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("^S???ACCT", AC_Charging_Time_Inputs);
+                    string receive = SerialCommunicationService.SendSettingCommand("^S???ACCT", AC_Charging_Time_Inputs+"-"+ AC_Charging_Time_InputsEnd);
 
                 })
                 , timeoutCts.Token);
@@ -1019,7 +1092,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("IVA-", InvVoltDetectAdjDec_Inputs);
+                    string receive = SerialCommunicationService.SendSettingCommand("IVA+", "01");
 
                 })
                 , timeoutCts.Token);
@@ -1119,7 +1192,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("IVA+", InvVoltDetectAdjInc_Inputs);
+                    string receive = SerialCommunicationService.SendSettingCommand("IVA-", "01");
 
                 })
                 , timeoutCts.Token);
@@ -1548,6 +1621,308 @@ namespace WpfApp1.Command.Comand_GB3024
 
         #endregion
 
+        #region 逆变输出时间
+
+        private int _InvOutputTime;
+
+        public int InvOutputTime
+        {
+            get { return _InvOutputTime; }
+            set
+            {
+                _InvOutputTime = value;
+                this.RaiseProperChanged(nameof(InvOutputTime));
+            }
+        }
+
+
+        private bool InvOutputTime_IsWorking;
+
+
+        //设置值
+        private string _InvOutputTime_Inputs;
+
+        public string InvOutputTime_Inputs
+        {
+            get { return _InvOutputTime_Inputs; }
+            set
+            {
+                _InvOutputTime_Inputs = value;
+                this.RaiseProperChanged(nameof(InvOutputTime_Inputs));
+                Command_SetInvOutputTime.RaiseCanExecuteChanged();
+            }
+        }
+
+        private string _InvOutputTime_InputsEnd;
+
+        public string InvOutputTime_InputsEnd
+        {
+            get { return _InvOutputTime_InputsEnd; }
+            set
+            {
+                _InvOutputTime_InputsEnd = value;
+                this.RaiseProperChanged(nameof(InvOutputTime_InputsEnd));
+                Command_SetInvOutputTime.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        //下拉选项
+        private List<string> _InvOutputTimeOptions = new List<string> { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24" };
+
+        public List<string> InvOutputTimeOptions
+        {
+            get { return _InvOutputTimeOptions; }
+            set
+            {
+                _InvOutputTimeOptions = value;
+                this.RaiseProperChanged(nameof(InvOutputTimeOptions));
+            }
+        }
+
+        //下拉选项
+        private List<string> _InvOutputTimeOptionsEnd = new List<string> { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24" };
+
+        public List<string> InvOutputTimeOptionsEnd
+        {
+            get { return _InvOutputTimeOptionsEnd; }
+            set
+            {
+                _InvOutputTimeOptionsEnd = value;
+                this.RaiseProperChanged(nameof(InvOutputTimeOptionsEnd));
+            }
+        }
+
+        public RelayCommand Command_SetInvOutputTime { get; }
+
+        /// <summary>
+        /// 点击设置
+        /// </summary>
+        private async void InvOutputTimeOperation()
+        {
+            try
+            {
+                InvOutputTime_IsWorking = true;
+                // 禁用按钮
+                Command_SetInvOutputTime.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(2000);//没有这个延时会报错
+                    string receive = SerialCommunicationService.SendSettingCommand("^S???ACLT", InvOutputTime_Inputs + "-" +InvOutputTime_InputsEnd);
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                InvOutputTime_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetInvOutputTime.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+
+        #endregion
+
+        #region 并网功率
+
+        private int _GridPwr;
+
+        public int GridPwr
+        {
+            get { return _GridPwr; }
+            set
+            {
+                _GridPwr = value;
+                this.RaiseProperChanged(nameof(GridPwr));
+            }
+        }
+
+
+        private bool GridPwr_IsWorking;
+
+
+        //设置值
+        private string _GridPwr_Inputs;
+
+        public string GridPwr_Inputs
+        {
+            get { return _GridPwr_Inputs; }
+            set
+            {
+                _GridPwr_Inputs = value;
+                this.RaiseProperChanged(nameof(GridPwr_Inputs));
+                Command_SetGridPwr.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        public RelayCommand Command_SetGridPwr { get; }
+
+        /// <summary>
+        /// 点击设置
+        /// </summary>
+        private async void GridPwrOperation()
+        {
+            try
+            {
+                GridPwr_IsWorking = true;
+                // 禁用按钮
+                Command_SetGridPwr.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(2000);//没有这个延时会报错
+                    string receive = SerialCommunicationService.SendSettingCommand("PGFP",Tools.PadToFiveDigits(GridPwr_Inputs));
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                GridPwr_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetGridPwr.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+        #endregion
+
+        #region 电池放电电流限制
+
+        private int _BattDisCurrLimit;
+
+        public int BattDisCurrLimit
+        {
+            get { return _BattDisCurrLimit; }
+            set
+            {
+                _BattDisCurrLimit = value;
+                this.RaiseProperChanged(nameof(BattDisCurrLimit));
+            }
+        }
+
+
+        private bool BattDisCurrLimit_IsWorking;
+
+
+        //设置值
+        private string _BattDisCurrLimit_Inputs;
+
+        public string BattDisCurrLimit_Inputs
+        {
+            get { return _BattDisCurrLimit_Inputs; }
+            set
+            {
+                _BattDisCurrLimit_Inputs = value;
+                this.RaiseProperChanged(nameof(BattDisCurrLimit_Inputs));
+                Command_SetBattDisCurrLimit.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        public RelayCommand Command_SetBattDisCurrLimit { get; }
+
+        /// <summary>
+        /// 点击设置
+        /// </summary>
+        private async void BattDisCurrLimitOperation()
+        {
+            try
+            {
+                BattDisCurrLimit_IsWorking = true;
+                // 禁用按钮
+                Command_SetBattDisCurrLimit.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(2000);//没有这个延时会报错
+                    string receive = SerialCommunicationService.SendSettingCommand("DISCC",Tools.PadToThreeDigits(BattDisCurrLimit_Inputs));
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                BattDisCurrLimit_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetBattDisCurrLimit.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+        #endregion
+
+
 
         #region 通用方法
         // 输入验证&选择验证
@@ -1574,7 +1949,10 @@ namespace WpfApp1.Command.Comand_GB3024
                     return !string.IsNullOrWhiteSpace(InvVoltDetectAdjDec_Inputs);
                 case "InvVoltDetectAdjInc_Inputs":
                     return !string.IsNullOrWhiteSpace(InvVoltDetectAdjInc_Inputs);
-
+                case "GridPwr_Inputs":
+                    return !string.IsNullOrWhiteSpace(GridPwr_Inputs);
+                case "BattDisCurrLimit_Inputs":
+                    return !string.IsNullOrWhiteSpace(BattDisCurrLimit_Inputs);
                 default:
                     return false;
             }
