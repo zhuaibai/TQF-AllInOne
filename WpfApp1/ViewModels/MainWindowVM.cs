@@ -14,15 +14,18 @@ using WpfApp1.Command.Command_PDF302;
 using WpfApp1.Command.Command_PDF3024;
 using WpfApp1.Command.Command_VQ3024;
 using WpfApp1.Command.GB_General;
+using WpfApp1.CustomMessageBox;
+using WpfApp1.CustomMessageBox.Service;
 using WpfApp1.Models;
 using WpfApp1.Services;
 using WpfApp1.UserControls;
+using InputType = WpfApp1.CustomMessageBox.InputType;
 
 namespace WpfApp1.ViewModels
 {
     public class MainWindowVM : BaseViewModel
     {
-        public MainWindowVM()
+        public MainWindowVM(IMessageDialogService messageService)
         {
             #region 日志界面
             // 初始化命令
@@ -59,6 +62,7 @@ namespace WpfApp1.ViewModels
             HSTS_GB = new HSTS_GB_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             SpecialCommand = new Special_Command(_pauseEvent, _semaphore, AddLog, UpdateState);
             HPVB_GB = new HPVB_GB_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            HSTS2_HPVINV08 = new HSTS2_HPVINV08_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             
             //初始化  VQ   ViewModel
             HOP_VQ = new HOP_VQ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
@@ -87,6 +91,10 @@ namespace WpfApp1.ViewModels
             //初始化实时时间ViewModel
             Clock = new ClockViewModel();
             #endregion
+
+            //消息框初始化
+            _messageService = messageService;
+            ShowMessageCommand = new RelayCommand(OnShowMessage);
         }
 
         #region 图标百分比
@@ -2151,6 +2159,14 @@ namespace WpfApp1.ViewModels
             receive = SerialCommunicationService.SendCommand(HPVB_GB.Command, 50);
             HPVB_GB.AnalysisStringToElement(receive);
 
+            //发送HCTMSG1指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HCTMSG1_PDF.Command, 80);
+            HCTMSG1_PDF.AnalysisStringToElement(receive);
+            ShowError(receive, "HCTMSG1");
+
+
             //机器型号
             MachineModel = StringToIntConversion(HOP_PDF.RatedPwr) + StringToIntConversion(HBAT_VQ.BattCells) * 12;
         }
@@ -2406,6 +2422,189 @@ namespace WpfApp1.ViewModels
             _cts.Cancel();
             AddLog("后台通信停止请求已发送");
         }
+        #endregion
+
+        #region 消息框
+
+        private readonly IMessageDialogService _messageService;
+
+        public ICommand ShowMessageCommand { get; }
+
+        private void OnShowMessage()
+        {
+           
+        }
+
+        /// <summary>
+        /// 消息弹框
+        /// </summary>
+        /// <param name="message">消息</param>
+        /// <param name="title">标题</param>
+        /// <param name="messageIcon">图标</param>
+        /// <returns></returns>
+        private MessageResult LShowMessage(string message, string title, MessageIcon messageIcon)
+        {
+            MessageResult result = MessageResult.OK;
+
+            if (Application.Current.Dispatcher.CheckAccess())
+            {
+                // 当前是UI线程直接调用
+                result = _messageService.Show(
+                message,
+                title,
+                messageIcon,
+                fontSize: 50
+                );
+            }
+            else
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    result = _messageService.Show(
+                    message,
+                    title,
+                    messageIcon,
+                    fontSize: 50
+                    );
+                }));
+            }
+
+            return result;
+
+        }
+
+
+
+        /// <summary>
+        /// 文本输入消息框
+        /// </summary>
+        /// <param name="message">消息</param>
+        /// <param name="title">标题</param>
+        /// <param name="error">输入错误提示</param>
+        /// <returns></returns>
+        private string LShowTestMessage(string message, string title, string error)
+        {
+            string result = string.Empty;
+            if (Application.Current.Dispatcher.CheckAccess())
+            {
+                // 当前是UI线程直接调用
+                result = _messageService.ShowInputDialog(
+                message,
+                title,
+                InputType.Text,
+                "软件版本",
+                validator: input => input.Length >= 4,
+                validationMessage: error,
+                fontSize: 50);
+            }
+            else
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    result = _messageService.ShowInputDialog(
+                message,
+                title,
+                InputType.Text,
+                "软件版本",
+                validator: input => input.Length >= 4,
+                validationMessage: error,
+                fontSize: 50);
+                }));
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 密码输入消息框
+        /// </summary>
+        /// <param name="message">消息</param>
+        /// <param name="title">标题</param>
+        /// <param name="error">输入错误提示</param>
+        /// <returns></returns>
+        private string MShowTestMessage(string message, string title, string error)
+        {
+            string result = string.Empty;
+            if (Application.Current.Dispatcher.CheckAccess())
+            {
+                // 当前是UI线程直接调用
+                result = _messageService.ShowInputDialog(
+                message,
+                title,
+                InputType.Password,
+                "管理员密码",
+
+                validator: input => input == "Tqf147258",
+                validationMessage: error,
+                fontSize: 50);
+            }
+            else
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    result = _messageService.ShowInputDialog(
+                message,
+                title,
+                InputType.Password,
+                "管理员密码",
+
+                validator: input => input == "Tqf147258",
+                validationMessage: error,
+                fontSize: 50);
+                }));
+            }
+            return result;
+        }
+
+
+        //是否打开
+        private bool IsExpand1;
+
+        public bool _IsExpand1
+        {
+            get { return IsExpand1; }
+            set
+            {
+                if (value == _IsExpand1) return;
+
+                // 只有当准备从收起 -> 展开时才需要确认
+                if (value && !_IsExpand1)
+                {
+                    string result = MShowTestMessage("请输入管理员密码", "打开权限", "密码错误，请联系研发人员");
+                    if (result != "Tqf147258")
+                    {
+                        return;
+                    }
+                }
+                IsExpand1 = value;
+                this.RaiseProperChanged(nameof(_IsExpand1));
+            }
+        }
+
+        //是否打开
+        private bool IsExpand2;
+
+        public bool _IsExpand2
+        {
+            get { return IsExpand2; }
+            set
+            {
+                if (value == _IsExpand2) return;
+
+                // 只有当准备从收起 -> 展开时才需要确认
+                if (value && !_IsExpand2)
+                {
+                    string result = MShowTestMessage("请输入管理员密码", "打开权限", "密码错误，请联系研发人员");
+                    if (result != "Tqf147258")
+                    {
+                        return;
+                    }
+                }
+                IsExpand2 = value;
+                this.RaiseProperChanged(nameof(_IsExpand2));
+            }
+        }
+
+
         #endregion
     }
 }

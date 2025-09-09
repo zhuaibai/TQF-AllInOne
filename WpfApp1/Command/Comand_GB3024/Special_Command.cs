@@ -131,6 +131,18 @@ namespace WpfApp1.Command.Comand_GB3024
                 canExecute: () =>
                 !BattDisCurrLimit_IsWorking && Validate(nameof(BattDisCurrLimit_Inputs))  // 增加处理状态检查
              );
+            //电池电压+
+            Command_SetBattVoltInc = new RelayCommand(
+                execute: () => BattVoltIncOperation(),
+                canExecute: () =>
+                !BattDisCurrLimit_IsWorking  // 增加处理状态检查
+             );
+            //电池电压-
+            Command_SetBattVoltDec = new RelayCommand(
+                execute: () => BattVoltDecOperation(),
+                canExecute: () =>
+                !BattDisCurrLimit_IsWorking  // 增加处理状态检查
+             );
             //
             ////抗干扰开关
             //Command_SetAntiJamMode = new RelayCommand(
@@ -1922,7 +1934,181 @@ namespace WpfApp1.Command.Comand_GB3024
 
         #endregion
 
+        #region 电池电压+
 
+        private int _BattVoltInc;
+
+        public int BattVoltInc
+        {
+            get { return _BattVoltInc; }
+            set
+            {
+                _BattVoltInc = value;
+                this.RaiseProperChanged(nameof(BattVoltInc));
+            }
+        }
+
+
+        private bool BattVoltInc_IsWorking;
+
+
+        //设置值
+        private string _BattVoltInc_Inputs;
+
+        public string BattVoltInc_Inputs
+        {
+            get { return _BattVoltInc_Inputs; }
+            set
+            {
+                _BattVoltInc_Inputs = value;
+                this.RaiseProperChanged(nameof(BattVoltInc_Inputs));
+                Command_SetBattVoltInc.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        public RelayCommand Command_SetBattVoltInc { get; }
+
+        /// <summary>
+        /// 点击设置
+        /// </summary>
+        private async void BattVoltIncOperation()
+        {
+            try
+            {
+                BattVoltInc_IsWorking = true;
+                // 禁用按钮
+                Command_SetBattVoltInc.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(2000);//没有这个延时会报错
+                    string receive = SerialCommunicationService.SendSettingCommand("BTA+", "1");
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                BattVoltInc_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetBattVoltInc.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+
+        #endregion
+
+        #region 电池电压-
+
+        private int _BattVoltDec;
+
+        public int BattVoltDec
+        {
+            get { return _BattVoltDec; }
+            set
+            {
+                _BattVoltDec = value;
+                this.RaiseProperChanged(nameof(BattVoltDec));
+            }
+        }
+
+
+        private bool BattVoltDec_IsWorking;
+
+
+        //设置值
+        private string _BattVoltDec_Inputs;
+
+        public string BattVoltDec_Inputs
+        {
+            get { return _BattVoltDec_Inputs; }
+            set
+            {
+                _BattVoltDec_Inputs = value;
+                this.RaiseProperChanged(nameof(BattVoltDec_Inputs));
+                Command_SetBattVoltDec.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        public RelayCommand Command_SetBattVoltDec { get; }
+
+        /// <summary>
+        /// 点击设置
+        /// </summary>
+        private async void BattVoltDecOperation()
+        {
+            try
+            {
+                BattVoltDec_IsWorking = true;
+                // 禁用按钮
+                Command_SetBattVoltDec.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(2000);//没有这个延时会报错
+                    string receive = SerialCommunicationService.SendSettingCommand("BTA-", "1");
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                BattVoltDec_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetBattVoltDec.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+
+        #endregion
 
         #region 通用方法
         // 输入验证&选择验证

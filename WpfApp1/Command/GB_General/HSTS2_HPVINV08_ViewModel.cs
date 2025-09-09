@@ -167,9 +167,9 @@ namespace WpfApp1.Command.GB_General
             {
                 if (value == "1")
                 {
-                    _InvStatus = App.GetText("开机");
+                    _InvStatus = App.GetText("开启");
                 }else
-                _InvStatus = _InvStatus = App.GetText("关机");
+                _InvStatus = _InvStatus = App.GetText("关闭");
                 this.RaiseProperChanged(nameof(InvStatus));
             }
         }
@@ -271,12 +271,12 @@ namespace WpfApp1.Command.GB_General
                 PVStatus = Values[1].Substring(1, 1)=="1" ? Visibility.Visible:Visibility.Hidden;
                 //并网标志
                 GridStatus = Values[1].Substring(4, 1) == "1" ? Visibility.Visible : Visibility.Hidden;
-                //市电输入状态
-                if (Values[1].Substring(4, 1) == "0")
+                //市电输入状态2
+                if (Values[1].Substring(2, 1) == "0")
                 {
                     ACStatusIn = Visibility.Hidden;
                     ACStatusOut = Visibility.Hidden;
-                }else if(Values[1].Substring(2, 1) == "1")
+                }else if(Values[1].Substring(4, 1) == "1")
                 {
                     ACStatusOut = Visibility.Visible;
                     ACStatusIn = Visibility.Hidden;

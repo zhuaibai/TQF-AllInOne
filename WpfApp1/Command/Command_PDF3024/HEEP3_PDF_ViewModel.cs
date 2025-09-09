@@ -121,7 +121,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("EZCTP", ZeroAdjPwr_Inputs);
+                    string receive = SerialCommunicationService.SendSettingCommand("EZCTP", Tools.PadToFourDigits(ZeroAdjPwr_Inputs));
 
                 })
                 , timeoutCts.Token);
@@ -142,6 +142,39 @@ namespace WpfApp1.Command.Command_PDF3024
                 // 确保释放锁
                 _semaphore.Release();
                 UpdateState("设置指令已经执行完");
+            }
+        }
+
+
+        #endregion
+
+        #region 并网功率
+
+        private string _GridPwr;
+
+        public string GridPwr
+        {
+            get { return _GridPwr; }
+            set
+            {
+                _GridPwr = Tools.RemoveLeadingZeros(value);
+                this.RaiseProperChanged(nameof(GridPwr));
+            }
+        }
+
+        #endregion
+
+        #region 电池放电电流限制
+
+        private string _BattDisCurrLimit;
+
+        public string BattDisCurrLimit
+        {
+            get { return _BattDisCurrLimit; }
+            set
+            {
+                _BattDisCurrLimit = Tools.RemoveLeadingZeros(value);
+                this.RaiseProperChanged(nameof(BattDisCurrLimit));
             }
         }
 
@@ -309,6 +342,10 @@ namespace WpfApp1.Command.Command_PDF3024
                 ZeroAdjPwr = Values[3];
                 //PFC工作状态
                 //PFCStatus = Values[6].Substring(0, 1);
+                //并网功率
+                GridPwr = Values[5];
+                //电池放电电流限制
+                BattDisCurrLimit = Values[6];
 
             }
             catch (Exception ex)

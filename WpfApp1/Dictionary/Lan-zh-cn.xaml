@@ -229,6 +229,9 @@
     <s:String x:Key="并网功率">并网功率</s:String>
     <s:String x:Key="电池放电电流限制">电池放电电流限制</s:String>
     <s:String x:Key="逆变电压">逆变电压</s:String>
+    <s:String x:Key="正常">正常</s:String>
+    <s:String x:Key="异常">异常</s:String>
+    
 
 
 

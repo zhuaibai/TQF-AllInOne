@@ -227,4 +227,6 @@
     <s:String x:Key="并网功率">GridPwr</s:String>
     <s:String x:Key="电池放电电流限制">BattDisCurrLimit</s:String>
     <s:String x:Key="逆变电压">InvVolt</s:String>
+    <s:String x:Key="正常">Normal</s:String>
+    <s:String x:Key="异常">Fault</s:String>
 </ResourceDictionary>

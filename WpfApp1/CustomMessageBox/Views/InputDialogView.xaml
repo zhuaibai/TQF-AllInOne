@@ -1,0 +1,144 @@
+﻿<Window x:Class="WpfApp1.CustomMessageBox.Views.InputDialogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WpfApp1.CustomMessageBox.Views"
+             xmlns:cv="clr-namespace:WpfApp1.CustomMessageBox.Converts"
+             mc:Ignorable="d" 
+             Height="550"
+             Width="800"
+             WindowStartupLocation="CenterScreen"
+             WindowStyle="None"
+             d:DesignHeight="550" d:DesignWidth="800">
+    <Window.Resources>
+        <!-- 在App.xaml中添加输入框样式 -->
+        <Style TargetType="TextBox" x:Key="InputTextBoxStyle">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Background" Value="#FFF8F8F8"/>
+            <Setter Property="BorderBrush" Value="#FFCCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="{Binding FontSize}"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="#FF0078D7"/>
+                </Trigger>
+                <Trigger Property="IsFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="#FF0078D7"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                </Trigger>
+                <DataTrigger Binding="{Binding IsInputValid}" Value="False">
+                    <Setter Property="BorderBrush" Value="Red"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                    <Setter Property="Background" Value="#FFFFF0F0"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        
+        <!-- 添加这个阴影效果资源 -->
+        <DropShadowEffect x:Key="DialogShadow" 
+               BlurRadius="10" 
+               Color="#33000000" 
+               Direction="-45" 
+               ShadowDepth="3" 
+               Opacity="0.7"/>
+        <cv:InputTypeToVisibilityConverter x:Key="InputTypeToVisibility"/>
+        <cv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </Window.Resources>
+    <Border CornerRadius="10" BorderThickness="1" BorderBrush="#FFD0D0D0" Background="White"
+            Effect="{StaticResource DialogShadow}" Padding="20">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- 标题栏 -->
+            <Grid Grid.Row="0" Height="40">
+                <TextBlock Text="{Binding Title}" FontSize="30" FontWeight="Bold" 
+                           VerticalAlignment="Center" Foreground="#FF333333"/>
+                <!--<Button Command="{Binding CloseCommand}" 
+                        HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Style="{StaticResource CancelButtonStyle}" 
+                        Content="✕" FontSize="14" MinWidth="30" Padding="0"/>-->
+            </Grid>
+
+            <!-- 消息内容 -->
+            <TextBlock Grid.Row="1" Text="{Binding Message}" 
+                       FontSize="{Binding FontSize}" Margin="0,10,0,15"
+                       TextWrapping="Wrap" Foreground="#FF333333" LineHeight="26"/>
+
+            <!-- 输入区域 -->
+            <Grid Grid.Row="2" Margin="0,0,0,15">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- 输入标签 -->
+                <TextBlock Grid.Row="0" Text="{Binding InputLabel}" 
+                           FontSize="{Binding FontSize}" Margin="0,0,0,5"
+                           Foreground="#FF555555"/>
+
+                <!-- 输入框 -->
+                <Grid Grid.Row="2">
+                    <!-- 单行文本输入 -->
+                    <TextBox x:Name="TextInput" Text="{Binding UserInput, UpdateSourceTrigger=PropertyChanged}"
+                             MaxLength="{Binding MaxLength}" FontSize="{Binding FontSize}"
+                             Visibility="{Binding InputType, Converter={StaticResource InputTypeToVisibility}, 
+                                 ConverterParameter=Text}"
+                             Padding="10,5" Background="#FFF8F8F8" BorderBrush="#FFCCCCCC"/>
+
+                    <!-- 密码输入 -->
+                    <PasswordBox x:Name="PasswordInput" 
+                                 Visibility="{Binding InputType, Converter={StaticResource InputTypeToVisibility}, 
+                                 ConverterParameter=Password}"
+                                 Padding="10,5" Background="#FFF8F8F8" BorderBrush="#FFCCCCCC"
+                                 FontSize="{Binding FontSize}"/>
+
+                    <!-- 多行文本输入 -->
+                    <TextBox x:Name="MultilineInput" Text="{Binding UserInput, UpdateSourceTrigger=PropertyChanged}"
+                             MaxLength="{Binding MaxLength}" FontSize="{Binding FontSize}"
+                             Visibility="{Binding InputType, Converter={StaticResource InputTypeToVisibility}, 
+                                 ConverterParameter=Multiline}"
+                             AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                             Height="{Binding MultilineHeight}" Padding="10,5" Background="#FFF8F8F8" 
+                             BorderBrush="#FFCCCCCC"/>
+
+                    <!-- 数字输入 -->
+                    <TextBox x:Name="NumberInput" Text="{Binding UserInput, UpdateSourceTrigger=PropertyChanged}"
+                             MaxLength="{Binding MaxLength}" FontSize="{Binding FontSize}"
+                             Visibility="{Binding InputType, Converter={StaticResource InputTypeToVisibility}, 
+                                 ConverterParameter=Number}"
+                             PreviewTextInput="NumberInput_PreviewTextInput"
+                             Padding="10,5" Background="#FFF8F8F8" BorderBrush="#FFCCCCCC"/>
+
+                     <!--日期输入--> 
+                    <DatePicker x:Name="DateInput" SelectedDate="{Binding UserInput}"
+                                Visibility="{Binding InputType, Converter={StaticResource InputTypeToVisibility}, 
+                                 ConverterParameter=Date}"
+                                FontSize="{Binding FontSize}" Padding="5"
+                                Background="#FFF8F8F8" BorderBrush="#FFCCCCCC"/>
+                </Grid>
+
+                <!-- 验证错误提示 -->
+                <TextBlock Grid.Row="1" Text="{Binding ValidationError}" 
+                           Foreground="Red" FontSize="40" Margin="0,5,0,0"
+                           Visibility="{Binding IsInputValid, Converter={StaticResource BoolToVisibilityConverter}, 
+                                 ConverterParameter=inverse}"/>
+            </Grid>
+
+            <!-- 按钮区域 -->
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Command="{Binding CancelCommand}" Content="取消" 
+                        Style="{StaticResource BtnStyle7}"/>
+                <Button Command="{Binding OkCommand}" Content="确定" 
+                        Style="{StaticResource BtnStyle6}" Margin="10,0,0,0"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

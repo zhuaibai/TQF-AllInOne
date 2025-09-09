@@ -15,6 +15,8 @@ using System.Windows.Shapes;
 using WpfApp1.Command;
 using WpfApp1.ViewModels;
 using WpfApp1.Views;
+using System.Globalization;
+using WpfApp1.CustomMessageBox.Service;
 
 namespace WpfApp1
 {
@@ -29,7 +31,36 @@ namespace WpfApp1
             InitializeComponent();
             ChangeLanguageToChinese(Owner,new RoutedEventArgs());
 
-            this.DataContext = new MainWindowVM();
+            this.DataContext = new MainWindowVM(new MessageDialogService());
+
+            LoadLanguage();
+
+        }
+
+        /// <summary>
+        /// 根据系统语言切换语言
+        /// </summary>
+        private void LoadLanguage()
+        {
+            // 获取系统 UI 语言
+            var culture = CultureInfo.CurrentUICulture;
+            string lang = culture.Name; // e.g. "zh-CN" or "en-US"
+
+            // 设置线程语言
+            Thread.CurrentThread.CurrentCulture = culture;
+            Thread.CurrentThread.CurrentUICulture = culture;
+
+            // 根据语言加载 ResourceDictionary
+           
+            switch (lang)
+            {
+                case "zh-CN":
+                    ChangeLanguageToChinese(this, new RoutedEventArgs());
+                    break;
+                default:
+                    ChangeLanguage(this,new RoutedEventArgs());
+                    break;
+            }
         }
 
         /// <summary>

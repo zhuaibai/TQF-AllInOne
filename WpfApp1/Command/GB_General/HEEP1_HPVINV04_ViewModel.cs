@@ -210,6 +210,12 @@ namespace WpfApp1.Command.Command_PDF3024
                 {
                     if (value == "1") { _WorkingMode = "SBU"; }
                     else if (value == "0") { _WorkingMode = "SUB"; }
+                }else if(SerialCommunicationService.MachineType == "F")
+                {
+                    if (value == "(0") { _WorkingMode = "SUB"; }
+                    else if (value == "(1") { _WorkingMode = "SBU"; }
+                    else if (value == "(2") { _WorkingMode = "SUF"; }
+                    else if (value == "(3") { _WorkingMode = "PEC"; }
                 }
                 else
                     _WorkingMode = value;
@@ -230,6 +236,22 @@ namespace WpfApp1.Command.Command_PDF3024
             {
                 _WorkingModeOptions = value;
                 RaiseProperChanged(nameof(WorkingModeOptions));
+                Command_SetWorkingMode.RaiseCanExecuteChanged();
+            }
+        }
+
+        /// <summary>
+        /// 工作模式可选项
+        /// </summary>
+        private List<string> _WorkingModeOptionsForMachineF = new List<string> { "SUB", "SBU","SUF" ,"PEC"};
+
+        public List<string> WorkingModeOptionsForMachineF
+        {
+            get { return _WorkingModeOptionsForMachineF; }
+            set
+            {
+                _WorkingModeOptionsForMachineF = value;
+                RaiseProperChanged(nameof(WorkingModeOptionsForMachineF));
                 Command_SetWorkingMode.RaiseCanExecuteChanged();
             }
         }
@@ -1772,7 +1794,7 @@ namespace WpfApp1.Command.Command_PDF3024
                         _ChargingPriority = "CUT";
                     }
                     else if (value == "1") { _ChargingPriority = "CSO"; }
-                    else if (value == "2") { _ChargingPriority = "SUN"; }
+                    else if (value == "2") { _ChargingPriority = "SNU"; }
                     else if (value == "3") { _ChargingPriority = "OSO"; }
                     else { _ChargingPriority = value; }
                 }
@@ -1785,6 +1807,18 @@ namespace WpfApp1.Command.Command_PDF3024
                     else if (value == "1") { _ChargingPriority = "SUN"; }
                     else if (value == "2") { _ChargingPriority = "OSO"; }
                     
+                    else { _ChargingPriority = value; }
+                }
+                else if (SerialCommunicationService.MachineType == "F")
+                {
+                    if (value == "0")
+                    {
+                        _ChargingPriority = "CSO";
+                    }
+                    else if (value == "1") { _ChargingPriority = "SNU"; }
+                    else if (value == "2") { _ChargingPriority = "OSO"; }
+                    else if (value == "3") { _ChargingPriority = "SOR"; }
+
                     else { _ChargingPriority = value; }
                 }
 
@@ -1822,6 +1856,19 @@ namespace WpfApp1.Command.Command_PDF3024
             {
                 _ChargingPriorityOptions = value;
                 RaiseProperChanged(nameof(ChargingPriorityOptions));
+            }
+        }
+
+        //下拉选项
+        private List<string> _ChargingPriorityOptionsForMachineF = new List<string> { "CSO", "SNU", "OSO","SOR" };
+
+        public List<string> ChargingPriorityOptionsForMachineF
+        {
+            get { return _ChargingPriorityOptionsForMachineF; }
+            set
+            {
+                _ChargingPriorityOptionsForMachineF = value;
+                RaiseProperChanged(nameof(ChargingPriorityOptionsForMachineF));
             }
         }
 
@@ -3297,7 +3344,7 @@ namespace WpfApp1.Command.Command_PDF3024
             try
             {
                 //工作模式
-                WorkingMode = Values[0].Substring(1,1);
+                WorkingMode = Values[0];
                 //最大总充电流
                 TotalChargeCurrent = Values[1];
                 //市电总充电流
@@ -3404,6 +3451,20 @@ namespace WpfApp1.Command.Command_PDF3024
                         }
                         else if (WorkingModeSelectedOption == "SUB") { return "00"; }
                     }
+                    else if (SerialCommunicationService.MachineType == "F")
+                    {
+                        if (string.IsNullOrWhiteSpace(WorkingModeSelectedOption))
+                        {
+                            return string.Empty;
+                        }
+                        else if (WorkingModeSelectedOption == "SBU")
+                        {
+                            return "01";
+                        }
+                        else if (WorkingModeSelectedOption == "SUB") { return "00"; }
+                        else if (WorkingModeSelectedOption == "SUF") { return "02"; }
+                        else if (WorkingModeSelectedOption == "PEC") { return "03"; }
+                    }
                     return "";
                 //设置电池类型
                 case "BatteryTypeSelectedOption":
@@ -3485,6 +3546,14 @@ namespace WpfApp1.Command.Command_PDF3024
                         else if (ChargingPriority_Inputs == "CSO") { return "00"; }
                         else if (ChargingPriority_Inputs == "SNU") { return "01"; }
                         else if (ChargingPriority_Inputs == "OSO") { return "02"; }
+                    }
+                    else if (SerialCommunicationService.MachineType == "F")
+                    {
+                        if (ChargingPriority_Inputs == "CUT") { return ""; }
+                        else if (ChargingPriority_Inputs == "CSO") { return "00"; }
+                        else if (ChargingPriority_Inputs == "SNU") { return "01"; }
+                        else if (ChargingPriority_Inputs == "OSO") { return "02"; }
+                        else if (ChargingPriority_Inputs == "SOR") { return "03"; }
                     }
                     return ChargingPriority_Inputs;
                 //过载转接旁路

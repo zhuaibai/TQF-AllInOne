@@ -482,7 +482,7 @@
                 <!--  光伏发电到逆变器箭头  -->
                 <Grid Grid.Row="1">
 
-
+                    <!--  向下箭头  -->
                     <TextBlock
                         HorizontalAlignment="Center"
                         VerticalAlignment="Top"
@@ -490,8 +490,9 @@
                         FontSize="15"
                         Foreground="#FF1BD0E4"
                         Text="&#xe62f;"
-                        Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                        Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
 
+                    <!--  向右箭头  -->
                     <StackPanel
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
@@ -502,31 +503,36 @@
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                     </StackPanel>
 
                 </Grid>
@@ -544,25 +550,37 @@
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xe62f;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.BattChgFlag}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xe62f;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.BattChgFlag}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xe62f;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.BattChgFlag}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xe62f;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.BattChgFlag}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xe62f;"
+                            Visibility="{Binding HSTS2_HPVINV08.BattChgFlag}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xe62f;"
+                            Visibility="{Binding HSTS2_HPVINV08.BattChgFlag}" />
 
                     </StackPanel>
                     <!--  向上的箭头  -->
@@ -575,25 +593,37 @@
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xec64;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.BattDisFlag}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xec64;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.BattDisFlag}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xec64;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.BattDisFlag}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xec64;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.BattDisFlag}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec64;"
+                            Visibility="{Binding HSTS2_HPVINV08.BattDisFlag}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec64;"
+                            Visibility="{Binding HSTS2_HPVINV08.BattDisFlag}" />
 
                     </StackPanel>
                     <!--  向右的箭头  -->
@@ -607,31 +637,36 @@
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.BattDisFlag}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.BattDisFlag}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.BattDisFlag}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.BattDisFlag}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.BattDisFlag}" />
                     </StackPanel>
                     <!--  向左的箭头  -->
                     <StackPanel
@@ -644,31 +679,36 @@
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec63;" />
+                            Text="&#xec63;"
+                            Visibility="{Binding HSTS2_HPVINV08.BattChgFlag}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec63;" />
+                            Text="&#xec63;"
+                            Visibility="{Binding HSTS2_HPVINV08.BattChgFlag}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec63;" />
+                            Text="&#xec63;"
+                            Visibility="{Binding HSTS2_HPVINV08.BattChgFlag}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec63;" />
+                            Text="&#xec63;"
+                            Visibility="{Binding HSTS2_HPVINV08.BattChgFlag}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec63;" />
+                            Text="&#xec63;"
+                            Visibility="{Binding HSTS2_HPVINV08.BattChgFlag}" />
                     </StackPanel>
 
                 </Grid>
@@ -686,25 +726,37 @@
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xe62f;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusIn}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xe62f;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusIn}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xe62f;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusIn}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xe62f;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusIn}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xe62f;"
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusIn}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xe62f;"
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusIn}" />
 
                     </StackPanel>
                     <!--  向上的箭头  -->
@@ -717,25 +769,37 @@
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xec64;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusOut}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xec64;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusOut}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xec64;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusOut}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xec64;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusOut}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec64;"
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusOut}" />
+                        <TextBlock
+                            FontFamily="../Resource/Fonts/#iconfont"
+                            FontSize="15"
+                            Foreground="#FF1BD0E4"
+                            Text="&#xec64;"
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusOut}" />
 
                     </StackPanel>
                     <!--  向右的箭头  -->
@@ -749,31 +813,36 @@
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusOut}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusOut}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusOut}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusOut}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusOut}" />
                     </StackPanel>
                     <!--  向左的箭头  -->
                     <StackPanel
@@ -786,31 +855,36 @@
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec63;" />
+                            Text="&#xec63;"
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusIn}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec63;" />
+                            Text="&#xec63;"
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusIn}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec63;" />
+                            Text="&#xec63;"
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusIn}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec63;" />
+                            Text="&#xec63;"
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusIn}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec63;" />
+                            Text="&#xec63;"
+                            Visibility="{Binding HSTS2_HPVINV08.ACStatusIn}" />
                     </StackPanel>
 
                 </Grid>
@@ -825,25 +899,29 @@
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
 
                     </StackPanel>
                     <!--  中间逆变器图标  -->
@@ -863,25 +941,29 @@
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.InvOutput}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.InvOutput}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.InvOutput}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.InvOutput}" />
                     </StackPanel>
 
                 </Grid>
@@ -894,7 +976,8 @@
                         FontFamily="../Resource/Fonts/#iconfont"
                         FontSize="15"
                         Foreground="#FF1BD0E4"
-                        Text="&#xe62f;" />
+                        Text="&#xe62f;"
+                        Visibility="{Binding HSTS2_HPVINV08.InvOutput}" />
 
 
                     <StackPanel
@@ -907,31 +990,36 @@
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.InvOutput}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.InvOutput}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.InvOutput}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.InvOutput}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
-                            Text="&#xec62;" />
+                            Text="&#xec62;"
+                            Visibility="{Binding HSTS2_HPVINV08.InvOutput}" />
                     </StackPanel>
 
                 </Grid>
@@ -1003,9 +1091,9 @@
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="1*" />
-                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="1*" />
                     </Grid.ColumnDefinitions>
                     <!--  PV电压  -->
@@ -1887,9 +1975,6 @@
 
         </Grid>
 
-
-
-
         <!--  参数设置 界面  -->
         <Grid
             x:Name="SettingView"
@@ -2633,7 +2718,7 @@
                                 Style="{StaticResource HeaderText}"
                                 Text="{DynamicResource 操作}" />
 
-                            <!--  输出模式  -->
+                            <!--  工作模式  -->
                             <TextBlock
                                 Grid.Row="1"
                                 Style="{StaticResource ContentText}"
@@ -2646,7 +2731,7 @@
                             <ComboBox
                                 Grid.Row="1"
                                 Grid.Column="2"
-                                ItemsSource="{Binding HEEP1_HPVINV02.WorkingModeOptions}"
+                                ItemsSource="{Binding HEEP1_HPVINV02.WorkingModeOptionsForMachineF}"
                                 SelectedItem="{Binding HEEP1_HPVINV02.WorkingModeSelectedOption}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
@@ -2779,7 +2864,7 @@
                             <ComboBox
                                 Grid.Row="7"
                                 Grid.Column="2"
-                                ItemsSource="{Binding HEEP1_HPVINV02.ChargingPriorityOptions}"
+                                ItemsSource="{Binding HEEP1_HPVINV02.ChargingPriorityOptionsForMachineF}"
                                 SelectedItem="{Binding HEEP1_HPVINV02.ChargingPriority_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
@@ -3130,28 +3215,8 @@
                                 Command="{Binding DataContext.HEEP3_PDF.Command_SetZeroAdjPwr, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
-                            <!--  CT功能开关  -->
-                            <TextBlock
-                                Grid.Row="20"
-                                Style="{StaticResource ContentText}"
-                                Text="{DynamicResource CT功能开关}" />
-                            <TextBlock
-                                Grid.Row="20"
-                                Grid.Column="1"
-                                Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_HPVINV02.CT_Enable}" />
-                            <ComboBox
-                                Grid.Row="20"
-                                Grid.Column="2"
-                                ItemsSource="{Binding HEEP1_HPVINV02.CT_EnableOptions}"
-                                SelectedItem="{Binding HEEP1_HPVINV02.CT_Enable_Inputs, UpdateSourceTrigger=PropertyChanged}"
-                                Style="{StaticResource SelectBox}" />
-                            <Button
-                                Grid.Row="20"
-                                Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_HPVINV02.Command_SetCT_Enable, RelativeSource={RelativeSource AncestorType=Window}}"
-                                Content="{DynamicResource 设置}"
-                                Style="{StaticResource ActionButton}" />
+
+
                             <!--  并网功率  -->
                             <TextBlock
                                 Grid.Row="21"
@@ -3161,7 +3226,7 @@
                                 Grid.Row="21"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="" />
+                                Text="{Binding HEEP3_PDF.GridPwr, UpdateSourceTrigger=PropertyChanged}" />
                             <TextBox
                                 Grid.Row="21"
                                 Grid.Column="2"
@@ -3173,7 +3238,7 @@
                                 Command="{Binding DataContext.SpecialCommand.Command_SetGridPwr, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
-                            <!--  并网功率  -->
+                            <!--  电池放电电流限制  -->
                             <TextBlock
                                 Grid.Row="22"
                                 Style="{StaticResource ContentText}"
@@ -3182,7 +3247,7 @@
                                 Grid.Row="22"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="" />
+                                Text="{Binding HEEP3_PDF.BattDisCurrLimit, UpdateSourceTrigger=PropertyChanged}" />
                             <TextBox
                                 Grid.Row="22"
                                 Grid.Column="2"
@@ -3265,6 +3330,45 @@
                              SelectedItem="{Binding SpecialCommand.InvVoltDetectAdjDec_Inputs, UpdateSourceTrigger=PropertyChanged}"
                              Style="{StaticResource SelectBox}" />
                      </Grid>-->
+                                <!--  电池电压  -->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="auto" />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        Command="{Binding DataContext.SpecialCommand.Command_SetBattVoltDec, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Content="&#xe62b;"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Center"
+                                        Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压}" />
+                                        <TextBlock Style="{StaticResource ContentText}" Text=":     " />
+                                        <TextBlock
+                                            Grid.Row="0"
+                                            Grid.Column="3"
+                                            Style="{StaticResource ContentText}"
+                                            Text="{Binding HBAT_VQ.BattVolt, StringFormat={}{0}V}" />
+
+                                    </StackPanel>
+
+                                    <Button
+                                        Grid.Column="2"
+                                        Width="50"
+                                        Height="30"
+                                        HorizontalAlignment="Right"
+                                        Command="{Binding DataContext.SpecialCommand.Command_SetBattVoltInc, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Content="&#xe606;"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                </Grid>
+                                <!--  逆变电压  -->
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="auto" />
@@ -3275,7 +3379,8 @@
                                         Width="50"
                                         Height="30"
                                         Command="{Binding DataContext.SpecialCommand.Command_SetInvVoltDetectAdjDec, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        Content="-"
+                                        Content="&#xe62b;"
+                                        FontFamily="../Resource/Fonts/#iconfont"
                                         Style="{StaticResource ActionButton}" />
                                     <StackPanel
                                         Grid.Column="1"
@@ -3291,29 +3396,22 @@
                                         Height="30"
                                         HorizontalAlignment="Right"
                                         Command="{Binding DataContext.SpecialCommand.Command_SetInvVoltDetectAdjInc, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        Content="+"
+                                        Content="&#xe606;"
+                                        FontFamily="../Resource/Fonts/#iconfont"
                                         Style="{StaticResource ActionButton}" />
                                 </Grid>
 
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition />
-                                        <RowDefinition />
-                                    </Grid.RowDefinitions>
-                                    <UniformGrid Columns="2">
-                                        <Button
-                                            Height="30"
-                                            Command="{Binding DataContext.SpecialCommand.Command_SetSystemReset, RelativeSource={RelativeSource AncestorType=Window}}"
-                                            Content="{DynamicResource 复位系统状态}"
-                                            Style="{StaticResource ActionButton}" />
-                                        <Button
-                                            Height="30"
-                                            Command="{Binding DataContext.SpecialCommand.Command_SetClearPowerGeneration, RelativeSource={RelativeSource AncestorType=Window}}"
-                                            Content="{DynamicResource 清除发电量}"
-                                            Style="{StaticResource ActionButton}" />
-                                    </UniformGrid>
+                                <Button
+                                    Height="30"
+                                    Command="{Binding DataContext.SpecialCommand.Command_SetSystemReset, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    Content="{DynamicResource 复位系统状态}"
+                                    Style="{StaticResource ActionButton}" />
+                                <Button
+                                    Height="30"
+                                    Command="{Binding DataContext.SpecialCommand.Command_SetClearPowerGeneration, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    Content="{DynamicResource 清除发电量}"
+                                    Style="{StaticResource ActionButton}" />
 
-                                </Grid>
                                 <Button
                                     Height="30"
                                     Command="{Binding DataContext.SpecialCommand.Command_SetAuxiliaryOutputOn, RelativeSource={RelativeSource AncestorType=Window}}"
