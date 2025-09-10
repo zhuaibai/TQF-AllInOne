@@ -208,8 +208,8 @@ namespace WpfApp1.Command.Command_PDF3024
                 }
                 else if (SerialCommunicationService.MachineType == "B" || SerialCommunicationService.MachineType == "D")
                 {
-                    if (value == "1") { _WorkingMode = "SBU"; }
-                    else if (value == "0") { _WorkingMode = "SUB"; }
+                    if (value == "(1") { _WorkingMode = "SBU"; }
+                    else if (value == "(0") { _WorkingMode = "SUB"; }
                 }else if(SerialCommunicationService.MachineType == "F")
                 {
                     if (value == "(0") { _WorkingMode = "SUB"; }
@@ -1681,7 +1681,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 }
                 else if (value == "1")
                 {
-                    _AC_InputRange = "UPL(窄范围)";
+                    _AC_InputRange = "UPS(窄范围)";
                 }
                 else
                     _AC_InputRange = value;
@@ -1804,7 +1804,7 @@ namespace WpfApp1.Command.Command_PDF3024
                     {
                         _ChargingPriority = "CSO";
                     }
-                    else if (value == "1") { _ChargingPriority = "SUN"; }
+                    else if (value == "1") { _ChargingPriority = "SNU"; }
                     else if (value == "2") { _ChargingPriority = "OSO"; }
                     
                     else { _ChargingPriority = value; }

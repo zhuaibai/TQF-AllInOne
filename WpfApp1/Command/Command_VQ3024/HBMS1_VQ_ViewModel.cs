@@ -249,7 +249,7 @@ namespace WpfApp1.Command.Command_VQ3024
             get { return _BMS_SOC; }
             set
             {
-                _BMS_SOC = value;
+                _BMS_SOC = Tools.RemoveLeadingZeros(value);
                 this.RaiseProperChanged(nameof(BMS_SOC));
             }
         }

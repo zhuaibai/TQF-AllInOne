@@ -369,7 +369,7 @@
                             Grid.Row="2"
                             Grid.Column="3"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding HTEMP_PDF.FanSpeed, StringFormat={}{0}℃}" />
+                            Text="{Binding HTEMP_PDF.BoostTemp, StringFormat={}{0}℃}" />
 
                         <!--  变压器温度  -->
                         <TextBlock
@@ -2455,7 +2455,60 @@
                                 Cursor="Hand"
                                 Style="{StaticResource ActionButton}" />
 
+                            <UniformGrid
+                                Grid.Row="31"
+                                Grid.ColumnSpan="4"
+                                Columns="2">
+                                <StackPanel
+                                    Margin="8,0"
+                                    HorizontalAlignment="Stretch"
+                                    Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource AC充电时间}" />
+                                    <ComboBox
+                                        Width="60"
+                                        Height="30"
+                                        ItemsSource="{Binding SpecialCommand.AC_Charging_TimeOptions}"
+                                        SelectedItem="{Binding SpecialCommand.AC_Charging_Time_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                        Style="{StaticResource SelectBox}" />
+                                    <TextBlock Style="{StaticResource ContentText}" Text="-" />
+                                    <ComboBox
+                                        Width="60"
+                                        Height="30"
+                                        ItemsSource="{Binding SpecialCommand.AC_Charging_TimeOptionsEnd}"
+                                        SelectedItem="{Binding SpecialCommand.AC_Charging_Time_InputsEnd, UpdateSourceTrigger=PropertyChanged}"
+                                        Style="{StaticResource SelectBox}" />
+                                    <Button
+                                        Height="30"
+                                        Command="{Binding DataContext.SpecialCommand.Command_SetAC_Charging_Time, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Content="{DynamicResource 设置}"
+                                        Style="{StaticResource ActionButton}" />
+                                </StackPanel>
+                                <StackPanel
+                                    Margin="8,0"
+                                    HorizontalAlignment="Stretch"
+                                    Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 逆变输出时间}" />
+                                    <ComboBox
+                                        Width="60"
+                                        Height="30"
+                                        ItemsSource="{Binding SpecialCommand.InvOutputTimeOptions}"
+                                        SelectedItem="{Binding SpecialCommand.InvOutputTime_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                        Style="{StaticResource SelectBox}" />
+                                    <TextBlock Style="{StaticResource ContentText}" Text="-" />
+                                    <ComboBox
+                                        Width="60"
+                                        Height="30"
+                                        ItemsSource="{Binding SpecialCommand.InvOutputTimeOptionsEnd}"
+                                        SelectedItem="{Binding SpecialCommand.InvOutputTime_InputsEnd, UpdateSourceTrigger=PropertyChanged}"
+                                        Style="{StaticResource SelectBox}" />
+                                    <Button
+                                        Height="30"
+                                        Command="{Binding DataContext.SpecialCommand.Command_SetInvOutputTime, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Content="{DynamicResource 设置}"
+                                        Style="{StaticResource ActionButton}" />
+                                </StackPanel>
 
+                            </UniformGrid>
 
 
 
@@ -3028,10 +3081,139 @@
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
 
+                            <!--  校准设置  -->
                             <UniformGrid
                                 Grid.Row="22"
                                 Grid.ColumnSpan="4"
                                 Columns="2">
+
+
+
+
+                                <!--<Grid>
+    <Grid.RowDefinitions>
+        <RowDefinition />
+        <RowDefinition />
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition />
+        <ColumnDefinition Width="auto" />
+    </Grid.ColumnDefinitions>
+                                -->
+                                <!--  逆变电压提高  -->
+                                <!--
+    <Button
+        Height="30"
+        Command="{Binding DataContext.SpecialCommand.Command_SetInvVoltDetectAdjInc, RelativeSource={RelativeSource AncestorType=Window}}"
+        Content="{DynamicResource 逆变器逆变电压检测值提高n个单位}"
+        Style="{StaticResource ActionButton}" />
+    <ComboBox
+        Grid.Column="1"
+        Height="30"
+        ItemsSource="{Binding SpecialCommand.InvVoltDetectAdjIncOptions}"
+        SelectedItem="{Binding SpecialCommand.InvVoltDetectAdjInc_Inputs, UpdateSourceTrigger=PropertyChanged}"
+        Style="{StaticResource SelectBox}" />
+                                -->
+                                <!--  逆变电压降低  -->
+                                <!--
+    <Button
+        Grid.Row="1"
+        Height="30"
+        Command="{Binding DataContext.SpecialCommand.Command_SetInvVoltDetectAdjDec, RelativeSource={RelativeSource AncestorType=Window}}"
+        Content="{DynamicResource 逆变器逆变电压检测值降低n个单位}"
+        Style="{StaticResource ActionButton}" />
+    <ComboBox
+        Grid.Row="1"
+        Grid.Column="1"
+        Height="30"
+        HorizontalAlignment="Right"
+        ItemsSource="{Binding SpecialCommand.InvVoltDetectAdjDecOptions}"
+        SelectedItem="{Binding SpecialCommand.InvVoltDetectAdjDec_Inputs, UpdateSourceTrigger=PropertyChanged}"
+        Style="{StaticResource SelectBox}" />
+</Grid>-->
+
+                                <!--  电池电压  -->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="auto" />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        Command="{Binding DataContext.SpecialCommand.Command_SetBattVoltDec, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Content="&#xe62b;"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Center"
+                                        Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压}" />
+                                        <TextBlock Style="{StaticResource ContentText}" Text=":     " />
+                                        <TextBlock
+                                            Grid.Row="0"
+                                            Grid.Column="3"
+                                            Style="{StaticResource ContentText}"
+                                            Text="{Binding HBAT_VQ.BattVolt, StringFormat={}{0}V}" />
+
+                                    </StackPanel>
+
+                                    <Button
+                                        Grid.Column="2"
+                                        Width="50"
+                                        Height="30"
+                                        HorizontalAlignment="Right"
+                                        Command="{Binding DataContext.SpecialCommand.Command_SetBattVoltInc, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Content="&#xe606;"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                </Grid>
+                                <!--  逆变电压  -->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="auto" />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        Command="{Binding DataContext.SpecialCommand.Command_SetInvVoltDetectAdjDec, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Content="&#xe62b;"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Center"
+                                        Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 逆变电压}" />
+
+                                    </StackPanel>
+
+                                    <Button
+                                        Grid.Column="2"
+                                        Width="50"
+                                        Height="30"
+                                        HorizontalAlignment="Right"
+                                        Command="{Binding DataContext.SpecialCommand.Command_SetInvVoltDetectAdjInc, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Content="&#xe606;"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                </Grid>
+
+                                <Button
+                                    Height="30"
+                                    Command="{Binding DataContext.SpecialCommand.Command_SetSystemReset, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    Content="{DynamicResource 复位系统状态}"
+                                    Style="{StaticResource ActionButton}" />
+                                <Button
+                                    Height="30"
+                                    Command="{Binding DataContext.SpecialCommand.Command_SetClearPowerGeneration, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    Content="{DynamicResource 清除发电量}"
+                                    Style="{StaticResource ActionButton}" />
+
                                 <Button
                                     Height="30"
                                     Command="{Binding DataContext.SpecialCommand.Command_SetAuxiliaryOutputOn, RelativeSource={RelativeSource AncestorType=Window}}"
@@ -3042,101 +3224,11 @@
                                     Command="{Binding DataContext.SpecialCommand.Command_SetAuxiliaryOutputShutdown, RelativeSource={RelativeSource AncestorType=Window}}"
                                     Content="{DynamicResource 副输出关}"
                                     Style="{StaticResource ActionButton}" />
-                                <!--<Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition />
-                                        <RowDefinition />
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition />
-                                        <ColumnDefinition Width="auto" />
-                                    </Grid.ColumnDefinitions>
-                                -->
-                                <!--  逆变电压提高  -->
-                                <!--
-                                    <Button
-                                        Height="30"
-                                        Command="{Binding DataContext.SpecialCommand.Command_SetInvVoltDetectAdjInc, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        Content="{DynamicResource 逆变器逆变电压检测值提高n个单位}"
-                                        Style="{StaticResource ActionButton}" />
-                                    <ComboBox
-                                        Grid.Column="1"
-                                        Height="30"
-                                        ItemsSource="{Binding SpecialCommand.InvVoltDetectAdjIncOptions}"
-                                        SelectedItem="{Binding SpecialCommand.InvVoltDetectAdjInc_Inputs, UpdateSourceTrigger=PropertyChanged}"
-                                        Style="{StaticResource SelectBox}" />
-                                -->
-                                <!--  逆变电压降低  -->
-                                <!--
-                                    <Button
-                                        Grid.Row="1"
-                                        Height="30"
-                                        Command="{Binding DataContext.SpecialCommand.Command_SetInvVoltDetectAdjDec, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        Content="{DynamicResource 逆变器逆变电压检测值降低n个单位}"
-                                        Style="{StaticResource ActionButton}" />
-                                    <ComboBox
-                                        Grid.Row="1"
-                                        Grid.Column="1"
-                                        Height="30"
-                                        HorizontalAlignment="Right"
-                                        ItemsSource="{Binding SpecialCommand.InvVoltDetectAdjDecOptions}"
-                                        SelectedItem="{Binding SpecialCommand.InvVoltDetectAdjDec_Inputs, UpdateSourceTrigger=PropertyChanged}"
-                                        Style="{StaticResource SelectBox}" />
-                                </Grid>-->
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="auto" />
-                                        <ColumnDefinition />
-                                        <ColumnDefinition Width="auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <Button
-                                        Width="50"
-                                        Height="30"
-                                        Command="{Binding DataContext.SpecialCommand.Command_SetInvVoltDetectAdjDec, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        Content="-"
-                                        Style="{StaticResource ActionButton}" />
-                                    <StackPanel
-                                        Grid.Column="1"
-                                        HorizontalAlignment="Center"
-                                        Orientation="Horizontal">
-                                        <TextBlock Style="{StaticResource ContentText}" Text="逆变电压：" />
-                                        <TextBlock Style="{StaticResource ContentText}" Text="虚拟" />
-                                    </StackPanel>
-
-                                    <Button
-                                        Grid.Column="2"
-                                        Width="50"
-                                        Height="30"
-                                        HorizontalAlignment="Right"
-                                        Command="{Binding DataContext.SpecialCommand.Command_SetInvVoltDetectAdjInc, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        Content="+"
-                                        Style="{StaticResource ActionButton}" />
-                                </Grid>
-
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition />
-                                        <RowDefinition />
-                                    </Grid.RowDefinitions>
-                                    <UniformGrid Columns="2">
-                                        <Button
-                                            Height="30"
-                                            Command="{Binding DataContext.SpecialCommand.Command_SetSystemReset, RelativeSource={RelativeSource AncestorType=Window}}"
-                                            Content="{DynamicResource 复位系统状态}"
-                                            Style="{StaticResource ActionButton}" />
-                                        <Button
-                                            Height="30"
-                                            Command="{Binding DataContext.SpecialCommand.Command_SetClearPowerGeneration, RelativeSource={RelativeSource AncestorType=Window}}"
-                                            Content="{DynamicResource 清除发电量}"
-                                            Style="{StaticResource ActionButton}" />
-                                    </UniformGrid>
-
-                                </Grid>
 
                             </UniformGrid>
                             <!--  保存设置参数  -->
                             <Button
-                                Grid.Row="23"
+                                Grid.Row="25"
                                 Grid.ColumnSpan="4"
                                 Height="30"
                                 Command="{Binding DataContext.SpecialCommand.Command_SetSaveConfig, RelativeSource={RelativeSource AncestorType=Window}}"

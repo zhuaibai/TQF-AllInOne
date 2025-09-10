@@ -11,6 +11,8 @@
     Title="TQF ALL-in-One"
     Width="1400"
     Height="780"
+    MinWidth="1400"
+    MinHeight="780"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
     <Window.Resources>
@@ -176,9 +178,12 @@
                 Tag="&#xe653;" />
 
 
-            <StackPanel Margin="10,0" VerticalAlignment="Center" Cursor="Hand">
+            <StackPanel
+                Margin="10,0"
+                VerticalAlignment="Center"
+                Cursor="Hand">
                 <ToggleButton
-                    Command="{Binding  SwitchOpenReceiveCRC}"
+                    Command="{Binding SwitchOpenReceiveCRC}"
                     IsChecked="{Binding IsChecked}"
                     Style="{StaticResource SwitchButton2}" />
                 <TextBlock

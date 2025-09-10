@@ -367,7 +367,7 @@
                             Grid.Row="2"
                             Grid.Column="3"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding HTEMP_PDF.FanSpeed, StringFormat={}{0}℃}" />
+                            Text="{Binding HTEMP_PDF.BoostTemp, StringFormat={}{0}℃}" />
 
                         <!--  变压器温度  -->
                         <TextBlock
@@ -1117,7 +1117,7 @@
                             Grid.Row="8"
                             Grid.Column="1"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding HBMS1_VQ.BMS_ChgVoltLimit}" />
+                            Text="{Binding HBMS1_VQ.BMS_ChgVoltLimit, StringFormat={}{0}V}" />
                         <!--  BMS放电电压限制  -->
                         <TextBlock
                             Grid.Row="8"
@@ -1128,7 +1128,7 @@
                             Grid.Row="8"
                             Grid.Column="3"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding HBMS1_VQ.BMS_DisVoltLimit}" />
+                            Text="{Binding HBMS1_VQ.BMS_DisVoltLimit, StringFormat={}{0}V}" />
                         <!--  BMS充电电流限制  -->
                         <TextBlock
                             Grid.Row="6"
@@ -1139,7 +1139,7 @@
                             Grid.Row="6"
                             Grid.Column="1"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding HBMS1_VQ.BMS_ChgCurrLimit}" />
+                            Text="{Binding HBMS1_VQ.BMS_ChgCurrLimit, StringFormat={}{0}A}" />
                         <!--  BMS当前SOC  -->
                         <TextBlock
                             Grid.Row="6"
@@ -1150,7 +1150,7 @@
                             Grid.Row="6"
                             Grid.Column="3"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding HBMS1_VQ.BMS_SOC}" />
+                            Text="{Binding HBMS1_VQ.BMS_SOC, StringFormat={}{0}%}" />
                         <!--  BMS充电电流  -->
                         <!--
                         <TextBlock
@@ -1251,7 +1251,7 @@
                         Grid.Row="0"
                         Grid.Column="3"
                         Style="{StaticResource ContentText}"
-                        Text="{Binding HBAT_VQ.BattVolt}" />
+                        Text="{Binding HBAT_VQ.BattVolt, StringFormat={}{0}V}" />
                     <!--  电池容量  -->
                     <TextBlock
                         Grid.Row="1"

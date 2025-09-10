@@ -1532,12 +1532,15 @@ namespace WpfApp1.ViewModels
                 UpdateState(App.GetText("异常!"));
                 //关闭串口
                 openCom();
+
                 MessageBox.Show($"通讯异常{ex.ToString()},已停止通讯！,请重新打开串口", "异常", MessageBoxButton.OK, MessageBoxImage.Error);
 
             }
             finally
             {
                 IsRunning = false;
+                ChangeComIcon(false);
+                comStateColor(false);
             }
         }
 
@@ -1722,6 +1725,8 @@ namespace WpfApp1.ViewModels
         /// <param name="token"></param>
         private void CommunicationWithGB3024(CancellationToken token)
         {
+            
+
             string receive = string.Empty;
             // 等待暂停或取消信号
             _pauseEvent.Wait(token);
@@ -1730,6 +1735,24 @@ namespace WpfApp1.ViewModels
             MachineType = receive_MachineType.Substring(1, 8);
             //解析指令
             SerialCommunicationService.MachineType = receive_MachineType;
+
+            //判断是否开启CRC接收校验（抗干扰 默认开启
+            if (IsChecked)
+            {
+                //发送HOSTCRCEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "EN");
+                ShowError(receive, "HOSTCRC");
+            }
+            else if (OnceOpenCRC)
+            {
+                //发送HOSTCRDEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "DN");
+                OnceOpenCRC = false;
+                IsChecked = false;
+                SerialCommunicationService.OpenReceiveCRC(false);
+            }
 
             //发送HBMS1指令
             _pauseEvent.Wait(token); // 等待暂停或取消信号
@@ -1911,6 +1934,24 @@ namespace WpfApp1.ViewModels
 
             string receive = "";
 
+            //判断是否开启CRC接收校验（抗干扰 默认开启
+            if (IsChecked)
+            {
+                //发送HOSTCRCEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "EN");
+                ShowError(receive, "HOSTCRC");
+            }
+            else if (OnceOpenCRC)
+            {
+                //发送HOSTCRDEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "DN");
+                OnceOpenCRC = false;
+                IsChecked = false;
+                SerialCommunicationService.OpenReceiveCRC(false);
+            }
+
             //获取机器型号
             _pauseEvent.Wait(token);
             string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
@@ -2027,6 +2068,24 @@ namespace WpfApp1.ViewModels
         {
 
             string receive = "";
+
+            //判断是否开启CRC接收校验（抗干扰 默认开启
+            if (IsChecked)
+            {
+                //发送HOSTCRCEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "EN");
+                ShowError(receive, "HOSTCRC");
+            }
+            else if (OnceOpenCRC)
+            {
+                //发送HOSTCRDEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "DN");
+                OnceOpenCRC = false;
+                IsChecked = false;
+                SerialCommunicationService.OpenReceiveCRC(false);
+            }
 
             //获取机器型号
             _pauseEvent.Wait(token);
@@ -2179,6 +2238,26 @@ namespace WpfApp1.ViewModels
         private void CommunicationWithGB_HPVINV06(CancellationToken token)
         {
             string receive = string.Empty;
+
+
+            //判断是否开启CRC接收校验（抗干扰 默认开启
+            if (IsChecked)
+            {
+                //发送HOSTCRCEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "EN");
+                ShowError(receive, "HOSTCRC");
+            }
+            else if (OnceOpenCRC)
+            {
+                //发送HOSTCRDEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "DN");
+                OnceOpenCRC = false;
+                IsChecked = false;
+                SerialCommunicationService.OpenReceiveCRC(false);
+            }
+
             // 等待暂停或取消信号
             _pauseEvent.Wait(token);
             //发送查询机器指令
@@ -2280,6 +2359,24 @@ namespace WpfApp1.ViewModels
         {
             string receive = string.Empty;
 
+            //判断是否开启CRC接收校验（抗干扰 默认开启
+            if (IsChecked)
+            {
+                //发送HOSTCRCEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "EN");
+                ShowError(receive, "HOSTCRC");
+            }
+            else if (OnceOpenCRC)
+            {
+                //发送HOSTCRDEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "DN");
+                OnceOpenCRC = false;
+                IsChecked = false;
+                SerialCommunicationService.OpenReceiveCRC(false);
+            }
+
             Thread.Sleep(200);
             // 等待暂停或取消信号
             _pauseEvent.Wait(token);
@@ -2348,6 +2445,24 @@ namespace WpfApp1.ViewModels
         private void CommunicationWith_LB6(CancellationToken token)
         {
             string receive = string.Empty;
+
+            //判断是否开启CRC接收校验（抗干扰 默认开启
+            if (IsChecked)
+            {
+                //发送HOSTCRCEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "EN");
+                ShowError(receive, "HOSTCRC");
+            }
+            else if (OnceOpenCRC)
+            {
+                //发送HOSTCRDEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "DN");
+                OnceOpenCRC = false;
+                IsChecked = false;
+                SerialCommunicationService.OpenReceiveCRC(false);
+            }
 
             Thread.Sleep(200);
             // 等待暂停或取消信号

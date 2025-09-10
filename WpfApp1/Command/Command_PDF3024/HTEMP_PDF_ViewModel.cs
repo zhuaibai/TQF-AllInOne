@@ -531,7 +531,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 //逆变温度
                 InvTemp = Values[1];
                 //升压温度
-                FanSpeed = Values[2];
+                BoostTemp = Values[2];
                 //变压器温度
                 XfmrTemp = Values[3];
                 //当前最大温度

@@ -1612,7 +1612,7 @@
                             Grid.Row="2"
                             Grid.Column="3"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding HTEMP_PDF.FanSpeed, StringFormat={}{0}℃}" />
+                            Text="{Binding HTEMP_PDF.BoostTemp, StringFormat={}{0}℃}" />
 
                         <!--  变压器温度  -->
                         <TextBlock
