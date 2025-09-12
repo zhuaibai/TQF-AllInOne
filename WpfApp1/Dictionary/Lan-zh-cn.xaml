@@ -231,7 +231,8 @@
     <s:String x:Key="逆变电压">逆变电压</s:String>
     <s:String x:Key="正常">正常</s:String>
     <s:String x:Key="异常">异常</s:String>
-    
+    <s:String x:Key="模式选择">模式选择</s:String>
+
 
 
 

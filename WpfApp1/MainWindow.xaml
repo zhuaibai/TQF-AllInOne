@@ -173,7 +173,7 @@
                 x:Name="ChineseBtn"
                 Background="#FF1677FF"
                 Click="ChangeLanguageToChinese"
-                Content="中文"
+                Content="Ch-language"
                 Style="{StaticResource MenuStyleBtn}"
                 Tag="&#xe653;" />
 
@@ -327,7 +327,7 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Foreground="Red"
-                    Text="0" />
+                    Text="{Binding SerialCountVM.SetZero}" />
             </StackPanel>
             <StackPanel
                 Grid.Column="2"

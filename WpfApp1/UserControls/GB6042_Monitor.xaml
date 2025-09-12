@@ -380,7 +380,7 @@
                             Grid.Row="3"
                             Grid.Column="1"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding HTEMP_PDF.XfmrTemp}" />
+                            Text="{Binding HTEMP_PDF.XfmrTemp, StringFormat={}{0}℃}" />
                         <!--  当前最高温度  -->
                         <TextBlock
                             Grid.Row="3"

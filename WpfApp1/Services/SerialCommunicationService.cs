@@ -34,7 +34,7 @@ namespace WpfApp1.Services
         //校验抗干扰校验关闭
         private static int IsReceiveCRC_CLose = 0;
         // 异步竞争
-        private static SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1); 
+        private static SemaphoreSlim _semaphore; 
         //机器类型
         public static string _MachineType = "";
         public static string MachineType
@@ -68,6 +68,8 @@ namespace WpfApp1.Services
             SerialPort.StopBits = SerialPortModel.StopBits;
             SerialPort.DataBits = SerialPortModel.DataBits;
             SerialPort.BaudRate = SerialPortModel.BaudRate;
+            _semaphore = new SemaphoreSlim(1, 1);
+            
         }
 
         /// <summary>

@@ -45,13 +45,35 @@ namespace WpfApp1.ViewModels
         public void AddSendFrame(int send)
         {
             SendFrame += send;
+            if (SendFrame > 2000000000)
+            {
+                RemoveAllFrame();
+            }
         }
         /// <summary>
         /// 发送帧减少
         /// </summary>
         /// <param name="receive"></param>
-        public void AddReceiveFrame(int receive) { ReceiveFrame += receive; }
+        public void AddReceiveFrame(int receive) { ReceiveFrame += receive;
+            if (ReceiveFrame > 2000000000)
+            {
+                RemoveAllFrame();
+            }
 
+        }
+
+        //清零次数
+        private int _setZoro;
+
+        public int SetZero
+        {
+            get { return _setZoro; }
+            set
+            {
+                _setZoro = value;
+                this.RaiseProperChanged(nameof(SetZero));
+            }
+        }
 
 
 
@@ -62,6 +84,11 @@ namespace WpfApp1.ViewModels
         {
             SendFrame = 0;
             ReceiveFrame = 0;
+            SetZero++;
+            if (SetZero >= 100000)
+            {
+                SetZero = 0;
+            }
         }
     }
 }

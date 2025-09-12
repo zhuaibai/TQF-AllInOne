@@ -229,4 +229,5 @@
     <s:String x:Key="逆变电压">InvVolt</s:String>
     <s:String x:Key="正常">Normal</s:String>
     <s:String x:Key="异常">Fault</s:String>
+    <s:String x:Key="模式选择">ModeSelect</s:String>
 </ResourceDictionary>

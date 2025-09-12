@@ -107,7 +107,12 @@ namespace WpfApp1.Command.Command_CYJ
               execute: () => TimeToDownOperation(),
               canExecute: () => Validate(nameof(TimeToDown_Inputs)) && !TimeToDown_IsWorking
              );
-            
+            //模式选择
+            Command_SetMode = new RelayCommand(
+              execute: () => ModeOperation(),
+              canExecute: () => Validate(nameof(Mode_Inputs)) && !Mode_IsWorking
+             );
+
 
             #endregion
         }
@@ -1699,6 +1704,110 @@ namespace WpfApp1.Command.Command_CYJ
 
         #endregion
 
+        #region 模式选择
+
+        private string _Mode;
+
+        public string Mode
+        {
+            get { return _Mode; }
+            set
+            {
+                if(value=="0")
+                _Mode = "UPS";
+                else
+                {
+                    _Mode = "GEN";
+                }
+                this.RaiseProperChanged(nameof(Mode));
+            }
+        }
+
+
+        private bool Mode_IsWorking;
+
+
+        //设置值
+        private string _Mode_Inputs;
+
+        public string Mode_Inputs
+        {
+            get { return _Mode_Inputs; }
+            set
+            {
+                _Mode_Inputs = value;
+                this.RaiseProperChanged(nameof(Mode_Inputs));
+                Command_SetMode.RaiseCanExecuteChanged();
+            }
+        }
+
+        //下拉选项
+        private List<string> _ModeOptions = new List<string> { "UPS", "GEN" };
+
+        public List<string> ModeOptions
+        {
+            get { return _ModeOptions; }
+            set
+            {
+                _ModeOptions = value;
+                this.RaiseProperChanged(nameof(ModeOptions));
+            }
+        }
+
+        public RelayCommand Command_SetMode { get; }
+
+        /// <summary>
+        /// 点击设置
+        /// </summary>
+        private async void ModeOperation()
+        {
+            try
+            {
+                Mode_IsWorking = true;
+                // 禁用按钮
+                Command_SetMode.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(2000);//没有这个延时会报错
+                    string receive = SerialCommunicationService.SendSettingCommand("PGR",getSelectedToCommad("Mode_Inputs"));
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                Mode_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetMode.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+        #endregion
+
         #region 通用方法
         // 输入验证&选择验证
         private bool Validate(string value)
@@ -1730,7 +1839,9 @@ namespace WpfApp1.Command.Command_CYJ
                 case "FaultLog_Inputs":
                     return !string.IsNullOrWhiteSpace(FaultLog_Inputs);                          //故障记录
                 case "TimeToDown_Inputs":
-                    return !string.IsNullOrWhiteSpace(TimeToDown_Inputs);                          //定时关机
+                    return !string.IsNullOrWhiteSpace(TimeToDown_Inputs);                        //定时关机
+                case "Mode_Inputs":
+                    return !string.IsNullOrWhiteSpace(Mode_Inputs);                              //模式
                 default:
                     return false;
             }
@@ -1788,12 +1899,14 @@ namespace WpfApp1.Command.Command_CYJ
                 LoadTime = Values[10];
                 //自动返回首页
                 AutoReturnHome = Values[11];
+                //模式
+                Mode = Values[12];
 
             }
             catch (Exception ex)
             {
                 //异常
-                ReceiveException("HEEP1异常");
+                ReceiveException("HEEP1_Exe");
                 AddLog($"{command}返回数据：{value}解析异常");
             }
 
@@ -1879,7 +1992,16 @@ namespace WpfApp1.Command.Command_CYJ
                         return "05";
                     }else 
                     return TimeToDown_Inputs;
-
+                case "Mode_Inputs":
+                    if (Mode_Inputs == "UPS")
+                    {
+                        return "00";
+                    }
+                    else
+                    {
+                        return "01";
+                    }
+                    
                 default:
                     return "";
 

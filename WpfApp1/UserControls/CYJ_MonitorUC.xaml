@@ -258,77 +258,193 @@
                 </GroupBox>
             </ScrollViewer>
 
-            <!--  系统信息与状态  -->
+
+            <!--  机器状态  -->
             <ScrollViewer
                 Grid.Row="2"
                 VerticalAlignment="Bottom"
                 VerticalScrollBarVisibility="Auto">
-                <GroupBox FontSize="16" Header="{DynamicResource 系统信息}">
-                    <Grid>
+                <GroupBox FontSize="16" Header="{DynamicResource 机器状态}">
+                    <Grid Margin="0,10,0,0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition />
-                            <ColumnDefinition />
-                            <ColumnDefinition />
-                            <ColumnDefinition />
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="1*" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
                         </Grid.RowDefinitions>
-                        <!--  系统时间  -->
-                        <!--<TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 系统时间}" />
-                        <TextBlock
-                            Grid.Column="2"
-                            Grid.ColumnSpan="2"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding HGEN.SystemTime}" />-->
-                        <!--  版本号  -->
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="2"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 版本号}" />
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding HIMSG1.Version}" />
-                        <!--  发布日期  -->
-                        <TextBlock
-                            Grid.Row="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 发布日期}" />
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding HIMSG1.ReleaseDate}" />
-                        <!--  机器型号  -->
-                        <TextBlock
-                            Grid.Row="2"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 机器型号}" />
-                        <TextBlock
-                            Grid.Row="2"
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding MachineModel}" />
-                        <!--  机器类型  -->
-                        <TextBlock
-                            Grid.Row="2"
-                            Grid.Column="2"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 机器类型}" />
-                        <TextBlock
-                            Grid.Row="2"
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding MachineType}" />
 
+
+
+                        <!--  故障代码  -->
+                        <TextBlock
+                            Grid.Row="1"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource 故障代码}" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding HSTS_CYJ.FaultCode}" />
+                        <!--  模式  -->
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="2"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource 模式}" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="3"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding HSTS_CYJ.Mode}" />
+                        <!--  逆变温度  -->
+                        <TextBlock
+                            Grid.Row="2"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource 逆变温度}" />
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding HTEMP_PDF.InvTemp}" />
+                        <!--  当前最高温度  -->
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="2"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource 当前最高温度}" />
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="3"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding HTEMP_PDF.MaxTemp}" />
+                        <!--  电池未接  -->
+                        <TextBlock
+                            Grid.Row="3"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource 电池未接}" />
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding HSTS_CYJ.BattDisconnected}" />
+                        <!--  输出过载  -->
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="2"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource 输出过载}" />
+
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="3"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding HSTS_CYJ.OutputOverload}" />
+                        <!--  机器过温  -->
+                        <TextBlock
+                            Grid.Row="4"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource 机器过温}" />
+                        <TextBlock
+                            Grid.Row="4"
+                            Grid.Column="1"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding HSTS_CYJ.OverTemp}" />
+                        <!--  电池低电报警  -->
+                        <TextBlock
+                            Grid.Row="4"
+                            Grid.Column="2"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource 电池低电报警}" />
+                        <TextBlock
+                            Grid.Row="4"
+                            Grid.Column="3"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding HSTS_CYJ.BattLowAlarm}" />
+                        <!--  EEPROM数据异常  -->
+                        <TextBlock
+                            Grid.Row="5"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource EEPROM数据异常}" />
+                        <TextBlock
+                            Grid.Row="5"
+                            Grid.Column="1"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding HSTS_CYJ.EEPROM_DataErr}" />
+                        <!--  EEPROM读写异常  -->
+                        <TextBlock
+                            Grid.Row="5"
+                            Grid.Column="2"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource EEPROM读写异常}" />
+
+                        <TextBlock
+                            Grid.Row="5"
+                            Grid.Column="3"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding HSTS_CYJ.EEPROM_IOErr}" />
+                        <!--  输入电压过高  -->
+                        <TextBlock
+                            Grid.Row="6"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource 输入电压过高}" />
+                        <TextBlock
+                            Grid.Row="6"
+                            Grid.Column="1"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding HSTS_CYJ.InputOV}" />
+                        <!--  电池电压过高  -->
+                        <TextBlock
+                            Grid.Row="6"
+                            Grid.Column="2"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource 电池电压过高}" />
+
+                        <TextBlock
+                            Grid.Row="6"
+                            Grid.Column="3"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding HSTS_CYJ.BattOV}" />
+
+                        <!--  风扇转速异常  -->
+                        <TextBlock
+                            Grid.Row="7"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource 风扇转速异常}" />
+                        <TextBlock
+                            Grid.Row="7"
+                            Grid.Column="1"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding HSTS_CYJ.FanSpeedFault}" />
+                        <!--  机器是否有输出  -->
+                        <TextBlock
+                            Grid.Row="7"
+                            Grid.Column="2"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource 机器是否有输出}" />
+
+                        <TextBlock
+                            Grid.Row="7"
+                            Grid.Column="3"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding HSTS_CYJ.OutputStatus}" />
                     </Grid>
                 </GroupBox>
             </ScrollViewer>
+
 
         </Grid>
         <!--  第二行 第二列  -->
@@ -735,190 +851,78 @@
 
                 </Grid>
             </GroupBox>
+            <!--  系统信息与状态  -->
             <ScrollViewer
                 Grid.Row="1"
                 VerticalAlignment="Bottom"
                 VerticalScrollBarVisibility="Auto">
-                <GroupBox FontSize="16" Header="{DynamicResource 机器状态}">
-                    <Grid Margin="0,10,0,0">
+                <GroupBox FontSize="16" Header="{DynamicResource 系统信息}">
+                    <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*" />
-                            <ColumnDefinition Width="1*" />
-                            <ColumnDefinition Width="2*" />
-                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
                         </Grid.RowDefinitions>
-
-
-
-                        <!--  故障代码  -->
-                        <TextBlock
-                            Grid.Row="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 故障代码}" />
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding HSTS_CYJ.FaultCode}" />
-                        <!--  模式  -->
+                        <!--  系统时间  -->
+                        <!--<TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 系统时间}" />
+            <TextBlock
+                Grid.Column="2"
+                Grid.ColumnSpan="2"
+                Style="{StaticResource ContentText}"
+                Text="{Binding HGEN.SystemTime}" />-->
+                        <!--  版本号  -->
                         <TextBlock
                             Grid.Row="1"
                             Grid.Column="2"
                             Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 模式}" />
+                            Text="{DynamicResource 版本号}" />
                         <TextBlock
                             Grid.Row="1"
                             Grid.Column="3"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding HSTS_CYJ.Mode}" />
-                        <!--  逆变温度  -->
+                            Text="{Binding HIMSG1.Version}" />
+                        <!--  发布日期  -->
+                        <TextBlock
+                            Grid.Row="1"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource 发布日期}" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding HIMSG1.ReleaseDate}" />
+                        <!--  机器型号  -->
                         <TextBlock
                             Grid.Row="2"
                             Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 逆变温度}" />
+                            Text="{DynamicResource 机器型号}" />
                         <TextBlock
                             Grid.Row="2"
                             Grid.Column="1"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding HTEMP_PDF.InvTemp}" />
-                        <!--  当前最高温度  -->
+                            Text="{Binding MachineModel}" />
+                        <!--  机器类型  -->
                         <TextBlock
                             Grid.Row="2"
                             Grid.Column="2"
                             Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 当前最高温度}" />
+                            Text="{DynamicResource 机器类型}" />
                         <TextBlock
                             Grid.Row="2"
                             Grid.Column="3"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding HTEMP_PDF.MaxTemp}" />
-                        <!--  电池未接  -->
-                        <TextBlock
-                            Grid.Row="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 电池未接}" />
-                        <TextBlock
-                            Grid.Row="3"
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding HSTS_CYJ.BattDisconnected}" />
-                        <!--  输出过载  -->
-                        <TextBlock
-                            Grid.Row="3"
-                            Grid.Column="2"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 输出过载}" />
+                            Text="{Binding MachineType}" />
 
-                        <TextBlock
-                            Grid.Row="3"
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding HSTS_CYJ.OutputOverload}" />
-                        <!--  机器过温  -->
-                        <TextBlock
-                            Grid.Row="4"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 机器过温}" />
-                        <TextBlock
-                            Grid.Row="4"
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding HSTS_CYJ.OverTemp}" />
-                        <!--  电池低电报警  -->
-                        <TextBlock
-                            Grid.Row="4"
-                            Grid.Column="2"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 电池低电报警}" />
-                        <TextBlock
-                            Grid.Row="4"
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding HSTS_CYJ.BattLowAlarm}" />
-                        <!--  EEPROM数据异常  -->
-                        <TextBlock
-                            Grid.Row="5"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource EEPROM数据异常}" />
-                        <TextBlock
-                            Grid.Row="5"
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding HSTS_CYJ.EEPROM_DataErr}" />
-                        <!--  EEPROM读写异常  -->
-                        <TextBlock
-                            Grid.Row="5"
-                            Grid.Column="2"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource EEPROM读写异常}" />
-
-                        <TextBlock
-                            Grid.Row="5"
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding HSTS_CYJ.EEPROM_IOErr}" />
-                        <!--  输入电压过高  -->
-                        <TextBlock
-                            Grid.Row="6"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 输入电压过高}" />
-                        <TextBlock
-                            Grid.Row="6"
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding HSTS_CYJ.InputOV}" />
-                        <!--  电池电压过高  -->
-                        <TextBlock
-                            Grid.Row="6"
-                            Grid.Column="2"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 电池电压过高}" />
-
-                        <TextBlock
-                            Grid.Row="6"
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding HSTS_CYJ.BattOV}" />
-
-                        <!--  风扇转速异常  -->
-                        <TextBlock
-                            Grid.Row="7"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 风扇转速异常}" />
-                        <TextBlock
-                            Grid.Row="7"
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding HSTS_CYJ.FanSpeedFault}" />
-                        <!--  机器是否有输出  -->
-                        <TextBlock
-                            Grid.Row="7"
-                            Grid.Column="2"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 机器是否有输出}" />
-
-                        <TextBlock
-                            Grid.Row="7"
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding HSTS_CYJ.OutputStatus}" />
                     </Grid>
                 </GroupBox>
             </ScrollViewer>
+
 
 
 
@@ -1183,6 +1187,29 @@
                                 Command="{Binding DataContext.HEEP1_CYJ.Command_SetAC_ChargingCurrent, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />-->
+
+                            <!--  Mode  -->
+                            <TextBlock
+                                Grid.Row="14"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 模式选择}" />
+                            <TextBlock
+                                Grid.Row="14"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP1_CYJ.Mode}" />
+                            <ComboBox
+                                Grid.Row="14"
+                                Grid.Column="2"
+                                ItemsSource="{Binding HEEP1_CYJ.ModeOptions}"
+                                SelectedItem="{Binding HEEP1_CYJ.Mode_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{StaticResource SelectBox}" />
+                            <Button
+                                Grid.Row="14"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP1_CYJ.Command_SetMode, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Style="{StaticResource ActionButton}" />
 
                             <!--  强充时间  -->
                             <!--
