@@ -1455,7 +1455,7 @@ namespace WpfApp1.ViewModels
                 _pauseEvent.Set();
                 UpdateState(App.GetText("正在通信"));
                 comStateColor(true);
-                Task.Run(() => BackgroundWorker(_cts.Token));
+                BackgroundWorker(_cts.Token);
                 AddLog("后台通信线程已启动");
             }
 
