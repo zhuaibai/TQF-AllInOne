@@ -1,0 +1,407 @@
+﻿<Window
+    x:Class="WpfApp1.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:convert="clr-namespace:WpfApp1.Convert"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:lo="clr-namespace:WpfApp1.Behavior"
+    xmlns:local="clr-namespace:WpfApp1"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="TQF ALL-in-One"
+    Width="1400"
+    Height="780"
+    MinWidth="1400"
+    MinHeight="780"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
+    <Window.Resources>
+        <DropShadowEffect
+            x:Key="DropShadow"
+            BlurRadius="10"
+            Direction="270"
+            Opacity="0.6"
+            ShadowDepth="3"
+            Color="#40000000" />
+
+
+        <!--  开关按钮样式  -->
+        <Style x:Key="ToggleSwitchStyle" TargetType="ToggleButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border
+                            Width="60"
+                            Height="30"
+                            Background="#E0E0E0"
+                            CornerRadius="15">
+                            <Ellipse
+                                x:Name="Thumb"
+                                Width="26"
+                                Height="26"
+                                Margin="2"
+                                HorizontalAlignment="Left"
+                                Fill="Green"
+                                RenderTransformOrigin="0.5,0.5">
+                                <Ellipse.RenderTransform>
+                                    <TranslateTransform X="0" />
+                                </Ellipse.RenderTransform>
+                            </Ellipse>
+
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="Thumb"
+                                                Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.X)"
+                                                To="30"
+                                                Duration="0:0:0.2" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="Thumb"
+                                                Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.X)"
+                                                To="0"
+                                                Duration="0:0:0.2" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60" />
+            <RowDefinition />
+            <RowDefinition Height="35" />
+        </Grid.RowDefinitions>
+        <!--  第一行 菜单  -->
+
+        <StackPanel Background="#FFD9E8FF" Orientation="Horizontal">
+            <Button
+                x:Name="btnMenu"
+                Background="#FF1677FF"
+                Click="btnMenu_Click"
+                Content="{DynamicResource 功能选项}"
+                Style="{StaticResource MenuStyleBtn}"
+                Tag="&#xe867;" />
+            <Border
+                Margin="10,20,5,20"
+                BorderBrush="White"
+                BorderThickness="2,0,0,0" />
+            <Button
+                Background="#FF1677FF"
+                Click="SerialSettingButton_Click"
+                Content="{DynamicResource 串口设置}"
+                Style="{StaticResource MenuStyleBtn}"
+                Tag="&#xe62c;" />
+            <Button
+                Background="#FF1677FF"
+                Command="{Binding OpenCom}"
+                Content="{DynamicResource 打开串口}"
+                Style="{StaticResource MenuStyleBtn}"
+                Tag="&#xec61;"
+                Visibility="{Binding ComIconOpen}" />
+            <Button
+                Background="#FFF75231"
+                Command="{Binding OpenCom}"
+                Content="{DynamicResource 关闭串口}"
+                Style="{StaticResource MenuStyleBtn}"
+                Tag="&#xe800;"
+                Visibility="{Binding ComIconClose}" />
+            <Border
+                Margin="10,20,5,20"
+                BorderBrush="White"
+                BorderThickness="2,0,0,0" />
+            <!--<Button
+        Background="#FF1677FF"
+        Command="{Binding SwitchViewToVQ}"
+        Content="{DynamicResource 命令测试}"
+        Style="{StaticResource MenuStyleBtn}"
+        Tag="&#xe602;" />
+    <Button
+        Background="#FF1677FF"
+        Content="{DynamicResource 更新下载}"
+        Style="{StaticResource MenuStyleBtn}"
+        Tag="&#xe616;" />
+    <Button
+        Background="#FF1677FF"
+        Click="OpenSettingsButton_Click"
+        Content="{DynamicResource 指令设置}"
+        Style="{StaticResource MenuStyleBtn}"
+        Tag="&#xe765;" />
+    <Button
+        Background="#FF81ED7B"
+        Content="{DynamicResource 开机}"
+        Style="{StaticResource MenuStyleBtn}"
+        Tag="&#xe601;" />
+    <Button
+        Background="#FFF75231"
+        Content="{DynamicResource 关机}"
+        Style="{StaticResource MenuStyleBtn}"
+        Tag="&#xe601;" />-->
+            <Button
+                Background="#FF1677FF"
+                Click="Log_Click"
+                Command="{Binding ChangeCommand}"
+                Content="{DynamicResource 日志}"
+                Style="{StaticResource MenuStyleBtn}"
+                Tag="&#xe8ac;" />
+            <Button
+                x:Name="EnglishBtn"
+                Background="#FF1677FF"
+                Click="ChangeLanguage"
+                Content="En-Language"
+                Style="{StaticResource MenuStyleBtn}"
+                Tag="&#xe617;" />
+            <Button
+                x:Name="ChineseBtn"
+                Background="#FF1677FF"
+                Click="ChangeLanguageToChinese"
+                Content="Ch-language"
+                Style="{StaticResource MenuStyleBtn}"
+                Tag="&#xe653;" />
+
+
+            <StackPanel
+                Margin="10,0"
+                VerticalAlignment="Center"
+                Cursor="Hand">
+                <ToggleButton
+                    Command="{Binding SwitchOpenReceiveCRC}"
+                    IsChecked="{Binding IsChecked}"
+                    Style="{StaticResource SwitchButton2}" />
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    FontSize="10"
+                    Text="抗干扰模式" />
+            </StackPanel>
+            <ComboBox
+                MaxHeight="30"
+                Margin="30,0"
+                ItemsSource="{Binding MachineItems}"
+                SelectedItem="{Binding SelectedMachineItem}"
+                Style="{StaticResource cmbstyle}">
+
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ComboBox>
+        </StackPanel>
+
+        <!--  下拉菜单弹出层  -->
+        <Popup
+            x:Name="myPopup"
+            Width="100"
+            AllowsTransparency="True"
+            Placement="Bottom"
+            PlacementTarget="{Binding ElementName=btnMenu}"
+            StaysOpen="False">
+            <!--  设置阴影  -->
+            <Border Padding="5" Background="Transparent">
+                <Border
+                    Height="50"
+                    Background="White"
+                    BorderBrush="#FFCCCCCC"
+                    BorderThickness="1"
+                    CornerRadius="7"
+                    Effect="{StaticResource DropShadow}">
+                    <StackPanel>
+                        <Button Command="{Binding SwitchViewToVQ}">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border
+                                                    x:Name="bord"
+                                                    Width="70"
+                                                    Height="25"
+                                                    Margin="0,5,0,0"
+                                                    BorderBrush="Black"
+                                                    BorderThickness="1"
+                                                    CornerRadius="5">
+                                                    <TextBlock
+                                                        x:Name="text"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        Foreground="Black"
+                                                        Text="示波器"
+                                                        TextAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="bord" Property="Background" Value="#FF9479FA" />
+                                                        <Setter Property="Cursor" Value="Hand" />
+                                                        <Setter TargetName="text" Property="Foreground" Value="#FFFFFFFF" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Border>
+        </Popup>
+        <!--  第二行 内容  -->
+        <ContentControl
+            Grid.Row="1"
+            Margin="3,3"
+            Content="{Binding ContentUC}" />
+        <!--  第三行 底部  -->
+        <Grid Grid.Row="2" Background="#FFD9E8FF">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.5*" />
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal">
+                <Border
+                    Width="20"
+                    Height="20"
+                    Margin="5,0"
+                    Background="{Binding ComStatus}"
+                    CornerRadius="10" />
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Text="{DynamicResource 串口状态}" />
+                <TextBlock
+                    Margin="5,0,0,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Foreground="{Binding ComStatus}"
+                    Text="{Binding Status}"
+                    ToolTip="{Binding Status}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Text="{DynamicResource 发送帧}" />
+                <TextBlock
+                    Margin="7,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Foreground="Red"
+                    Text="{Binding SerialCountVM.SendFrame}" />
+                <TextBlock
+                    Margin="50,0,0,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Text="{DynamicResource 接收帧}" />
+                <TextBlock
+                    Margin="7,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Foreground="Red"
+                    Text="{Binding SerialCountVM.ReceiveFrame}" />
+                <TextBlock
+                    Margin="50,0,0,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Text="{DynamicResource 计数清零}" />
+                <TextBlock
+                    Margin="7,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Foreground="Red"
+                    Text="{Binding SerialCountVM.SetZero}" />
+            </StackPanel>
+            <StackPanel
+                Grid.Column="2"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Orientation="Horizontal">
+
+                <TextBlock Margin="8,0,20,0" Text="{Binding Clock.CurrentTime}" />
+            </StackPanel>
+        </Grid>
+        <!--  日志显示  -->
+        <Border
+            Name="Log"
+            Grid.Row="1"
+            Background="#11000000"
+            Visibility="Collapsed">
+            <Border
+                x:Name="logContent"
+                VerticalAlignment="Bottom"
+                Background="#f5f7f9fa"
+                BorderBrush="Gray"
+                BorderThickness="0,5,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="350" />
+
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ListBox
+                        lo:ScrollBehavior.AdjustScrollOnAdd="{Binding IsScrollingEnabled}"
+                        ItemsSource="{Binding LogMessages}"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                    <StackPanel Grid.Column="1">
+                        <Button
+                            Margin="5"
+                            Command="{Binding ClearLogCommand}"
+                            Content="清空日志" />
+                        <ToggleButton
+                            Margin="5"
+                            IsChecked="{Binding IsScrollingEnabled}"
+                            Style="{StaticResource ToggleSwitchStyle}" />
+                        <Button
+                            Margin="5"
+                            Command="{Binding SaveLogCommand}"
+                            Content="保存日志" />
+                        <Button
+                            Margin="5"
+                            Command="{Binding AddLogCommand}"
+                            Content="添加数据" />
+                        <ToggleButton IsChecked="{Binding IsScrollingEnabled}" Style="{StaticResource SwitchButton}" />
+
+                    </StackPanel>
+                    <Button
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Width="80"
+                        Height="30"
+                        Margin="5"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Background="Red"
+                        Click="Log_Close_Click"
+                        Content="关闭"
+                        Style="{StaticResource BtnStyle}"
+                        Tag="&#xe62f;" />
+
+                </Grid>
+
+
+            </Border>
+        </Border>
+
+    </Grid>
+</Window>
