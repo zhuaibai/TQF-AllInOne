@@ -233,24 +233,25 @@ namespace WpfApp1.Services
         /// <returns></returns>
         public static string SendCommand(string command ,int returnCount)
         {
-            _semaphore.Wait();
            
-            SerialPort.WriteTimeout = 1000;
-            //写命令
-            byte[] Command = Encoding.ASCII.GetBytes(command);
-            //接收帧数
-            //int totalBytesRead =0;
-            //判断是否需要接收校验CRC
-            if(Receive_CRC_Check)
-            {
-                //添加两个校验字节
-                returnCount += 2;
-            }
-            //在写命令之前先清空一下接受缓存
-            SerialPort.DiscardInBuffer();
             //收报文
             try
             {
+                _semaphore.Wait();
+
+                SerialPort.WriteTimeout = 1000;
+                //写命令
+                byte[] Command = Encoding.ASCII.GetBytes(command);
+                //接收帧数
+                //int totalBytesRead =0;
+                //判断是否需要接收校验CRC
+                if (Receive_CRC_Check)
+                {
+                    //添加两个校验字节
+                    returnCount += 2;
+                }
+                //在写命令之前先清空一下接受缓存
+                SerialPort.DiscardInBuffer();
                 SerialPort.Write(Command, 0, Command.Length);
                 //增加延时100ms
                 Thread.Sleep(100);

@@ -191,7 +191,7 @@ namespace WpfApp1.ViewModels
             string tag = str.Substring(0, 1);
             if (tag == "-")
             {
-                return 0;
+                str = str.Substring(1);
             }
             else if (tag == "+")
             {
@@ -238,7 +238,7 @@ namespace WpfApp1.ViewModels
         {
             int newFront = StringToIntConversion(front);
             int newAfter = StringToIntConversion(after);
-            if (newAfter == 0 || newAfter == 0)
+            if (newAfter <= 0 || newAfter <= 0)
             {
                 return 0;
             }
