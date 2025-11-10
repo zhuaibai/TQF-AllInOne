@@ -151,10 +151,6 @@ namespace WpfApp1.Command.Comand_GB3024
         #endregion
 
 
-
-
-
-
         /// <summary>
         /// 对字符串进行解析
         /// </summary>
@@ -190,6 +186,7 @@ namespace WpfApp1.Command.Comand_GB3024
                     return false;
             }
         }
+
         /// <summary>
         /// 对属性值进行二次转换，换成命令指令符号
         /// </summary>

@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml.Serialization;
 using WpfApp1.Command;
+using WpfApp1.Command.BMS;
 using WpfApp1.Command.Comand_GB3024;
 using WpfApp1.Command.Command_CYJ;
 using WpfApp1.Command.Command_LB6;
@@ -14,6 +15,7 @@ using WpfApp1.Command.Command_PDF302;
 using WpfApp1.Command.Command_PDF3024;
 using WpfApp1.Command.Command_VQ3024;
 using WpfApp1.Command.GB_General;
+using WpfApp1.Convert;
 using WpfApp1.CustomMessageBox;
 using WpfApp1.CustomMessageBox.Service;
 using WpfApp1.Models;
@@ -51,6 +53,8 @@ namespace WpfApp1.ViewModels
             SerialCommunicationService.AddReceiveFrame = SerialCountVM.AddReceiveFrame;
             SerialCommunicationService.AddSendFrame = SerialCountVM.AddSendFrame;
 
+            //BMS
+            BMS_Command_Setting = new SendingCommandSettingsViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
 
             //初始化  GB   ViewModel
             HOP = new HOPViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
@@ -63,7 +67,7 @@ namespace WpfApp1.ViewModels
             SpecialCommand = new Special_Command(_pauseEvent, _semaphore, AddLog, UpdateState);
             HPVB_GB = new HPVB_GB_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             HSTS2_HPVINV08 = new HSTS2_HPVINV08_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            
+
             //初始化  VQ   ViewModel
             HOP_VQ = new HOP_VQ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             HBMS1_VQ = new HBMS1_VQ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
@@ -90,12 +94,50 @@ namespace WpfApp1.ViewModels
             HSTS_CYJ = new HSTS_CYJ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             //初始化实时时间ViewModel
             Clock = new ClockViewModel();
+
+            //初始化BMS上位机界面
+
             #endregion
 
             //消息框初始化
             _messageService = messageService;
             ShowMessageCommand = new RelayCommand(OnShowMessage);
+            BMS02 = new BMS_UserControl();
         }
+
+        #region BMS
+
+        //bmsViewModel
+        private ModbusAddr _BMS_VM = new ModbusAddr();
+
+        public ModbusAddr BMS_VM
+        {
+            get { return _BMS_VM; }
+            set
+            {
+                _BMS_VM = value;
+                this.RaiseProperChanged(nameof(BMS_VM));
+            }
+        }
+
+        //130-220数据项的读取、写入与显示
+        private SendingCommandSettingsViewModel BMS_Command_Setting;
+
+        public SendingCommandSettingsViewModel BMS_Setting
+        {
+            get { return BMS_Command_Setting; }
+            set
+            {
+                BMS_Command_Setting = value;
+                this.RaiseProperChanged(nameof(BMS_Setting));
+            }
+        }
+
+
+
+
+
+        #endregion
 
         #region 图标百分比
 
@@ -294,7 +336,7 @@ namespace WpfApp1.ViewModels
                 Task.Run(new Action(() => SpecialCommand.AntiJamModeOperation(true)));
             }
             else
-            {  
+            {
                 //发送HOSTCRCDN
                 Task.Run(new Action(() => SpecialCommand.AntiJamModeOperation(false)));
                 SerialCommunicationService.OpenReceiveCRC(false);
@@ -318,6 +360,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
+        public BMS_UserControl BMS02 { get; set; }
         public ObservableCollection<string> MachineItems { get; } = new(){
         "HPVINV02",
         "HPVINV04",
@@ -326,7 +369,8 @@ namespace WpfApp1.ViewModels
         "HPVINV08",
         "LPVINV02",
         "UPSCYX01",
-        "LB6"
+        "LB6",
+        "BMS02"
          };
 
         //切换指令
@@ -390,6 +434,10 @@ namespace WpfApp1.ViewModels
                     ContentUC = new LB6_MonitorUC();
                     SelectedMachineItem = "LB6";
                     break;
+                case "BMS02":
+                    ContentUC = BMS02;
+                    SelectedMachineItem = "BMS02";
+                    break;
             }
 
         }
@@ -400,7 +448,7 @@ namespace WpfApp1.ViewModels
         private bool AutoSelectedMachineType(out string machine)
         {
             string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
-            if (receive_MachineType.Length>=2 && receive_MachineType.StartsWith("-1"))
+            if (receive_MachineType.Length >= 2 && receive_MachineType.StartsWith("-1"))
             {
                 //判断抗干扰是否打开
                 if (IsChecked)
@@ -492,13 +540,25 @@ namespace WpfApp1.ViewModels
                     //返回机器类型
                     machine = receive_MachineType;
                     return true;
-                }else if((receive_MachineType.Substring(0, 9) == "LB6"))
+                }
+                else if ((receive_MachineType.Substring(0, 9) == "LB6"))
                 {
                     SwitchViewToVQorGB("LB6");
                     //默认设置抗干扰模式
                     IsChecked = true;
                     OnceOpenCRC = true;
                     SerialCommunicationService.OpenReceiveCRC(true);
+                    //返回机器类型
+                    machine = receive_MachineType;
+                    return true;
+                }
+                else if ((receive_MachineType.Substring(0, 9) == "(BMS00002"))
+                {
+                    SwitchViewToVQorGB("BMS02");
+                    //默认设置抗干扰模式
+                    //IsChecked = true;
+                    //OnceOpenCRC = true;
+                    //SerialCommunicationService.OpenReceiveCRC(true);
                     //返回机器类型
                     machine = receive_MachineType;
                     return true;
@@ -1050,7 +1110,8 @@ namespace WpfApp1.ViewModels
                     //停止后台通信(如果有)
                     StopBackgroundThread();
                     // 等待通讯线程结束
-                    var WaitFinish = Task.Run(() => {
+                    var WaitFinish = Task.Run(() =>
+                    {
                         while (IsRunning)
                         {
                             // 可以添加短暂延迟避免CPU占用过高
@@ -1088,7 +1149,7 @@ namespace WpfApp1.ViewModels
                     MessageBox.Show("串口打开失败！");
                     return;
                 };
-                ChangeComIcon(true);            
+                ChangeComIcon(true);
                 comStateColor(true);
                 AddLog($"打开串口{SerialCommunicationService.getComName()}成功");
 
@@ -1102,8 +1163,8 @@ namespace WpfApp1.ViewModels
                     MessageBoxResult result = MessageBox.Show($"无法识别机器机器类型:{machine}", "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                     //if (result != MessageBoxResult.OK)
                     //{
-                        //关闭串口
-                        openCom();
+                    //关闭串口
+                    openCom();
                     ChangeComIcon(false);
                     comStateColor(false);
                     AddLog($"关闭串口{SerialCommunicationService.getComName()}成功");
@@ -1434,7 +1495,7 @@ namespace WpfApp1.ViewModels
                 _pauseEvent.Set();
                 UpdateState(App.GetText("正在通信"));
                 comStateColor(true);
-                Task.Run(()=>( BackgroundWorker(_cts.Token),_cts.Token));
+                Task.Run(() => (BackgroundWorker(_cts.Token), _cts.Token));
                 AddLog("后台通信线程已启动");
             }
 
@@ -1446,82 +1507,98 @@ namespace WpfApp1.ViewModels
         /// </summary>
         private async Task BackgroundWorker(CancellationToken token)
         {
-            
-                try
+            int flag = 0;//初始设置值
+
+            try
+            {
+                //COM通讯
+                while (!token.IsCancellationRequested)
                 {
-                    //COM通讯
-                    while (!token.IsCancellationRequested)
+                    if (SelectedMachineItem == "HPVINV02")
                     {
-                        if (SelectedMachineItem == "HPVINV02")
-                        {
-                            //GB3024通讯
-                            CommunicationWithGB3024(token);
-                        }
-                        else if (SelectedMachineItem == "LPVINV02")
-                        {
-                            //VQ3024通讯
-                            CommunicationWithVQ3024(token);
-                        }
-                        else if (SelectedMachineItem == "HPVINV07")
-                        {
-
-                            //PTF通讯
-                            CommunicationWithPTF3024(token);
-                        }
-                        else if (SelectedMachineItem == "HPVINV04")
-                        {
-                            //GB6042通讯
-                            CommunicationWithGB6042(token);
-
-                        }
-                        else if (SelectedMachineItem == "HPVINV06")
-                        {
-                            //GB6042通讯
-                            CommunicationWithGB_HPVINV06(token);
-
-                        }
-                        else if (SelectedMachineItem == "HPVINV08")
-                        {
-                            //HPVINV08通讯
-                            CommunicationWithGB_HPVINV08(token);
-
-                        }
-                        else if (SelectedMachineItem == "UPSCYX01")
-                        {
-                            //CYJ通讯
-                            CommunicationWith_CYJ(token);
-                        }
-                        else if (SelectedMachineItem == "LB6")
-                        {
-                            CommunicationWith_LB6(token);
-                        }
-                        // 模拟常规通信
-                        await Task.Delay(1000, token);
-                        //AddLog($"[后台] 常规通信: {DateTime.Now:HH:mm:ss.fff}");
+                        //GB3024通讯
+                        CommunicationWithGB3024(token);
                     }
+                    else if (SelectedMachineItem == "LPVINV02")
+                    {
+                        //VQ3024通讯
+                        CommunicationWithVQ3024(token);
+                    }
+                    else if (SelectedMachineItem == "HPVINV07")
+                    {
+
+                        //PTF通讯
+                        CommunicationWithPTF3024(token);
+                    }
+                    else if (SelectedMachineItem == "HPVINV04")
+                    {
+                        //GB6042通讯
+                        CommunicationWithGB6042(token);
+
+                    }
+                    else if (SelectedMachineItem == "HPVINV06")
+                    {
+                        //GB6042通讯
+                        CommunicationWithGB_HPVINV06(token);
+
+                    }
+                    else if (SelectedMachineItem == "HPVINV08")
+                    {
+                        //HPVINV08通讯
+                        CommunicationWithGB_HPVINV08(token);
+
+                    }
+                    else if (SelectedMachineItem == "UPSCYX01")
+                    {
+                        //CYJ通讯
+                        CommunicationWith_CYJ(token);
+                    }
+                    else if (SelectedMachineItem == "LB6")
+                    {
+                        CommunicationWith_LB6(token);
+                    }
+                    else if (SelectedMachineItem == "BMS02")
+                    {
+                        if (flag == 0)
+                        {
+                            //发送03功能码(查是91个设置项的电压)
+                            Thread.Sleep(200);
+                            byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 130, 95), 195);
+                            ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
+                            //初始化设置值
+                            ModbusRTU.FirstSetReceive(BMS_Setting.SendingCommands);
+                            flag = 1;
+                        }
+                        //BMS通讯
+                        CommunicationWithBMS(token);
+                    }
+                    // 模拟常规通信
+                    await Task.Delay(1000, token);
+                    //AddLog($"[后台] 常规通信: {DateTime.Now:HH:mm:ss.fff}");
                 }
-                catch (OperationCanceledException)
-                {
-                    AddLog("后台通信已终止");
-                    UpdateState(App.GetText("已停止通信!"));
-                    IsRunning = false;
-                }
-                catch (Exception ex)
-                {
-                    string mes = ex.ToString();
-                    AddLog($"后台通信异常{mes}");
-                    UpdateState(App.GetText("异常!"));
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("后台通信已终止");
+                UpdateState(App.GetText("已停止通信!"));
+                IsRunning = false;
+            }
+            catch (Exception ex)
+            {
+                string mes = ex.ToString();
+                AddLog($"后台通信异常{mes}");
+                UpdateState(App.GetText("异常!"));
                 //关闭串口
-                    
+
                 SerialCommunicationService.CloseCom();
 
-                }
-                finally
-                {
-                    IsRunning = false;
-                    ChangeComIcon(false);
-                    comStateColor(false);
-                }
+            }
+            finally
+            {
+                IsRunning = false;
+                ChangeComIcon(false);
+                comStateColor(false);
+            }
         }
 
         #endregion
@@ -1617,7 +1694,7 @@ namespace WpfApp1.ViewModels
             ShowError(receive, "HBAT");
 
             Thread.Sleep(100);
-            _pauseEvent.Wait(token); 
+            _pauseEvent.Wait(token);
             //发送HEEP1指令
             receive = SerialCommunicationService.SendCommand(HEEP1_PDF.Command, 80);
             //解析返回指令
@@ -1625,7 +1702,7 @@ namespace WpfApp1.ViewModels
             ShowError(receive, "HEEP1");
 
             Thread.Sleep(100);
-            _pauseEvent.Wait(token); 
+            _pauseEvent.Wait(token);
             //发送HEEP2指令
             receive = SerialCommunicationService.SendCommand(HEEP2.Command, 80);
             //解析返回指令
@@ -1692,12 +1769,12 @@ namespace WpfApp1.ViewModels
             {
                 AddLog($"{name}返回超时");
             }
-            else if (value.Length>=2&&value.StartsWith("-1"))
+            else if (value.Length >= 2 && value.StartsWith("-1"))
             {
                 AddLog($"{name}CRC异常:{value}");
             }
-           
-            
+
+
         }
         /// <summary>
         /// GB3024通讯
@@ -1705,7 +1782,7 @@ namespace WpfApp1.ViewModels
         /// <param name="token"></param>
         private void CommunicationWithGB3024(CancellationToken token)
         {
-            
+
 
             string receive = string.Empty;
 
@@ -2127,8 +2204,8 @@ namespace WpfApp1.ViewModels
             receive = SerialCommunicationService.SendCommand(HEEP3_PDF.Command, 80);
             HEEP3_PDF.AnalysisStringToElement(receive);
 
-            
-            
+
+
             //发送HOP指令
             Thread.Sleep(100);
             // 等待暂停或取消信号
@@ -2452,6 +2529,10 @@ namespace WpfApp1.ViewModels
 
         }
 
+        /// <summary>
+        /// LB6通讯
+        /// </summary>
+        /// <param name="token"></param>
         private void CommunicationWith_LB6(CancellationToken token)
         {
             string receive = string.Empty;
@@ -2539,6 +2620,74 @@ namespace WpfApp1.ViewModels
 
         }
 
+
+        /// <summary>
+        /// BMS通讯
+        /// </summary>
+        /// <param name="token"></param>
+        private void CommunicationWithBMS(CancellationToken token)
+        {
+            byte[] receive;
+            short[] data;
+            Thread.Sleep(200);
+            // 等待暂停或取消信号
+            _pauseEvent.Wait(token);
+            //发送查询机器指令
+            string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
+            MachineType = receive_MachineType.Substring(1, 8);
+            //解析指令
+            SerialCommunicationService.MachineType = receive_MachineType;
+
+            //发送03功能码(查是16个电芯的电压)
+            Thread.Sleep(200);
+            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 2, 16), 37);
+            //解析返回的报文
+            BMS_VM.MOD_CELL1_VOL_1_16(ModbusRTU.ParseRead03Response(receive));
+
+            //发送03功能码(查是91个设置项的电压)
+            Thread.Sleep(200);
+            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 130, 95), 195);
+            ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
+
+            //查五个状态码(83)
+            Thread.Sleep(200);
+            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 80, 5), 15);
+            data = ModbusRTU.ParseRead03Response(receive);
+            BMS_VM.MOD_INST_STATE_Set(ModbusRTU.GetBits(data[3]));
+
+            //查告警(80)、保护(81)、硬件错误(82)信息
+            BMS_VM.MOD_WARN_STATE_Set(ModbusRTU.GetBits(data[0]));
+            BMS_VM.MOD_PROT_STATE_Set(ModbusRTU.GetBits(data[1]));
+            BMS_VM.MOD_ERROR_STATE_Set(ModbusRTU.GetBits(data[2]));
+
+            //查电压  //查当前电流 //查温度
+            Thread.Sleep(200);
+            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 21, 15), 35);
+            data = ModbusRTU.ParseRead03Response(receive);
+            BMS_VM.OverViewSet(data);
+
+            //查系统信息
+            Thread.Sleep(200);
+            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 283, 14), 33);
+            data = ModbusRTU.ParseRead03Response(receive);
+            BMS_VM.SystemInfoSet(data);
+
+            //AFE_Protect
+            Thread.Sleep(200);
+            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 86, 1), 7);
+            BMS_VM.AFE_Protect = ModbusRTU.GetBits(ModbusRTU.ParseRead03Response(receive)[0]);
+
+            //查前端芯片
+            Thread.Sleep(200);
+            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 320, 36), 77);
+            BMS_Setting.SetFrontMonitor(ModbusRTU.ParseRead03Response(receive));
+
+            //读写入的参数设置值
+            Thread.Sleep(200);
+            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 252, 4), 13);
+            BMS_Setting.setSystem(ModbusRTU.ParseRead03Response(receive));
+        }
+
         /// <summary>
         /// 停止后台通信
         /// </summary>
@@ -2553,11 +2702,28 @@ namespace WpfApp1.ViewModels
 
         private readonly IMessageDialogService _messageService;
 
+        private Visibility showAdmin = Visibility.Hidden;
+
+        public Visibility ShowAdmin
+        {
+            get { return showAdmin; }
+            set
+            {
+                showAdmin = value;
+                this.RaiseProperChanged(nameof(ShowAdmin));
+            }
+        }
+
+
         public ICommand ShowMessageCommand { get; }
 
         private void OnShowMessage()
         {
-           
+            string Password = MShowTestMessage("请输入管理员密码", "前端芯片监控", "密码错误");
+            if(Password == "Tqf147258")
+            {
+                ShowAdmin = Visibility.Visible;
+            }
         }
 
         /// <summary>
@@ -2657,7 +2823,6 @@ namespace WpfApp1.ViewModels
                 title,
                 InputType.Password,
                 "管理员密码",
-
                 validator: input => input == "Tqf147258",
                 validationMessage: error,
                 fontSize: 50);
@@ -2671,7 +2836,6 @@ namespace WpfApp1.ViewModels
                 title,
                 InputType.Password,
                 "管理员密码",
-
                 validator: input => input == "Tqf147258",
                 validationMessage: error,
                 fontSize: 50);

@@ -258,7 +258,8 @@
                         Grid.Row="3"
                         Grid.Column="2"
                         Style="{StaticResource ContentText}"
-                        Text="W" />
+                        Text="VA
+" />
                     <!--  有功功率  -->
                     <TextBlock
                         Grid.Row="4"

@@ -158,7 +158,7 @@
             <Button
                 Background="#FF1677FF"
                 Click="Log_Click"
-                Command="{Binding ChangeCommand}"
+                
                 Content="{DynamicResource 日志}"
                 Style="{StaticResource MenuStyleBtn}"
                 Tag="&#xe8ac;" />
@@ -224,7 +224,7 @@
                     CornerRadius="7"
                     Effect="{StaticResource DropShadow}">
                     <StackPanel>
-                        <Button Command="{Binding SwitchViewToVQ}">
+                        <Button >
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="Template">

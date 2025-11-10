@@ -36,8 +36,8 @@ namespace WpfApp1.Models
         /// <summary>
         /// 返回字节
         /// </summary>
-        private int _returnCount;
-        public int ReturnCount
+        private string _returnCount;
+        public string ReturnCount
         {
             get { return _returnCount; }
             set
@@ -68,10 +68,10 @@ namespace WpfApp1.Models
         }
 
         /// <summary>
-        /// 是否启用
+        /// 多少字节表示
         /// </summary>
-        private bool _enable;
-        public bool Enable
+        private string _enable;
+        public string Enable
         {
             get { return _enable; }
             set

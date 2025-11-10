@@ -135,13 +135,13 @@ namespace WpfApp1.Command.Comand_GB3024
             Command_SetBattVoltInc = new RelayCommand(
                 execute: () => BattVoltIncOperation(),
                 canExecute: () =>
-                !BattDisCurrLimit_IsWorking  // 增加处理状态检查
+                !BattVoltInc_IsWorking  // 增加处理状态检查
              );
             //电池电压-
             Command_SetBattVoltDec = new RelayCommand(
                 execute: () => BattVoltDecOperation(),
                 canExecute: () =>
-                !BattDisCurrLimit_IsWorking  // 增加处理状态检查
+                !BattVoltDec_IsWorking  // 增加处理状态检查
              );
             //
             ////抗干扰开关

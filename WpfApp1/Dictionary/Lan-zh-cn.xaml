@@ -94,9 +94,9 @@
     <s:String x:Key="发布日期">发布日期</s:String>
     <s:String x:Key="程序完整性">程序完整性</s:String>
     <s:String x:Key="输出频率">输出频率</s:String>
-    <s:String x:Key="视在功率">视在功率(VA)</s:String>
-    <s:String x:Key="有功功率">有功功率(VA)</s:String>
-    <s:String x:Key="负载百分比">负载百分比(%)</s:String>
+    <s:String x:Key="视在功率">视在功率</s:String>
+    <s:String x:Key="有功功率">有功功率</s:String>
+    <s:String x:Key="负载百分比">负载百分比</s:String>
     <s:String x:Key="直流分量">直流分量</s:String>
     <s:String x:Key="额定功率">额定功率</s:String>
     <s:String x:Key="电感电流">电感电流</s:String>
@@ -232,6 +232,120 @@
     <s:String x:Key="正常">正常</s:String>
     <s:String x:Key="异常">异常</s:String>
     <s:String x:Key="模式选择">模式选择</s:String>
+    <s:String x:Key="电池电压1">电池电压1</s:String>
+    <s:String x:Key="电池电压2">电池电压2</s:String>
+    <s:String x:Key="电池电压3">电池电压3</s:String>
+    <s:String x:Key="电池电压4">电池电压4</s:String>
+    <s:String x:Key="电池电压5">电池电压5</s:String>
+    <s:String x:Key="电池电压6">电池电压6</s:String>
+    <s:String x:Key="电池电压7">电池电压7</s:String>
+    <s:String x:Key="电池电压8">电池电压8</s:String>
+    <s:String x:Key="电池电压9">电池电压9</s:String>
+    <s:String x:Key="电池电压10">电池电压10</s:String>
+    <s:String x:Key="电池电压11">电池电压11</s:String>
+    <s:String x:Key="电池电压12">电池电压12</s:String>
+    <s:String x:Key="电池电压13">电池电压13</s:String>
+    <s:String x:Key="电池电压14">电池电压14</s:String>
+    <s:String x:Key="电池电压15">电池电压15</s:String>
+    <s:String x:Key="电池电压16">电池电压16</s:String>
+    <s:String x:Key="充电MOS">充电MOS</s:String>
+    <s:String x:Key="放电MOS">放电MOS</s:String>
+    <s:String x:Key="负载连接">负载连接</s:String>
+    <s:String x:Key="充电">充电</s:String>
+    <s:String x:Key="放电">放电</s:String>
+    <s:String x:Key="总览">总览</s:String>
+    <s:String x:Key="电流">电流</s:String>
+    <s:String x:Key="SOC">SOC</s:String>
+    <s:String x:Key="SOH">SOH</s:String>
+    <s:String x:Key="总压">总压</s:String>
+    <s:String x:Key="剩余容量">剩余容量</s:String>
+    <s:String x:Key="满充容量">满充容量</s:String>
+    <s:String x:Key="循环次数">循环次数</s:String>
+    <s:String x:Key="告警">告警</s:String>
+    <s:String x:Key="保护">保护</s:String>
+    <s:String x:Key="硬件错误">硬件错误</s:String>
+    <s:String x:Key="信息">信息</s:String>
+    <s:String x:Key="导入">导入</s:String>
+    <s:String x:Key="导出">导出</s:String>
+    <s:String x:Key="保存">保存</s:String>
+    <s:String x:Key="写入">写入</s:String>
+    <s:String x:Key="系统设置">系统设置</s:String>
+    <s:String x:Key="软件版本号">软件版本号</s:String>
+    <s:String x:Key="硬件版本号">硬件版本号</s:String>
+    <s:String x:Key="Pack序列号">Pack序列号</s:String>
+    <s:String x:Key="出厂日期">出厂日期</s:String>
+    <s:String x:Key="厂商">厂商</s:String>
+    <s:String x:Key="设备型号">设备型号</s:String>
+    <s:String x:Key="电芯型号">电芯型号</s:String>
+    <s:String x:Key="充电校准系数">充电校准系数</s:String>
+    <s:String x:Key="放电校准系数">放电校准系数</s:String>
+    <s:String x:Key="零点校准系数">零点校准系数</s:String>
+    <s:String x:Key="设计容量">设计容量</s:String>
+    <s:String x:Key="重置用户参数">重置用户参数</s:String>
+    <s:String x:Key="重置系统参数">重置系统参数</s:String>
+    <s:String x:Key="清除历史记录">清除历史记录</s:String>
+    <s:String x:Key="零点电流">零点电流</s:String>
+    <s:String x:Key="充电电流">充电电流</s:String>
+    <s:String x:Key="放电电流">放电电流</s:String>
+    <s:String x:Key="温度">温度</s:String>
+    <s:String x:Key="电池包温度">电池包温度</s:String>
+    <s:String x:Key="MOS温度">MOS温度</s:String>
+    <s:String x:Key="电芯温度1">电芯温度1</s:String>
+    <s:String x:Key="电芯温度2">电芯温度2</s:String>
+    <s:String x:Key="电芯温度3">电芯温度3</s:String>
+    <s:String x:Key="电芯温度4">电芯温度4</s:String>
+    <s:String x:Key="历史低电">历史低电</s:String>
+    <s:String x:Key="充电器连接">充电器连接</s:String>
+    <s:String x:Key="容量学习">容量学习</s:String>
+    <s:String x:Key="短路保护">短路保护</s:String>
+    <s:String x:Key="放电过流保护">放电过流保护</s:String>
+    <s:String x:Key="充电过流保护">充电过流保护</s:String>
+    <s:String x:Key="AFE过充保护">AFE过充保护</s:String>
+    <s:String x:Key="AFE过放保护">AFE过放保护</s:String>
+    <s:String x:Key="前端芯片告警下拉">前端芯片告警下拉</s:String>
+    <s:String x:Key="前端芯片触发保护">前端芯片触发保护</s:String>
+    <s:String x:Key="前端芯片中断">前端芯片中断</s:String>
+    <s:String x:Key="历史记录">历史记录</s:String>
+    <s:String x:Key="时间">时间</s:String>
+    <s:String x:Key="单体电芯电压">单体电芯电压(mV)</s:String>
+    <s:String x:Key="单体最高电压">单体最高电压(mV)</s:String>
+    <s:String x:Key="单体最低电压">单体最低电压(mV)</s:String>
+    <s:String x:Key="电芯压差">电芯压差</s:String>
+    <s:String x:Key="电流(mA)">电流(mA)</s:String>
+    <s:String x:Key="电池包总电压">电池包总电压(mV)</s:String>  
+    <s:String x:Key="MOSFET温度">MOSFET温度(℃)</s:String>
+    <s:String x:Key="累计充电容量">累计充电容量(mAh)</s:String>
+    <s:String x:Key="NTC温度传感器值">NTC温度传感器值(℃)</s:String>
+    <s:String x:Key="当前电量SOC">当前电量SOC(%)</s:String>
+    <s:String x:Key="电池健康SOH">电池健康SOH(%)</s:String>
+    <s:String x:Key="剩余容量(mAh)">剩余容量(mAh)</s:String>
+    <s:String x:Key="满充容量(mAh)">满充容量(mAh)</s:String>
+    <s:String x:Key="BMS告警">BMS告警</s:String>
+    <s:String x:Key="BMS保护">BMS保护</s:String>
+    <s:String x:Key="BMS错误">BMS错误</s:String>
+    <s:String x:Key="BMS状态">BMS状态</s:String>
+    <s:String x:Key="保护次数">保护次数</s:String>
+    <s:String x:Key="前端芯片保护状态">前端芯片保护状态</s:String>
+    <s:String x:Key="单体过压触发次数">单体过压触发次数</s:String>
+    <s:String x:Key="单体欠压触发次数">单体欠压触发次数</s:String>
+    <s:String x:Key="总体过压触发次数">总体过压触发次数</s:String>
+    <s:String x:Key="总体欠压触发次数">总体欠压触发次数</s:String>
+    <s:String x:Key="充电过流触发次数">充电过流触发次数</s:String>
+    <s:String x:Key="放电过流触发次数">放电过流触发次数</s:String>
+    <s:String x:Key="放电短路触发次数">放电短路触发次数</s:String>
+    <s:String x:Key="充电高温触发次数">充电高温触发次数</s:String>
+    <s:String x:Key="充电低温触发次数">充电低温触发次数</s:String>
+    <s:String x:Key="放电低温触发次数">放电低温触发次数</s:String>
+    <s:String x:Key="放电高温触发次数">放电高温触发次数</s:String>
+    <s:String x:Key="满充保护次数">满充保护次数</s:String>
+    
+
+
+
+
+
+
+
 
 
 

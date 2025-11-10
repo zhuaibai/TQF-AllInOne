@@ -16,6 +16,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Dictionary\%40#￥%25%250.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Resource\Fonts\iconfont.ttf" />
   </ItemGroup>
 

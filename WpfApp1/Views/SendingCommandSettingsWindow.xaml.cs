@@ -23,7 +23,7 @@ namespace WpfApp1.Views
         public SendingCommandSettingsWindow()
         {
             InitializeComponent();
-            this.DataContext = new SendingCommandSettingsViewModel();
+            //this.DataContext = new SendingCommandSettingsViewModel();
         }
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {

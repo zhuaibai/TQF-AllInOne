@@ -410,6 +410,144 @@ namespace WpfApp1.Services
         }
 
         /// <summary>
+        /// 发送指令
+        /// </summary>
+        /// <param name="command">字节数据帧</param>
+        /// <param name="returnCount">返回字节数</param>
+        /// <returns></returns>
+        public static byte[] SendCommandToBMS(byte[] command,int returnCount)
+        {
+
+            byte[] receive_timeOut = new byte[] { 0xff };
+
+            //收报文
+            try
+            {
+                _semaphore.Wait();
+
+                SerialPort.WriteTimeout = 1000;
+                //写命令
+                byte[] Command =command;
+                
+                //在写命令之前先清空一下接受缓存
+                SerialPort.DiscardInBuffer();
+                SerialPort.Write(Command, 0, Command.Length);
+                //增加延时100ms
+                Thread.Sleep(100);
+                //添加发送帧数
+                AddSendFrame(Command.Length);
+
+                // 需要读取的字节数
+                int bytesToRead = returnCount;
+
+                // 设置读取超时时间
+                SerialPort.ReadTimeout = 1000;
+
+                // 使用动态缓冲区收集数据
+                var receivedData = new List<byte>();
+                int totalBytesRead = 0;
+                bool dataReceived = false;
+
+                // 第一阶段：读取所需的最小字节数
+                try
+                {
+                    while (totalBytesRead < returnCount)
+                    {
+                        byte[] tempBuffer = new byte[returnCount - totalBytesRead];
+                        int bytesRead = SerialPort.Read(tempBuffer, 0, tempBuffer.Length);
+
+                        if (bytesRead > 0)
+                        {
+                            receivedData.AddRange(tempBuffer.Take(bytesRead));
+                            totalBytesRead += bytesRead;
+                            dataReceived = true;
+                        }
+                    }
+                }
+                catch (TimeoutException)
+                {
+                    if (!dataReceived)
+                    {
+                        // 完全未收到任何数据
+                        //throw new TimeoutException("No data received within timeout period");
+                        return receive_timeOut;
+                    }
+                    // 部分数据已收到，继续处理
+                }
+
+                // 第二阶段：读取剩余所有可用字节
+                try
+                {
+                    while (true)
+                    {
+                        byte[] extraBuffer = new byte[SerialPort.BytesToRead];
+                        int bytesRead = SerialPort.Read(extraBuffer, 0, extraBuffer.Length);
+
+                        if (bytesRead > 0)
+                        {
+                            receivedData.AddRange(extraBuffer.Take(bytesRead));
+                            totalBytesRead += bytesRead;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // 处理其他可能的异常
+                    Debug.WriteLine($"Error reading extra bytes: {ex.Message}");
+                }
+
+                // 最终结果
+                byte[] buffer = receivedData.ToArray();
+
+                //增加接收返回帧数
+                AddReceiveFrame(totalBytesRead);
+
+                //判断是否空返回
+                if (buffer.Length == 0)
+                {
+                    return buffer;
+                }
+
+                //对返回字节进行CRC校验
+                if (Receive_CRC_Check)
+                {
+                    byte[] origin = buffer;
+                    byte[] crcori;
+                    byte[] build;
+                    bool CRC_Pass = CheckReceive_ModBus_CRC(buffer, out crcori, out build);
+                    if (!CRC_Pass)
+                    {
+                        //CRC校验不通过
+
+                        //return "-1   " + Encoding.ASCII.GetString(origin) + $"接收长度{origin.Length},期待长度{returnCount};\r收到的CRC:{crcori[0]},{crcori[1]};校验值:{build[0]},{build[1]}";
+                        
+                        return buffer;
+                    }
+                }
+
+                //获取返回转字符串
+                //string DataBuffer = Encoding.ASCII.GetString(buffer);
+                return buffer;
+            }
+            catch (Exception ex)
+            {
+                // 超时未
+                //MessageBox.Show("超时未收到ACK");
+                //增加接收返回帧数
+                //AddReceiveFrame(totalBytesRead);
+                return receive_timeOut;
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
+        /// <summary>
         /// 字节数组转换为字符串
         /// </summary>
         /// <param name="buff"></param>
@@ -491,8 +629,6 @@ namespace WpfApp1.Services
             }
         }
 
-
-
         /// <summary>
         /// 发送设置指令
         /// </summary>
@@ -559,6 +695,36 @@ namespace WpfApp1.Services
             bool isEqual = CRC_Build.SequenceEqual(CRC_Receuve);
             return isEqual;
         }
+        /// <summary>
+        /// CRC校验
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        private static bool CheckReceive_ModBus_CRC(byte[] bytes, out byte[] crcOri, out byte[] crcGet)
+        {
+            
+            crcOri = new byte[2];
+            crcGet = new byte[2];
+            if (bytes == null) return false;
+            int CRC_length = bytes.Length - 2;
+            // 创建新的字节数组进行 CRC 校验
+            byte[] buffer = new byte[CRC_length];
+            byte[] CRC_Receuve = new byte[2];
+
+            // 复制除 CRC 校验码外的数据到 buffer 数组
+            Array.Copy(bytes, 0, buffer, 0, CRC_length);
+
+            // 从 bytes 数组中提取接收到的 CRC 校验码到 CRC_Receuve 数组
+            Array.Copy(bytes, CRC_length, CRC_Receuve, 0, 2);
+
+            // 获取 CRC 校验码
+            byte[] CRC_Build = getCRC16(buffer,buffer.Length);
+            crcOri = CRC_Receuve;
+            crcGet = CRC_Build;
+            // 判断两个校验码是否一致
+            bool isEqual = CRC_Build.SequenceEqual(CRC_Receuve);
+            return isEqual;
+        }
 
 
         #region CRC校验
@@ -584,6 +750,20 @@ namespace WpfApp1.Services
             return checkSumResult;
         }
 
+
+        /// <summary>
+        /// 获取CRC16校验码(查表ModbusRTU)
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static byte[] getCRC16(byte[] data,int length)
+        {
+            int value = RTU_CalCRC16(data, length);
+            byte[] CRC = new byte[2];
+            CRC[1] = U16_MSB(value);//获取高位校验码
+            CRC[0] = U16_LSB(value);//获取地位校验码
+            return CRC;
+        }
 
         /// <summary>
         /// 获取CRC校验码

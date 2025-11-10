@@ -756,7 +756,7 @@
                         FontSize="15"
                         Foreground="#FF1BD0E4"
                         Text="&#xe62f;"
-                        Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                        Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
 
                     <StackPanel
                         HorizontalAlignment="Right"
@@ -810,25 +810,25 @@
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xe62f;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xe62f;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xe62f;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xe62f;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
 
                     </StackPanel>
                     <!--  向上的箭头  -->
@@ -841,25 +841,25 @@
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xec64;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xec64;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xec64;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xec64;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
 
                     </StackPanel>
                     <!--  向右的箭头  -->
@@ -952,25 +952,25 @@
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xe62f;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xe62f;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xe62f;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xe62f;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
 
                     </StackPanel>
                     <!--  向上的箭头  -->
@@ -983,25 +983,25 @@
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xec64;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xec64;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xec64;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
                         <TextBlock
                             FontFamily="../Resource/Fonts/#iconfont"
                             FontSize="15"
                             Foreground="#FF1BD0E4"
                             Text="&#xec64;"
-                            Visibility="{Binding HSTS2_HOVINV08.PVStatus}" />
+                            Visibility="{Binding HSTS2_HPVINV08.PVStatus}" />
 
                     </StackPanel>
                     <!--  向右的箭头  -->
