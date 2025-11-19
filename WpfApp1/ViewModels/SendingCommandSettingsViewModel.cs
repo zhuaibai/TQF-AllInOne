@@ -194,7 +194,7 @@ namespace WpfApp1.ViewModels
             SendingCommandsView_19.Filter = (object item) =>
             {
                 var index = SendingCommands.IndexOf((SendingCommand)item);
-                return index >= 89 && index <= 94;
+                return index >= 91 && index <= 94;
             };
             #endregion
 
