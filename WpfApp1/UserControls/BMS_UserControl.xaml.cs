@@ -36,6 +36,7 @@ namespace WpfApp1.UserControls
             SystemSettingView.Visibility = Visibility.Collapsed;
             HistoryLogView.Visibility = Visibility.Collapsed;
             AdminView.Visibility = Visibility.Collapsed;
+            RealTimeMonitor.Visibility = Visibility.Collapsed;
         }
 
         /// <summary>
@@ -49,6 +50,7 @@ namespace WpfApp1.UserControls
             SystemSettingView.Visibility = Visibility.Collapsed;
             HistoryLogView.Visibility = Visibility.Collapsed;
             AdminView.Visibility = Visibility.Collapsed;
+            RealTimeMonitor.Visibility = Visibility.Collapsed;
         }
 
         /// <summary>
@@ -62,6 +64,7 @@ namespace WpfApp1.UserControls
             SystemSettingView.Visibility = Visibility.Visible;
             HistoryLogView.Visibility = Visibility.Collapsed;
             AdminView.Visibility = Visibility.Collapsed;
+            RealTimeMonitor.Visibility = Visibility.Collapsed;
         }
 
         /// <summary>
@@ -75,10 +78,11 @@ namespace WpfApp1.UserControls
             SystemSettingView.Visibility = Visibility.Collapsed;
             HistoryLogView.Visibility = Visibility.Visible;
             AdminView.Visibility = Visibility.Collapsed;
+            RealTimeMonitor.Visibility = Visibility.Collapsed;
         }
 
         /// <summary>
-        /// 历史记录界面显示
+        /// 前端芯片监控
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -87,9 +91,23 @@ namespace WpfApp1.UserControls
             SettingView.Visibility = Visibility.Collapsed;
             SystemSettingView.Visibility = Visibility.Collapsed;
             HistoryLogView.Visibility = Visibility.Collapsed;
+            RealTimeMonitor.Visibility = Visibility.Collapsed;
             AdminView.Visibility = Visibility.Visible;
         }
 
+        /// <summary>
+        /// 前端芯片监控
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RealTimeMonitor_Click(object sender, RoutedEventArgs e)
+        {
+            SettingView.Visibility = Visibility.Collapsed;
+            SystemSettingView.Visibility = Visibility.Collapsed;
+            HistoryLogView.Visibility = Visibility.Collapsed;
+            AdminView.Visibility = Visibility.Collapsed;
+            RealTimeMonitor.Visibility = Visibility.Visible;
+        }
 
 
         private void DataGrid_PreviewMouseWheel(object sender, MouseWheelEventArgs e)

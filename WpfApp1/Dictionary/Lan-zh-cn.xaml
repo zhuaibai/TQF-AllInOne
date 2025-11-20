@@ -312,7 +312,7 @@
     <s:String x:Key="单体最低电压">单体最低电压(mV)</s:String>
     <s:String x:Key="电芯压差">电芯压差</s:String>
     <s:String x:Key="电流(mA)">电流(mA)</s:String>
-    <s:String x:Key="电池包总电压">电池包总电压(mV)</s:String>  
+    <s:String x:Key="电池包总电压">电池包总电压(mV)</s:String>
     <s:String x:Key="MOSFET温度">MOSFET温度(℃)</s:String>
     <s:String x:Key="累计充电容量">累计充电容量(mAh)</s:String>
     <s:String x:Key="NTC温度传感器值">NTC温度传感器值(℃)</s:String>
@@ -338,7 +338,9 @@
     <s:String x:Key="放电低温触发次数">放电低温触发次数</s:String>
     <s:String x:Key="放电高温触发次数">放电高温触发次数</s:String>
     <s:String x:Key="满充保护次数">满充保护次数</s:String>
-    
+    <s:String x:Key="正在通讯">正在通讯</s:String>
+
+
 
 
 

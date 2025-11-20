@@ -13,6 +13,8 @@ namespace WpfApp1.Convert
     public static class ModbusRTU
     {
 
+        public static Action<string>? showStatue;
+
         /// <summary>
         /// 生成 Modbus RTU 0x10 写多个寄存器帧
         /// </summary>
@@ -162,7 +164,13 @@ namespace WpfApp1.Convert
         public static short[] ParseRead20Response(byte[] response)
         {
             if (response.Length != 133)
-                return new short[]{ 1};
+            {
+
+                showStatue("响应异常!");
+                return new short[] { 1 };
+
+            }
+                
 
             byte slaveAddr = response[0];
             byte funcCode = response[1];
@@ -201,24 +209,47 @@ namespace WpfApp1.Convert
         /// <returns>ushort 数组，每个元素代表一个寄存器值</returns>
         public static short[] ParseRead03Response(byte[] response)
         {
+            if(response == null)
+            {
+                showStatue("响应帧长度不足");
+                return null;
+            }
+            
+
             if (response.Length < 5)
-                throw new ArgumentException("响应帧长度不足");
+            {
+                showStatue("响应帧长度不足");
+                return null;
+            }
+                
 
             byte slaveAddr = response[0];
             byte funcCode = response[1];
             byte byteCount = response[2];
 
             if (funcCode != 0x03)
-                throw new Exception("功能码错误，非 0x03 响应");
-
+            {
+                showStatue("功能码错误，非 0x03 响应");
+                return null;             
+            }
             if (response.Length < 3 + byteCount + 2)
-                throw new Exception("响应帧长度与数据长度不匹配");
+            {
+                showStatue("响应帧长度不足");
+                return null;
+            }
+
+
+
 
             // CRC 校验
             short recvCrc = (short)(response[response.Length - 2] | (response[response.Length - 1] << 8));
             short calcCrc = (short)CRC16(response, response.Length - 2);
             if (recvCrc != calcCrc)
-                throw new Exception("CRC 校验错误");
+            {
+                showStatue("CRC 校验错误");
+                return null;
+            }
+               
 
             int regCount = byteCount / 2;
             short[] registers = new short[regCount];
@@ -230,7 +261,7 @@ namespace WpfApp1.Convert
                 short value = (short)((response[dataIndex + 1] << 8) | response[dataIndex]);
                 registers[i] = value;
             }
-
+            showStatue("通讯正常");
             return registers;
         }
 
@@ -286,7 +317,7 @@ namespace WpfApp1.Convert
 
 
         /// <summary>
-        /// 自动生成发送包方法【8位帧头 + 一位数据长度(89) + 数据 + CRC校验(数据长度+数据)】
+        /// 自动生成发送包方法【8位帧头 + 一位数据长度(106) + 数据 + CRC校验(数据长度+数据)】
         /// </summary>
         /// <param name="HeadBytes">帧头字符串</param>
         /// <param name="sendingCommands">发送的数据</param>
@@ -299,7 +330,7 @@ namespace WpfApp1.Convert
             
 
             //一、 帧头
-            byte[] bytes = new byte[] { 0x01, 0x10, 0x00, 0x82, 0x00, 0x5b, 0xb6 };
+            byte[] bytes = new byte[] { 0x01, 0x10, 0x00, 0x82, 0x00, 0x70, 0xE0};
             // msCRC.Write(bytes);
 
             //二、 数据长度  固定182
@@ -309,23 +340,23 @@ namespace WpfApp1.Convert
             //三、 数据
 
             //复原原来的数据地址
-            for (int i = 0; i < sendingCommands.Count; i++)
-            {
+            //for (int i = 0; i < sendingCommands.Count; i++)
+            //{
 
-                if (i >= 22 && i <= 90)
-                {
-                    //跳过四个
-                    resultCommand.Add(sendingCommands[i + 4]);
-                }
-                else if (i >= 91)
-                {
-                    resultCommand.Add(sendingCommands[i - 69]);
-                }
-                else
-                    resultCommand.Add(sendingCommands[i]);
-            }
+            //    if (i >= 22 && i <= 90)
+            //    {
+            //        //跳过四个
+            //        resultCommand.Add(sendingCommands[i + 4]);
+            //    }
+            //    else if (i >= 91)
+            //    {
+            //        resultCommand.Add(sendingCommands[i - 69]);
+            //    }
+            //    else
+            //        resultCommand.Add(sendingCommands[i]);
+            //}
 
-            foreach (var sendingCommand in resultCommand)
+            foreach (var sendingCommand in sendingCommands)
             {
                 
                 if (ModbusRTU.ContainsDegreeSymbol(sendingCommand.Command))
@@ -371,7 +402,7 @@ namespace WpfApp1.Convert
  
 
         /// <summary>
-        /// 把130-224(95个数据)的数据进行解析
+        /// 把130-235(106个数据)的数据进行解析
         /// </summary>
         /// <param name="data">返回字节数组</param>
         /// <param name="sendingCommands">显示数据集合对象</param>
@@ -386,30 +417,49 @@ namespace WpfApp1.Convert
             }
             for (int i = 0; i < sendingCommands.Count; i++)
             {
-                if (i == 4 || i == 9)
+                if (ModbusRTU.ContainsDegreeSymbol(sendingCommands[i].Command))
                 {
-                    //对百分比进行处理
+                    //包含℃符号，也就是温度，进行处理
+                    sendingCommands[i].Enable = (data[i] / 10.0).ToString("F1");
+                }
+                else if (ModbusRTU.ContainsPercentSymbol(sendingCommands[i].Command))
+                {
+                    //包含%符号，也就是百分比，进行处理
                     sendingCommands[i].Enable = (data[i] / 100.0).ToString("F1");
-                    continue;
-                }
-                if (i == 37)
-                {
-                    //对百分比进行处理
-                    sendingCommands[i+4].Enable = (data[i] / 100.0).ToString("F1");
-                    continue;
-                }
-                if (i >= 22 && i <= 90)
-                {
-                    //跳过四个
-                    sendingCommands[i + 4].Enable = ModbusRTU.ContainsDegreeSymbol(sendingCommands[i+4].Command)? (data[i] / 10.0).ToString("F1"): data[i].ToString();
-                }
-                else if (i >= 91)
-                {
-                    sendingCommands[i - 69].Enable = ModbusRTU.ContainsDegreeSymbol(sendingCommands[i-69].Command) ? (data[i] / 10.0).ToString("F1") : data[i].ToString();
                 }
                 else
-                    sendingCommands[i].Enable = ModbusRTU.ContainsDegreeSymbol(sendingCommands[i].Command) ? (data[i] / 10.0).ToString("F1") : data[i].ToString();
+                {
+                    sendingCommands[i].Enable = data[i].ToString();
+                }
             }
+
+
+            //for (int i = 0; i < sendingCommands.Count; i++)
+            //{
+            //    if (i == 4 || i == 9)
+            //    {
+            //        //对百分比进行处理
+            //        sendingCommands[i].Enable = (data[i] / 100.0).ToString("F1");
+            //        continue;
+            //    }
+            //    if (i == 37)
+            //    {
+            //        //对百分比进行处理
+            //        sendingCommands[i+4].Enable = (data[i] / 100.0).ToString("F1");
+            //        continue;
+            //    }
+            //    if (i >= 22 && i <= 90)
+            //    {
+            //        //跳过四个
+            //        sendingCommands[i + 4].Enable = ModbusRTU.ContainsDegreeSymbol(sendingCommands[i+4].Command)? (data[i] / 10.0).ToString("F1"): data[i].ToString();
+            //    }
+            //    else if (i >= 91)
+            //    {
+            //        sendingCommands[i - 69].Enable = ModbusRTU.ContainsDegreeSymbol(sendingCommands[i-69].Command) ? (data[i] / 10.0).ToString("F1") : data[i].ToString();
+            //    }
+            //    else
+            //        sendingCommands[i].Enable = ModbusRTU.ContainsDegreeSymbol(sendingCommands[i].Command) ? (data[i] / 10.0).ToString("F1") : data[i].ToString();
+            //}
         }
 
         /// <summary>
@@ -421,7 +471,6 @@ namespace WpfApp1.Convert
         {
             
             for (int i = 0; i < sendingCommands.Count; i++) {
-
                 sendingCommands[i].ReturnCount = sendingCommands[i].Enable;
             }
         }

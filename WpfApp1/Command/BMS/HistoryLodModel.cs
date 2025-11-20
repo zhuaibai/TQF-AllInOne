@@ -10,14 +10,14 @@ namespace WpfApp1.Command.BMS
 {
     public class HistoryLodModel:BaseViewModel
     {
-        public HistoryLodModel(short[] data)
+        public HistoryLodModel(short[] data, int cellNum)
         {
             
             //进行解析数据
             //历史记录数
             Time = data[1].ToString();
             //16节电芯
-            for (int i = 4; i < 20; i++)
+            for (int i = 4; i < 4+cellNum; i++)
             {
                 CellVoltage += data[i].ToString() + ";";
             }
@@ -28,13 +28,13 @@ namespace WpfApp1.Command.BMS
             //电芯压差
             CellDiff = data[22].ToString();
             //电流
-            Current = data[23].ToString();
+            Current = (data[23]/100.0).ToString("F2");
             //电池包总电压
-            PackVoltage = data[24].ToString();
+            PackVoltage = (data[24]/100.0).ToString("F2");
             //OSFET温度
             MOSTemp = data[25].ToString();
             //累计充电容量
-            TotalChgCap = data[26].ToString();
+            TotalChgCap = (data[26]/100.0).ToString("F2");
             //NTC温度传感器值
             NTCTemp = ((data[27] * 1000 + data[28] * 100 + data[29] * 10 + data[30])/10000.0).ToString("F1");
             //当前电量SOC
@@ -59,12 +59,17 @@ namespace WpfApp1.Command.BMS
             //保护次数
             for (int i = 0; i < 16; i++)
             {
-                ProtectCount[i] = data[i + 40];
+                ProtectCount    [i] = data[i + 40];
             }
             //前端芯片保护状态
-            AFE_ProtStatus = data[56].ToString();
+            AFE_ProtStatus = getAFE_ProtStatus(ModbusRTU.GetBits(data[56]));
         }
 
+        /// <summary>
+        /// 获取BMS状态
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         private string getBMS_Status(int[] data)
         {
             string result = string.Empty;
@@ -92,6 +97,28 @@ namespace WpfApp1.Command.BMS
             result = data[10] == 1 ? result + "容量学习 " : result;
             return result;
         }
+
+        /// <summary>
+        /// 获取前端芯片状态
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private string getAFE_ProtStatus(int[] data)
+        {
+            string result = string.Empty;
+            
+            result = data[0] == 1 ? result + "前端芯片触发保护 " : result;
+            result = data[1] == 1 ? result + "前端芯片告警下拉 " : result;
+            result = data[2] == 1 ? result + "前端芯片中断 " : result;
+            result = data[3] == 1 ? result + "AFE过充保护 " : result;
+            result = data[4] == 1 ? result + "AFE过放保护 " : result;
+            result = data[5] == 1 ? result + "充电过流保护 " : result;
+            result = data[6] == 1 ? result + "放电过流保护 " : result;
+            result = data[7] == 1 ? result + "短路保护 " : result;
+           
+            return result;
+        }
+
         private string _Time;
         /// <summary>
         /// 时间
@@ -105,9 +132,6 @@ namespace WpfApp1.Command.BMS
                 this.RaiseProperChanged(nameof(Time));
             }
         }
-
-        
-
 
         private string _CellVoltage=string.Empty;
         /// <summary>

@@ -695,6 +695,7 @@ namespace WpfApp1.Services
             bool isEqual = CRC_Build.SequenceEqual(CRC_Receuve);
             return isEqual;
         }
+
         /// <summary>
         /// CRC校验
         /// </summary>

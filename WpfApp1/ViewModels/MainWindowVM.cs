@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using System.Xml.Serialization;
 using WpfApp1.Command;
 using WpfApp1.Command.BMS;
@@ -103,7 +104,44 @@ namespace WpfApp1.ViewModels
             _messageService = messageService;
             ShowMessageCommand = new RelayCommand(OnShowMessage);
             BMS02 = new BMS_UserControl();
+            ModbusRTU.showStatue = UpdateState;
+            //// 模拟电量变化
+            //var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3)};
+            //timer.Tick += (s, e) =>
+            //{
+            //    BMS_VM.SOC = (BMS_VM.SOC + 10) % 110;
+            //};
+            //timer.Start();
+            //实时监控列表
+            RT_Monitor.PollingList = new ObservableCollection<PollingData>();
         }
+
+        #region 小标题选项
+
+        public enum BatteryMode
+        {
+            Mode1,
+            Mode2,
+            Mode3,
+            Mode4,
+            Mode5,
+            Mode6
+        }
+
+        private BatteryMode _selectedMode = BatteryMode.Mode1;
+
+        public BatteryMode SelectedMode
+        {
+            get => _selectedMode;
+            set
+            {
+                _selectedMode = value;
+                OnPropertyChanged(nameof(SelectedMode));
+            }
+        }
+
+
+        #endregion
 
         #region BMS
 
@@ -133,8 +171,18 @@ namespace WpfApp1.ViewModels
             }
         }
 
+        //实时监控VM
+        private RealTimeMonitorVM rtMonitor = new RealTimeMonitorVM();
 
-
+        public RealTimeMonitorVM RT_Monitor
+        {
+            get { return rtMonitor; }
+            set
+            {
+                rtMonitor = value;
+                this.RaiseProperChanged(nameof(RT_Monitor));
+            }
+        }
 
 
         #endregion
@@ -370,6 +418,7 @@ namespace WpfApp1.ViewModels
         "LPVINV02",
         "UPSCYX01",
         "LB6",
+        "BMS01",
         "BMS02"
          };
 
@@ -433,6 +482,10 @@ namespace WpfApp1.ViewModels
                 case "LB6":
                     ContentUC = new LB6_MonitorUC();
                     SelectedMachineItem = "LB6";
+                    break;
+                case "BMS01":
+                    ContentUC = new BMS01_UserControl();
+                    SelectedMachineItem = "BMS01";
                     break;
                 case "BMS02":
                     ContentUC = BMS02;
@@ -552,6 +605,18 @@ namespace WpfApp1.ViewModels
                     machine = receive_MachineType;
                     return true;
                 }
+                else if ((receive_MachineType.Substring(0, 9) == "(BMS00001"))
+                {
+                    SwitchViewToVQorGB("BMS01");
+                    //默认设置抗干扰模式
+                    //IsChecked = true;
+                    //OnceOpenCRC = true;
+                    //SerialCommunicationService.OpenReceiveCRC(true);
+                    //返回机器类型
+                    machine = receive_MachineType;
+                    return true;
+                }
+
                 else if ((receive_MachineType.Substring(0, 9) == "(BMS00002"))
                 {
                     SwitchViewToVQorGB("BMS02");
@@ -1507,7 +1572,7 @@ namespace WpfApp1.ViewModels
         /// </summary>
         private async Task BackgroundWorker(CancellationToken token)
         {
-            int flag = 0;//初始设置值
+            flag = 0;//初始设置值
 
             try
             {
@@ -1559,21 +1624,38 @@ namespace WpfApp1.ViewModels
                     }
                     else if (SelectedMachineItem == "BMS02")
                     {
-                        if (flag == 0)
+                        //唤醒休眠
+                        if (BMS_Setting.isSleeping == 0 && BMS_Setting.SettingStatue[4] == 1)
                         {
-                            //发送03功能码(查是91个设置项的电压)
-                            Thread.Sleep(200);
-                            byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 130, 95), 195);
-                            ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
-                            //初始化设置值
-                            ModbusRTU.FirstSetReceive(BMS_Setting.SendingCommands);
-                            flag = 1;
+                            await Task.Delay(1000, token);
+                            byte[] rec = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 0), 8);
+                            if(rec.Length == 8)
+                            {
+                                BMS_Setting.SettingStatue[4] = 0;
+                            }
+                            continue;
                         }
                         //BMS通讯
                         CommunicationWithBMS(token);
                     }
+                    else if (SelectedMachineItem == "BMS01")
+                    {
+                        //唤醒休眠
+                        if (BMS_Setting.isSleeping == 0 && BMS_Setting.SettingStatue[4] == 1)
+                        {
+                            await Task.Delay(1000, token);
+                            byte[] rec = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 0), 8);
+                            if (rec.Length == 8)
+                            {
+                                BMS_Setting.SettingStatue[4] = 0;
+                            }
+                            continue;
+                        }
+                        //BMS通讯
+                        CommunicationWithBMS01(token);
+                    }
                     // 模拟常规通信
-                    await Task.Delay(1000, token);
+                    await Task.Delay(100, token);
                     //AddLog($"[后台] 常规通信: {DateTime.Now:HH:mm:ss.fff}");
                 }
             }
@@ -1589,9 +1671,7 @@ namespace WpfApp1.ViewModels
                 AddLog($"后台通信异常{mes}");
                 UpdateState(App.GetText("异常!"));
                 //关闭串口
-
                 SerialCommunicationService.CloseCom();
-
             }
             finally
             {
@@ -2437,7 +2517,6 @@ namespace WpfApp1.ViewModels
 
         }
 
-
         /// <summary>
         /// CYJ通讯
         /// </summary>
@@ -2621,71 +2700,577 @@ namespace WpfApp1.ViewModels
         }
 
 
+        int flag = 0;
         /// <summary>
         /// BMS通讯
         /// </summary>
         /// <param name="token"></param>
         private void CommunicationWithBMS(CancellationToken token)
         {
+
             byte[] receive;
             short[] data;
-            Thread.Sleep(200);
-            // 等待暂停或取消信号
-            _pauseEvent.Wait(token);
-            //发送查询机器指令
-            string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
-            MachineType = receive_MachineType.Substring(1, 8);
-            //解析指令
-            SerialCommunicationService.MachineType = receive_MachineType;
+            if (SelectedMode == BatteryMode.Mode1)
+            {
+                Thread.Sleep(100);
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //发送查询机器指令
+                string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
+                if (receive_MachineType != null && receive_MachineType.Length == 10)
+                    MachineType = receive_MachineType.Substring(1, 8);
+                //解析指令
+                SerialCommunicationService.MachineType = receive_MachineType;
 
-            //发送03功能码(查是16个电芯的电压)
-            Thread.Sleep(200);
-            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 2, 16), 37);
-            //解析返回的报文
-            BMS_VM.MOD_CELL1_VOL_1_16(ModbusRTU.ParseRead03Response(receive));
+                //首界面设置状态显示
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //读写入的参数设置值(充电MOS、放电MOS、关机、休眠)
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 120, 2), 9);
+                data = ModbusRTU.ParseRead03Response(receive);
+                if (data != null && data.Length >= 2)
+                {
+                    BMS_Setting.SettingStatue = ModbusRTU.GetBits(data[0]);
+                    BMS_Setting.JunHen = ModbusRTU.GetBits(data[1]);
+                }
 
-            //发送03功能码(查是91个设置项的电压)
-            Thread.Sleep(200);
-            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 130, 95), 195);
-            ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 250, 2), 9);
+                //解析返回的报文
+                data = ModbusRTU.ParseRead03Response(receive);
+                if (data != null && data.Length == 2)
+                {
+                    BMS_Setting.CellNum = data[0];
+                    BMS_Setting.NtcNum = data[1];
+                }
 
-            //查五个状态码(83)
-            Thread.Sleep(200);
-            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 80, 5), 15);
-            data = ModbusRTU.ParseRead03Response(receive);
-            BMS_VM.MOD_INST_STATE_Set(ModbusRTU.GetBits(data[3]));
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //发送03功能码(查是16个电芯的电压)
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 2, 16), 37);
+                //解析返回的报文
+                BMS_VM.MOD_CELL1_VOL_1_16(ModbusRTU.ParseRead03Response(receive));
 
-            //查告警(80)、保护(81)、硬件错误(82)信息
-            BMS_VM.MOD_WARN_STATE_Set(ModbusRTU.GetBits(data[0]));
-            BMS_VM.MOD_PROT_STATE_Set(ModbusRTU.GetBits(data[1]));
-            BMS_VM.MOD_ERROR_STATE_Set(ModbusRTU.GetBits(data[2]));
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //查五个状态码(83)
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 80, 5), 15);
+                data = ModbusRTU.ParseRead03Response(receive);
+                if (data != null)
+                {
+                    BMS_VM.MOD_INST_STATE_Set(ModbusRTU.GetBits(data[3]));
 
-            //查电压  //查当前电流 //查温度
-            Thread.Sleep(200);
-            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 21, 15), 35);
-            data = ModbusRTU.ParseRead03Response(receive);
-            BMS_VM.OverViewSet(data);
+                    //查告警(80)、保护(81)、硬件错误(82)信息
+                    BMS_VM.MOD_WARN_STATE_Set(ModbusRTU.GetBits(data[0]));
+                    BMS_VM.MOD_PROT_STATE_Set(ModbusRTU.GetBits(data[1]));
+                    BMS_VM.MOD_ERROR_STATE_Set(ModbusRTU.GetBits(data[2]));
+                }
 
-            //查系统信息
-            Thread.Sleep(200);
-            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 283, 14), 33);
-            data = ModbusRTU.ParseRead03Response(receive);
-            BMS_VM.SystemInfoSet(data);
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //查电压  //查当前电流 //查温度
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 18, 18), 41);
+                data = ModbusRTU.ParseRead03Response(receive);
+                BMS_VM.OverViewSet(data);
 
-            //AFE_Protect
-            Thread.Sleep(200);
-            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 86, 1), 7);
-            BMS_VM.AFE_Protect = ModbusRTU.GetBits(ModbusRTU.ParseRead03Response(receive)[0]);
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //查系统信息
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 283, 14), 33);
+                data = ModbusRTU.ParseRead03Response(receive);
+                BMS_VM.SystemInfoSet(data);
 
-            //查前端芯片
-            Thread.Sleep(200);
-            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 320, 36), 77);
-            BMS_Setting.SetFrontMonitor(ModbusRTU.ParseRead03Response(receive));
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //AFE_Protect
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 86, 1), 7);
+                if (receive != null && receive.Length > 1)
+                {
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    if (data != null)
+                    {
+                        BMS_VM.AFE_Protect = ModbusRTU.GetBits(data[0]);
+                    }
+                }
 
-            //读写入的参数设置值
-            Thread.Sleep(200);
-            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 252, 4), 13);
-            BMS_Setting.setSystem(ModbusRTU.ParseRead03Response(receive));
+            }
+            else if (SelectedMode == BatteryMode.Mode2)
+            {
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //发送03功能码(查是91个设置项的电压)
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 130, 112), 229);
+                ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
+                if (flag == 0)
+                {
+                    //发送03功能码(查是91个设置项的电压)
+                    Thread.Sleep(200);
+                    receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 130, 112), 229);
+                    ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
+                    //初始化设置值
+                    ModbusRTU.FirstSetReceive(BMS_Setting.SendingCommands);
+                    flag = 1;
+                }
+            }
+            else if (SelectedMode == BatteryMode.Mode6)
+            {
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //查前端芯片
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 320, 36), 77);
+                BMS_Setting.SetFrontMonitor(ModbusRTU.ParseRead03Response(receive));
+            }
+            else if (SelectedMode == BatteryMode.Mode3)
+            {
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //读写入的参数设置值
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 252, 4), 13);
+                BMS_Setting.setSystem(ModbusRTU.ParseRead03Response(receive));
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //查电压  //查当前电流 //查温度
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 18, 18), 41);
+                data = ModbusRTU.ParseRead03Response(receive);
+                BMS_VM.OverViewSet(data);
+            }
+            else if(SelectedMode == BatteryMode.Mode5)     //实时监控
+            {
+                //首界面设置状态显示
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //读写入的参数设置值(充电MOS、放电MOS、关机、休眠)
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 120, 2), 9);
+                data = ModbusRTU.ParseRead03Response(receive);
+                if (data != null && data.Length >= 2)
+                {
+                    BMS_Setting.SettingStatue = ModbusRTU.GetBits(data[0]);
+                    BMS_Setting.JunHen = ModbusRTU.GetBits(data[1]);
+                }
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 250, 2), 9);
+                //解析返回的报文
+                data = ModbusRTU.ParseRead03Response(receive);
+                if (data != null && data.Length == 2)
+                {
+                    BMS_Setting.CellNum = data[0];
+                    BMS_Setting.NtcNum = data[1];
+                }
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //发送03功能码(查是16个电芯的电压)
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 2, 16), 37);
+                //解析返回的报文
+                BMS_VM.MOD_CELL1_VOL_1_16(ModbusRTU.ParseRead03Response(receive));
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //查五个状态码(83)
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 80, 5), 15);
+                data = ModbusRTU.ParseRead03Response(receive);
+                if (data != null)
+                {
+                    BMS_VM.MOD_INST_STATE_Set(ModbusRTU.GetBits(data[3]));
+
+                    //查告警(80)、保护(81)、硬件错误(82)信息
+                    BMS_VM.MOD_WARN_STATE_Set(ModbusRTU.GetBits(data[0]));
+                    BMS_VM.MOD_PROT_STATE_Set(ModbusRTU.GetBits(data[1]));
+                    BMS_VM.MOD_ERROR_STATE_Set(ModbusRTU.GetBits(data[2]));
+                }
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //查电压  //查当前电流 //查温度
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 18, 18), 41);
+                data = ModbusRTU.ParseRead03Response(receive);
+                BMS_VM.OverViewSet(data);
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //查系统信息
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 283, 14), 33);
+                data = ModbusRTU.ParseRead03Response(receive);
+                BMS_VM.SystemInfoSet(data);
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //AFE_Protect
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 86, 1), 7);
+                if (receive != null && receive.Length > 1)
+                {
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    if (data != null)
+                    {
+                        BMS_VM.AFE_Protect = ModbusRTU.GetBits(data[0]);
+                    }
+                }
+
+                var polling = new PollingData
+                {
+                    Date = DateTime.Now,                                       //日期
+                    TotalVolt = BMS_VM.MOD_AFECOL_PACKVOL,                     //总电压
+                    Current = BMS_VM.MOD_AFECOL_CUR,                           //电流
+                    SOC = BMS_VM.MOD_SOC.ToString(),                           //SOC
+                    SOH = BMS_VM.MOD_SOH.ToString(),                           //SOH
+                    FullCap = BMS_VM.MOD_FULL_CAP,                             //满充容量
+                    FullRemainCap = BMS_VM.MOD_RES_CAP,                        //剩余容量
+                    CycleCount = BMS_VM.MOD_CYCLECNT,                          //循环次数
+                    Cell1 = BMS_VM.MOD_CELL1_VOL,                              //电芯1
+                    Cell2 = BMS_VM.MOD_CELL2_VOL,
+                    Cell3 = BMS_VM.MOD_CELL3_VOL,
+                    Cell4 = BMS_VM.MOD_CELL4_VOL,
+                    AvgVolt = BMS_VM.MOD_CELL_VOLDIFF,                         //最大电芯压差
+                    MaxVolt = BMS_VM.MOD_MAXCELL_VOL,                          //最高电压
+                    MinVolt = BMS_VM.MOD_MINCELL_VOL,                          //最低电压
+                    Temp1 = BMS_VM.MOD_GROUD1_TEMP,                            //电芯温度1
+                    Chg_MOS = BMS_VM.MOD_INST_STATE[0].ToString(),             //充电MOS
+                    Dis_MOS = BMS_VM.MOD_INST_STATE[1].ToString(),             //放电MOS
+                    Chg_Statues = BMS_VM.MOD_INST_STATE[4].ToString(),         //充电
+                    Dis_Statues = BMS_VM.MOD_INST_STATE[5].ToString(),         //放电
+                    AFE_OverChg_Pro = BMS_VM.AFE_Protect[3].ToString(),        //AFE过充保护
+                    AFE_OverDis_Pro = BMS_VM.AFE_Protect[4].ToString(),        //AFE过放保护
+                    Chg_Current_Pro = BMS_VM.AFE_Protect[5].ToString(),        //充电过流保护
+                    Dis_Current_Pro = BMS_VM.AFE_Protect[6].ToString(),        //放电过流保护
+                    AFE_Interrupt = BMS_VM.AFE_Protect[2].ToString(),          //前端芯片中断
+                    ShortProtect = BMS_VM.AFE_Protect[7].ToString(),           //短路保护
+                    AFE_TriggerProt = BMS_VM.AFE_Protect[0].ToString(),        //前端芯片触发保护
+                    AFE_AlertPull = BMS_VM.AFE_Protect[1].ToString(),          //前端芯片告警下拉
+                    BalanceStatus = BMS_Setting.JunHen[0].ToString()
+                    + ";" + BMS_Setting.JunHen[1].ToString() + ";"
+                    + BMS_Setting.JunHen[2].ToString()+";"
+                    + BMS_Setting.JunHen[3].ToString(),                        //均衡状态
+                    AlarmStatus = BMS_VM.MOD_WARN_STATE ,                      //告警信息
+                    ProtectStatus = BMS_VM.MOD_PROT_STATE,                     //保护信息
+                    ErrorStatus = BMS_VM.MOD_ERROR_STATE,                      //错误信息
+                };
+
+
+                // 最新在最前
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+
+                    // 添加到界面
+                    RT_Monitor.PollingList.Insert(0,polling);
+
+                    // 保证最多 100 条
+                    if (RT_Monitor.PollingList.Count > 100)
+                        RT_Monitor.PollingList.RemoveAt(RT_Monitor.PollingList.Count-1);
+
+                    // 保存
+                    if (RT_Monitor._isSaving && RT_Monitor._savePath != null)
+                        RT_Monitor.SaveToExcel(polling);
+                });
+            }
+
+        }
+
+        /// <summary>
+        /// BMS通讯
+        /// </summary>
+        /// <param name="token"></param>
+        private void CommunicationWithBMS01(CancellationToken token)
+        {
+
+            byte[] receive;
+            short[] data;
+            if (SelectedMode == BatteryMode.Mode1)
+            {
+                Thread.Sleep(100);
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //发送查询机器指令
+                string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
+                if (receive_MachineType != null && receive_MachineType.Length == 10)
+                    MachineType = receive_MachineType.Substring(1, 8);
+                //解析指令
+                SerialCommunicationService.MachineType = receive_MachineType;
+
+                //首界面设置状态显示
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //读写入的参数设置值(充电MOS、放电MOS、关机、休眠)
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 120, 2), 9);
+                data = ModbusRTU.ParseRead03Response(receive);
+                if (data != null && data.Length >= 2)
+                {
+                    BMS_Setting.SettingStatue = ModbusRTU.GetBits(data[0]);
+                    BMS_Setting.JunHen = ModbusRTU.GetBits(data[1]);
+                }
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 250, 2), 9);
+                //解析返回的报文
+                data = ModbusRTU.ParseRead03Response(receive);
+                if (data != null && data.Length == 2)
+                {
+                    BMS_Setting.CellNum = data[0];
+                    BMS_Setting.NtcNum = data[1];
+                }
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //发送03功能码(查是16个电芯的电压)
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 2, 16), 37);
+                //解析返回的报文
+                BMS_VM.MOD_CELL1_VOL_1_16(ModbusRTU.ParseRead03Response(receive));
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //查五个状态码(83)
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 80, 5), 15);
+                data = ModbusRTU.ParseRead03Response(receive);
+                if (data != null)
+                {
+                    BMS_VM.MOD_INST_STATE_Set(ModbusRTU.GetBits(data[3]));
+
+                    //查告警(80)、保护(81)、硬件错误(82)信息
+                    BMS_VM.MOD_WARN_STATE_Set(ModbusRTU.GetBits(data[0]));
+                    BMS_VM.MOD_PROT_STATE_Set(ModbusRTU.GetBits(data[1]));
+                    BMS_VM.MOD_ERROR_STATE_Set(ModbusRTU.GetBits(data[2]));
+                }
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //查电压  //查当前电流 //查温度
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 18, 18), 41);
+                data = ModbusRTU.ParseRead03Response(receive);
+                BMS_VM.OverViewSet(data);
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //查系统信息
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 283, 14), 33);
+                data = ModbusRTU.ParseRead03Response(receive);
+                BMS_VM.SystemInfoSet(data);
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //AFE_Protect
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 86, 1), 7);
+                if (receive != null && receive.Length > 1)
+                {
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    if (data != null)
+                    {
+                        BMS_VM.AFE_Protect = ModbusRTU.GetBits(data[0]);
+                    }
+                }
+
+            }
+            else if (SelectedMode == BatteryMode.Mode2)
+            {
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //发送03功能码(查是91个设置项的电压)
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 130, 112), 229);
+                ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
+                if (flag == 0)
+                {
+                    //发送03功能码(查是91个设置项的电压)
+                    Thread.Sleep(200);
+                    receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 130, 112), 229);
+                    ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
+                    //初始化设置值
+                    ModbusRTU.FirstSetReceive(BMS_Setting.SendingCommands);
+                    flag = 1;
+                }
+            }
+            else if (SelectedMode == BatteryMode.Mode6)
+            {
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //查前端芯片
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 320, 36), 77);
+                BMS_Setting.SetFrontMonitor(ModbusRTU.ParseRead03Response(receive));
+            }
+            else if (SelectedMode == BatteryMode.Mode3)
+            {
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //读写入的参数设置值
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 252, 4), 13);
+                BMS_Setting.setSystem(ModbusRTU.ParseRead03Response(receive));
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //查电压  //查当前电流 //查温度
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 18, 18), 41);
+                data = ModbusRTU.ParseRead03Response(receive);
+                BMS_VM.OverViewSet(data);
+            }
+            else if (SelectedMode == BatteryMode.Mode5)     //实时监控
+            {
+                //首界面设置状态显示
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //读写入的参数设置值(充电MOS、放电MOS、关机、休眠)
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 120, 2), 9);
+                data = ModbusRTU.ParseRead03Response(receive);
+                if (data != null && data.Length >= 2)
+                {
+                    BMS_Setting.SettingStatue = ModbusRTU.GetBits(data[0]);
+                    BMS_Setting.JunHen = ModbusRTU.GetBits(data[1]);
+                }
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 250, 2), 9);
+                //解析返回的报文
+                data = ModbusRTU.ParseRead03Response(receive);
+                if (data != null && data.Length == 2)
+                {
+                    BMS_Setting.CellNum = data[0];
+                    BMS_Setting.NtcNum = data[1];
+                }
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //发送03功能码(查是16个电芯的电压)
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 2, 16), 37);
+                //解析返回的报文
+                BMS_VM.MOD_CELL1_VOL_1_16(ModbusRTU.ParseRead03Response(receive));
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //查五个状态码(83)
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 80, 5), 15);
+                data = ModbusRTU.ParseRead03Response(receive);
+                if (data != null)
+                {
+                    BMS_VM.MOD_INST_STATE_Set(ModbusRTU.GetBits(data[3]));
+
+                    //查告警(80)、保护(81)、硬件错误(82)信息
+                    BMS_VM.MOD_WARN_STATE_Set(ModbusRTU.GetBits(data[0]));
+                    BMS_VM.MOD_PROT_STATE_Set(ModbusRTU.GetBits(data[1]));
+                    BMS_VM.MOD_ERROR_STATE_Set(ModbusRTU.GetBits(data[2]));
+                }
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //查电压  //查当前电流 //查温度
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 18, 18), 41);
+                data = ModbusRTU.ParseRead03Response(receive);
+                BMS_VM.OverViewSet(data);
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //查系统信息
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 283, 14), 33);
+                data = ModbusRTU.ParseRead03Response(receive);
+                BMS_VM.SystemInfoSet(data);
+
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //AFE_Protect
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 86, 1), 7);
+                if (receive != null && receive.Length > 1)
+                {
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    if (data != null)
+                    {
+                        BMS_VM.AFE_Protect = ModbusRTU.GetBits(data[0]);
+                    }
+                }
+
+                var polling = new PollingData
+                {
+                    Date = DateTime.Now,                                       //日期
+                    TotalVolt = BMS_VM.MOD_AFECOL_PACKVOL,                     //总电压
+                    Current = BMS_VM.MOD_AFECOL_CUR,                           //电流
+                    SOC = BMS_VM.MOD_SOC.ToString(),                           //SOC
+                    SOH = BMS_VM.MOD_SOH.ToString(),                           //SOH
+                    FullCap = BMS_VM.MOD_FULL_CAP,                             //满充容量
+                    FullRemainCap = BMS_VM.MOD_RES_CAP,                        //剩余容量
+                    CycleCount = BMS_VM.MOD_CYCLECNT,                          //循环次数
+                    Cell1 = BMS_VM.MOD_CELL1_VOL,                              //电芯1
+                    Cell2 = BMS_VM.MOD_CELL2_VOL,
+                    Cell3 = BMS_VM.MOD_CELL3_VOL,
+                    Cell4 = BMS_VM.MOD_CELL4_VOL,
+                    AvgVolt = BMS_VM.MOD_CELL_VOLDIFF,                         //最大电芯压差
+                    MaxVolt = BMS_VM.MOD_MAXCELL_VOL,                          //最高电压
+                    MinVolt = BMS_VM.MOD_MINCELL_VOL,                          //最低电压
+                    Temp1 = BMS_VM.MOD_GROUD1_TEMP,                            //电芯温度1
+                    Chg_MOS = BMS_VM.MOD_INST_STATE[0].ToString(),             //充电MOS
+                    Dis_MOS = BMS_VM.MOD_INST_STATE[1].ToString(),             //放电MOS
+                    Chg_Statues = BMS_VM.MOD_INST_STATE[4].ToString(),         //充电
+                    Dis_Statues = BMS_VM.MOD_INST_STATE[5].ToString(),         //放电
+                    AFE_OverChg_Pro = BMS_VM.AFE_Protect[3].ToString(),        //AFE过充保护
+                    AFE_OverDis_Pro = BMS_VM.AFE_Protect[4].ToString(),        //AFE过放保护
+                    Chg_Current_Pro = BMS_VM.AFE_Protect[5].ToString(),        //充电过流保护
+                    Dis_Current_Pro = BMS_VM.AFE_Protect[6].ToString(),        //放电过流保护
+                    AFE_Interrupt = BMS_VM.AFE_Protect[2].ToString(),          //前端芯片中断
+                    ShortProtect = BMS_VM.AFE_Protect[7].ToString(),           //短路保护
+                    AFE_TriggerProt = BMS_VM.AFE_Protect[0].ToString(),        //前端芯片触发保护
+                    AFE_AlertPull = BMS_VM.AFE_Protect[1].ToString(),          //前端芯片告警下拉
+                    BalanceStatus = BMS_Setting.JunHen[0].ToString()
+                    + ";" + BMS_Setting.JunHen[1].ToString() + ";"
+                    + BMS_Setting.JunHen[2].ToString() + ";"
+                    + BMS_Setting.JunHen[3].ToString(),                        //均衡状态
+                    AlarmStatus = BMS_VM.MOD_WARN_STATE,                      //告警信息
+                    ProtectStatus = BMS_VM.MOD_PROT_STATE,                     //保护信息
+                    ErrorStatus = BMS_VM.MOD_ERROR_STATE,                      //错误信息
+                };
+
+
+                // 最新在最前
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+
+                    // 添加到界面
+                    RT_Monitor.PollingList.Insert(0, polling);
+
+                    // 保证最多 100 条
+                    if (RT_Monitor.PollingList.Count > 100)
+                        RT_Monitor.PollingList.RemoveAt(RT_Monitor.PollingList.Count - 1);
+
+                    // 保存
+                    if (RT_Monitor._isSaving && RT_Monitor._savePath != null)
+                        RT_Monitor.SaveToExcel(polling);
+                });
+            }
+
         }
 
         /// <summary>
@@ -2720,7 +3305,7 @@ namespace WpfApp1.ViewModels
         private void OnShowMessage()
         {
             string Password = MShowTestMessage("请输入管理员密码", "前端芯片监控", "密码错误");
-            if(Password == "Tqf147258")
+            if (Password == "Tqf147258")
             {
                 ShowAdmin = Visibility.Visible;
             }

@@ -168,7 +168,7 @@
                                         <Style TargetType="ToggleButton">
 
                                             <Setter Property="Background" Value="White" />
-                                            <Setter Property="FontFamily" Value="../Resource/Fonts/#iconfont"/>
+                                            <Setter Property="FontFamily" Value="../Resource/Fonts/#iconfont" />
                                             <Setter Property="Template">
 
                                                 <Setter.Value>
@@ -183,11 +183,11 @@
                                                                     x:Name="arrow_tb"
                                                                     HorizontalAlignment="Center"
                                                                     VerticalAlignment="Center"
+                                                                    FontFamily="../Resource/Fonts/#iconfont"
                                                                     Foreground="{TemplateBinding Foreground}"
                                                                     RenderTransformOrigin="0.5,0.5"
-                                                                    FontFamily="../Resource/Fonts/#iconfont"
                                                                     Text="&#xe65e;">
-                                                                    
+
                                                                     <TextBlock.RenderTransform>
 
                                                                         <TransformGroup>
@@ -338,5 +338,57 @@
         </Setter>
     </Style>
 
+    <!--  主色  -->
+    <SolidColorBrush x:Key="PrimaryBlue" Color="#1677FF" />
+    <SolidColorBrush x:Key="LightBackground" Color="#F5F8FF" />
+    <SolidColorBrush x:Key="TableHeaderBlue" Color="#E8F1FF" />
+    <SolidColorBrush x:Key="BorderGray" Color="#D0D7E2" />
+    <SolidColorBrush x:Key="HoverBlue" Color="#D9E9FF" />
+
+    <!--  DataGrid 样式  -->
+    <Style x:Key="BlueWhiteDataGrid" TargetType="DataGrid">
+        <Setter Property="Background" Value="White" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderGray}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="RowHeaderWidth" Value="0" />
+        <Setter Property="ColumnHeaderHeight" Value="35" />
+        <Setter Property="RowHeight" Value="32" />
+        <Setter Property="GridLinesVisibility" Value="None" />
+        <Setter Property="HeadersVisibility" Value="Column" />
+        <Setter Property="AutoGenerateColumns" Value="False" />
+        <Setter Property="CanUserAddRows" Value="False" />
+        <Setter Property="CanUserDeleteRows" Value="False" />
+        <Setter Property="CanUserResizeRows" Value="False" />
+        <Setter Property="CanUserResizeColumns" Value="False" />
+        <Setter Property="CanUserSortColumns" Value="False" />
+        <Setter Property="HorizontalGridLinesBrush" Value="#E2E8F0" />
+        <Setter Property="VerticalGridLinesBrush" Value="#E2E8F0" />
+        <Setter Property="ColumnHeaderStyle">
+            <Setter.Value>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="{StaticResource TableHeaderBlue}" />
+                    <Setter Property="Foreground" Value="#333" />
+                    <Setter Property="FontWeight" Value="Bold" />
+                    <Setter Property="BorderBrush" Value="{StaticResource BorderGray}" />
+                    <Setter Property="BorderThickness" Value="0,0,1,1" />
+                </Style>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="RowStyle">
+            <Setter.Value>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="BorderBrush" Value="#E2E8F0" />
+                    <Setter Property="FontSize" Value="14" />
+                    <Setter Property="BorderThickness" Value="0,0,0,1" />
+                    <Setter Property="Background" Value="White" />
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource HoverBlue}" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
 </ResourceDictionary>

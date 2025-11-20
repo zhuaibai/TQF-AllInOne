@@ -277,26 +277,46 @@ namespace WpfApp1.Command.BMS
         /// <param name="data"></param>
         public void OverViewSet(short[] data)
         {
-            MOD_AFECOL_PACKVOL = data[0]; //电压
-            MOD_AFECOL_CUR = data[2];     //电流
-            MOD_GROUD1_TEMP = data[4];    //电芯温度1
-            MOD_GROUD2_TEMP = data[5];    //电芯温度2
-            MOD_GROUD3_TEMP = data[6];    //电芯温度3
-            MOD_GROUD4_TEMP = data[7];    //电芯温度4
-            MOD_MOS_TEMP = data[8];       //MOS温度
-            MOD_ENV_TEMP = data[9];       //环境温度
-            MOD_SOC = data[10];           //SOC
-            MOD_SOH = data[11];           //SOH
-            MOD_RES_CAP = data[12];       //剩余容量
-            MOD_FULL_CAP = data[13];      //充满容量
-            MOD_CYCLECNT = data[14];      //循环次数
+            if (data == null)
+            {
+                return;
+            }
+            MOD_MAXCELL_VOL = data[0];    //最大电芯电压
+            MOD_MINCELL_VOL = data[1];    //最小电芯电压
+            MOD_CELL_VOLDIFF = data[2];   //最大电芯压差
+            MOD_AFECOL_PACKVOL = data[3]; //电压
+            MOD_AFECOL_CUR = data[5];     //电流
+            MOD_GROUD1_TEMP = data[7];    //电芯温度1
+            MOD_GROUD2_TEMP = data[8];    //电芯温度2
+            MOD_GROUD3_TEMP = data[9];    //电芯温度3
+            MOD_GROUD4_TEMP = data[10];    //电芯温度4
+            MOD_MOS_TEMP = data[11];       //MOS温度
+            MOD_ENV_TEMP = data[12];       //环境温度
+            MOD_SOC = data[13];           //SOC
+            SOC = MOD_SOC / 100;          //整数显示百分比
+            MOD_SOH = data[14];           //SOH
+            MOD_RES_CAP = data[15];       //剩余容量
+            MOD_FULL_CAP = data[16];      //充满容量
+            MOD_CYCLECNT = data[17];      //循环次数
+        }
+
+        private int _SOC;
+
+        public int SOC
+        {
+            get { return _SOC; }
+            set
+            {
+                _SOC = value;
+                this.RaiseProperChanged(nameof(SOC));
+            }
         }
 
 
-       
-           
 
-        
+
+
+
 
 
         /************************************** 模拟量参数读取区(Read Only) **************************************/

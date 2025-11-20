@@ -41,7 +41,6 @@ namespace WpfApp1.ViewModels
 
         public SendingCommandSettingsViewModel(ManualResetEventSlim pauseEvent, SemaphoreSlim semaphore, Action<string> addLog, Action<string> _updateState)
         {
-
             _pauseEvent = pauseEvent;
             _semaphore = semaphore;
             AddLog = addLog;
@@ -53,6 +52,7 @@ namespace WpfApp1.ViewModels
             LoadFromFile = new DelegateCommand((object ds) => { SendingCommands = LoadSettingsFromFile(); });
             // 初始化命令，传入异步操作和按钮状态判断
             WriteCommand = new RelayCommand(ExecuteWriteAsync, () => IsButtonEnabled);
+            StopReadComamnd = new RelayCommand(StopReadOperation, () => !stopReadFlag_isWorking);
 
             #region 初始化参数分类
 
@@ -96,106 +96,142 @@ namespace WpfApp1.ViewModels
             SendingCommandsView_20.Filter = (object item) =>
             {
                 var index = SendingCommands.IndexOf((SendingCommand)item);
-                return index >= 22 && index <= 25;
+                return index >= 91 && index <= 94;
             };
             //放电过流
             SendingCommandsView_6 = new ListCollectionView(SendingCommands);
             SendingCommandsView_6.Filter = (object item) =>
             {
                 var index = SendingCommands.IndexOf((SendingCommand)item);
-                return index >= 26 && index <= 31;
+                return index >= 22 && index <= 27;
             };
             //均衡
             SendingCommandsView_7 = new ListCollectionView(SendingCommands);
             SendingCommandsView_7.Filter = (object item) =>
             {
                 var index = SendingCommands.IndexOf((SendingCommand)item);
-                return index >= 32 && index <= 36;
+                return index >= 29 && index <= 32;
             };
             //单体休眠和电池包
             SendingCommandsView_8 = new ListCollectionView(SendingCommands);
             SendingCommandsView_8.Filter = (object item) =>
             {
                 var index = SendingCommands.IndexOf((SendingCommand)item);
-                return index >= 37 && index <= 41;
+                return index >= 33 && index <= 37;
             };
             //充电高温1
             SendingCommandsView_9 = new ListCollectionView(SendingCommands);
             SendingCommandsView_9.Filter = (object item) =>
             {
                 var index = SendingCommands.IndexOf((SendingCommand)item);
-                return index >= 42 && index <= 45;
+                return index >= 38 && index <= 41;
             };
             //充点低温
             SendingCommandsView_10 = new ListCollectionView(SendingCommands);
             SendingCommandsView_10.Filter = (object item) =>
             {
                 var index = SendingCommands.IndexOf((SendingCommand)item);
-                return index >= 46 && index <= 49;
+                return index >= 42 && index <= 45;
             };
             //充电高温2
             SendingCommandsView_11 = new ListCollectionView(SendingCommands);
             SendingCommandsView_11.Filter = (object item) =>
             {
                 var index = SendingCommands.IndexOf((SendingCommand)item);
-                return index >= 50 && index <= 53;
+                return index >= 46 && index <= 49;
             };
             //放电低温
             SendingCommandsView_12 = new ListCollectionView(SendingCommands);
             SendingCommandsView_12.Filter = (object item) =>
             {
                 var index = SendingCommands.IndexOf((SendingCommand)item);
-                return index >= 54 && index <= 57;
+                return index >= 50 && index <= 53;
             };
             //MOS
             SendingCommandsView_13 = new ListCollectionView(SendingCommands);
             SendingCommandsView_13.Filter = (object item) =>
             {
                 var index = SendingCommands.IndexOf((SendingCommand)item);
-                return index >= 58 && index <= 61;
+                return index >= 54 && index <= 57;
             };
             //放电高温
             SendingCommandsView_14 = new ListCollectionView(SendingCommands);
             SendingCommandsView_14.Filter = (object item) =>
             {
                 var index = SendingCommands.IndexOf((SendingCommand)item);
-                return index >= 62 && index <= 65;
+                return index >= 58 && index <= 61;
             };
             //环境高温
             SendingCommandsView_15 = new ListCollectionView(SendingCommands);
             SendingCommandsView_15.Filter = (object item) =>
             {
                 var index = SendingCommands.IndexOf((SendingCommand)item);
-                return index >= 66 && index <= 69;
+                return index >= 62 && index <= 65;
             };
             //电芯、预充与限流
             SendingCommandsView_16 = new ListCollectionView(SendingCommands);
             SendingCommandsView_16.Filter = (object item) =>
             {
                 var index = SendingCommands.IndexOf((SendingCommand)item);
-                return index >= 70 && index <= 76;
+                return index >= 66 && index <= 72;
             };
             //散热与加热
             SendingCommandsView_17 = new ListCollectionView(SendingCommands);
             SendingCommandsView_17.Filter = (object item) =>
             {
                 var index = SendingCommands.IndexOf((SendingCommand)item);
-                return index >= 77 && index <= 82;
+                return index >= 73 && index <= 78;
             };
             //其他
             SendingCommandsView_18 = new ListCollectionView(SendingCommands);
             SendingCommandsView_18.Filter = (object item) =>
             {
                 var index = SendingCommands.IndexOf((SendingCommand)item);
-                return index >= 83 && index <= 88;
+                return index >= 79 && index <= 84;
             };
             //其他
             SendingCommandsView_19 = new ListCollectionView(SendingCommands);
             SendingCommandsView_19.Filter = (object item) =>
             {
                 var index = SendingCommands.IndexOf((SendingCommand)item);
-                return index >= 91 && index <= 94;
+                return index >= 85 && index <= 90;
             };
+            //AFE 短路保护参数
+            SendingCommandsView_21 = new ListCollectionView(SendingCommands);
+            SendingCommandsView_21.Filter = (object item) =>
+            {
+                var index = SendingCommands.IndexOf((SendingCommand)item);
+                return index >= 95 && index <= 96;
+            };
+            //AFE 过充保护参数
+            SendingCommandsView_22 = new ListCollectionView(SendingCommands);
+            SendingCommandsView_22.Filter = (object item) =>
+            {
+                var index = SendingCommands.IndexOf((SendingCommand)item);
+                return index >= 97 && index <= 101;
+            };
+            //AFE 过放保护参数
+            SendingCommandsView_23 = new ListCollectionView(SendingCommands);
+            SendingCommandsView_23.Filter = (object item) =>
+            {
+                var index = SendingCommands.IndexOf((SendingCommand)item);
+                return index >= 102 && index <= 105;
+            };
+            //AFE 充电过流保护参数
+            SendingCommandsView_24 = new ListCollectionView(SendingCommands);
+            SendingCommandsView_24.Filter = (object item) =>
+            {
+                var index = SendingCommands.IndexOf((SendingCommand)item);
+                return index >= 106 && index <= 108;
+            };
+            //AFE 充电过流保护参数
+            SendingCommandsView_25 = new ListCollectionView(SendingCommands);
+            SendingCommandsView_25.Filter = (object item) =>
+            {
+                var index = SendingCommands.IndexOf((SendingCommand)item);
+                return index >= 109 && index <= 111;
+            };
+
             #endregion
 
             //点击开启配置窗口
@@ -203,8 +239,12 @@ namespace WpfApp1.ViewModels
             //初始化串口
             SerialPort1 = new SerialPortSettingViewModel();
 
-
             #region 初始化命令
+            //导出到Excel
+            ExportExcel = new RelayCommand(() =>
+            {
+                ExcelExportHelper.ExportHistoryToExcel(HistoryLods);
+            });
             //零点电流
             Command_SetZeroCurrent = new RelayCommand(
                 execute: () => ZeroCurrentOperation(),
@@ -331,6 +371,16 @@ namespace WpfApp1.ViewModels
                 execute: () => GetOutIndexOperation(),
                 canExecute: () => !GetOutIndex_IsWorking // 增加处理状态检查
             );
+            //休眠
+            SleepCommand = new RelayCommand(
+                execute: () => SleepOperation(),
+                canExecute: () => !Sleep_IsWorking // 增加处理状态检查
+            );
+            //取消休眠
+            CancelSleepCommand = new RelayCommand(
+                execute: () => CancelSleepOperation(),
+                canExecute: () => !CancelSleep_IsWorking // 增加处理状态检查
+            );
             #endregion
 
             #region 监控参数初始化
@@ -377,7 +427,7 @@ namespace WpfApp1.ViewModels
 
         public void setSystem(short[] data)
         {
-            if (data.Length < 4)
+            if (data == null || data.Length < 4)
             {
                 return;
             }
@@ -386,6 +436,33 @@ namespace WpfApp1.ViewModels
             RemainCap = data[2] / 100;
             CycleCount = data[3];
         }
+
+        //电芯数量
+        private int cellNum;
+
+        public int CellNum
+        {
+            get { return cellNum; }
+            set
+            {
+                cellNum = value;
+                this.RaiseProperChanged(nameof(CellNum));
+            }
+        }
+
+        //温度探头数量
+        private int ntcNum;
+
+        public int NtcNum
+        {
+            get { return ntcNum; }
+            set
+            {
+                ntcNum = value;
+                this.RaiseProperChanged(nameof(NtcNum));
+            }
+        }
+
 
         #region 历史记录
 
@@ -406,6 +483,12 @@ namespace WpfApp1.ViewModels
 
         }
 
+        //导出到excel表中
+        public RelayCommand ExportExcel { get; }
+
+        //停止读取历史记录
+        public RelayCommand StopReadComamnd { get; }
+
         //读取的条数
         private int _readCounts;
 
@@ -424,7 +507,8 @@ namespace WpfApp1.ViewModels
 
         public RelayCommand HistoryReadCommand { get; }
 
-
+        private bool stopReadFlag;
+        private bool stopReadFlag_isWorking;
 
         /// <summary>
         /// 点击设置
@@ -434,6 +518,7 @@ namespace WpfApp1.ViewModels
             try
             {
                 HistoryRead_IsWorking = true;
+                stopReadFlag = false;
                 // 禁用按钮
                 HistoryReadCommand.RaiseCanExecuteChanged();
 
@@ -458,13 +543,17 @@ namespace WpfApp1.ViewModels
                         short[] data = ModbusRTU.ParseRead20Response(SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 4, (ushort)i), 133));
                         if (data.Length == 64)
                         {
-                            var model = new HistoryLodModel(data);
+                            var model = new HistoryLodModel(data, cellNum);
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 HistoryLods.Add(model);
                             });
                         }
                         else
+                        {
+                            break;
+                        }
+                        if (stopReadFlag)
                         {
                             break;
                         }
@@ -489,7 +578,46 @@ namespace WpfApp1.ViewModels
                 HistoryReadCommand.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
+                stopReadFlag = true;
                 UpdateState("历史记录读取完成");
+            }
+        }
+
+
+        /// <summary>
+        /// 停止读取历史记录
+        /// </summary>
+        private async void StopReadOperation()
+        {
+            try
+            {
+                stopReadFlag_isWorking = true;
+                // 禁用按钮
+                StopReadComamnd.RaiseCanExecuteChanged();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    stopReadFlag = true;
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                stopReadFlag_isWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                StopReadComamnd.RaiseCanExecuteChanged();
+
+
             }
         }
 
@@ -1867,7 +1995,7 @@ namespace WpfApp1.ViewModels
                 {
                     //执行设置指令
                     Thread.Sleep(2000);//没有这个延时会报错
-                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 1, 1), 8);
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 5, (ushort)(settingStatue[0] == 1 ? 0 : 1)), 8);
                 })
                 , timeoutCts.Token);
             }
@@ -1931,7 +2059,7 @@ namespace WpfApp1.ViewModels
                 {
                     //执行设置指令
                     Thread.Sleep(2000);//没有这个延时会报错
-                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 1, 1), 8);
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 6, (ushort)(settingStatue[1] == 1 ? 0 : 1)), 8);
                 })
                 , timeoutCts.Token);
             }
@@ -1955,6 +2083,140 @@ namespace WpfApp1.ViewModels
         }
 
 
+        #endregion
+
+        #region 休眠
+
+        public int isSleeping = 0;
+
+        public RelayCommand SleepCommand
+        {
+            get;
+            set
+            ;
+        }
+
+        private bool Sleep_IsWorking;
+
+        /// <summary>
+        /// 点击设置
+        /// </summary>
+        private async void SleepOperation()
+        {
+            try
+            {
+                Sleep_IsWorking = true;
+                // 禁用按钮
+                SleepCommand.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(1000);//没有这个延时会报错
+                    ushort open = (ushort)(settingStatue[4] == 1 ? 0 : 1);
+                    
+                    isSleeping = open;
+                    
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, open), 8);
+                    if (receive.Length == 8)
+                    {
+                        SettingStatue[4] = open;
+                    }
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                Sleep_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                SleepCommand.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+        #endregion
+
+        #region 取消休眠
+
+
+        public RelayCommand CancelSleepCommand
+        {
+            get;
+            set
+            ;
+        }
+
+        private bool CancelSleep_IsWorking;
+
+        /// <summary>
+        /// 点击设置
+        /// </summary>
+        private async void CancelSleepOperation()
+        {
+            try
+            {
+                CancelSleep_IsWorking = true;
+                // 禁用按钮
+                CancelSleepCommand.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(2000);//没有这个延时会报错
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 0), 8);
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                CancelSleep_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                CancelSleepCommand.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
         #endregion
 
         #region 关机
@@ -1990,7 +2252,12 @@ namespace WpfApp1.ViewModels
                 {
                     //执行设置指令
                     Thread.Sleep(2000);//没有这个延时会报错
-                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 1, 1), 8);
+                    ushort shutDown = (ushort)(settingStatue[2] == 1 ? 0 : 1);
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 7, shutDown), 8);
+                    if(receive.Length == 8)
+                    {
+                        settingStatue[2] = (ushort)(settingStatue[2] == 1 ? 0 : 1);
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -2012,6 +2279,43 @@ namespace WpfApp1.ViewModels
                 UpdateState("设置指令已经执行完");
             }
         }
+
+        #endregion
+
+        #region 设置状态颜色显示 和 均衡状态显示
+
+        /// <summary>
+        /// 设置状态颜色
+        /// </summary>
+        private int[] settingStatue = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+        public int[] SettingStatue
+        {
+            get { return settingStatue; }
+            set
+            {
+                settingStatue = value;
+                this.RaiseProperChanged(nameof(SettingStatue));
+            }
+        }
+
+        /// <summary>
+        /// 均衡状态
+        /// </summary>
+        private int[] junHen = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+        public int[] JunHen
+        {
+            get { return junHen; }
+            set
+            {
+                junHen = value;
+                this.RaiseProperChanged(nameof(JunHen));
+            }
+        }
+
+
+
 
         #endregion
 
@@ -2147,7 +2451,7 @@ namespace WpfApp1.ViewModels
         /// <param name="data"></param>
         public void SetFrontMonitor(short[] data)
         {
-            if (data.Length < 36)
+            if (data == null || data.Length < 36)
                 return;
             for (int i = 0; i < 36; i++)
             {
@@ -2221,6 +2525,24 @@ namespace WpfApp1.ViewModels
         public ListCollectionView SendingCommandsView_19 { get; set; }
         //充电过流2
         public ListCollectionView SendingCommandsView_20 { get; set; }
+        //AFE 短路保护参数
+        public ListCollectionView SendingCommandsView_21 { get; set; }
+        //AFE 过充保护参数
+        public ListCollectionView SendingCommandsView_22 { get; set; }
+        //AFE 过放保护参数
+        public ListCollectionView SendingCommandsView_23 { get; set; }
+        //AFE 充电过流保护电流
+        public ListCollectionView SendingCommandsView_24 { get; set; }
+        //AFE 充电过流保护延时
+        public ListCollectionView SendingCommandsView_25 { get; set; }
+        //AFE 充电过流保护恢复时间
+        public ListCollectionView SendingCommandsView_26 { get; set; }
+        //AFE 放电过流保护电流
+        public ListCollectionView SendingCommandsView_27 { get; set; }
+        //AFE 放电过流保护延时
+        public ListCollectionView SendingCommandsView_28 { get; set; }
+        //AFE 放电过流保护恢复时间
+        public ListCollectionView SendingCommandsView_29 { get; set; }
 
         //保存
         public ICommand SaveCommand { get; }
@@ -2541,7 +2863,16 @@ namespace WpfApp1.ViewModels
                     // 模拟耗时操作，例如写入文件或网络请求
                     System.Threading.Thread.Sleep(1000);
                     receive = SerialCommunicationService.SendCommandToBMS(sendBuffer, 8);
+                    if (receive.Length != 8)
+                    {
 
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 8, 1), 8);
+                        if (receive.Length == 8)
+                        {
+                            OutIndex = receive[5];
+                            MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
                 });
 
                 ButtonText = receive.Length == 8 ? "成功" : "失败";
