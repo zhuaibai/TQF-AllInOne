@@ -339,6 +339,15 @@
     <s:String x:Key="放电高温触发次数">放电高温触发次数</s:String>
     <s:String x:Key="满充保护次数">满充保护次数</s:String>
     <s:String x:Key="正在通讯">正在通讯</s:String>
+    <s:String x:Key="最高电压">最高电压</s:String>
+    <s:String x:Key="最低电压">最低电压</s:String>
+    <s:String x:Key="最大电压差">最大电压差</s:String>
+    <s:String x:Key="充电限流开关">充电限流开关</s:String>
+    <s:String x:Key="预充电开关">预充电开关</s:String>
+    <s:String x:Key="日历时钟故障">日历时钟故障</s:String>
+    <s:String x:Key="存储功能故障">存储功能故障</s:String>
+    <s:String x:Key="预充电检测">预充电检测</s:String>
+    <s:String x:Key="均衡">均衡</s:String>
 
 
 

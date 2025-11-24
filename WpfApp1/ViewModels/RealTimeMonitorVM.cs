@@ -127,11 +127,13 @@ namespace WpfApp1.ViewModels
             {
                 using (FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
                 {
+                   
                     return false; // 没有被占用
                 }
             }
             catch (IOException)
             {
+                _isSaving = false;
                 return true; // 被占用
             }
         }

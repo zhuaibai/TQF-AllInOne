@@ -114,6 +114,8 @@ namespace WpfApp1.ViewModels
             //timer.Start();
             //实时监控列表
             RT_Monitor.PollingList = new ObservableCollection<PollingData>();
+            //并联监控
+            UnionVM = new UnionMonitorVM();
         }
 
         #region 小标题选项
@@ -125,7 +127,8 @@ namespace WpfApp1.ViewModels
             Mode3,
             Mode4,
             Mode5,
-            Mode6
+            Mode6,
+            Mode7
         }
 
         private BatteryMode _selectedMode = BatteryMode.Mode1;
@@ -183,6 +186,19 @@ namespace WpfApp1.ViewModels
                 this.RaiseProperChanged(nameof(RT_Monitor));
             }
         }
+
+        private UnionMonitorVM uinonVN;
+
+        public UnionMonitorVM UnionVM
+        {
+            get { return uinonVN; }
+            set
+            {
+                uinonVN = value;
+                this.RaiseProperChanged(nameof(UnionVM));
+            }
+        }
+            
 
 
         #endregion
@@ -2996,6 +3012,7 @@ namespace WpfApp1.ViewModels
 
             byte[] receive;
             short[] data;
+            int i = 0;
             if (SelectedMode == BatteryMode.Mode1)
             {
                 Thread.Sleep(100);
@@ -3013,7 +3030,7 @@ namespace WpfApp1.ViewModels
                 _pauseEvent.Wait(token);
                 //读写入的参数设置值(充电MOS、放电MOS、关机、休眠)
                 Thread.Sleep(100);
-                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 120, 2), 9);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame((byte)SerialCommunicationService.address, 120, 2), 9);
                 data = ModbusRTU.ParseRead03Response(receive);
                 if (data != null && data.Length >= 2)
                 {
@@ -3024,7 +3041,7 @@ namespace WpfApp1.ViewModels
                 // 等待暂停或取消信号
                 _pauseEvent.Wait(token);
                 Thread.Sleep(100);
-                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 250, 2), 9);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame((byte)SerialCommunicationService.address, 250, 2), 9);
                 //解析返回的报文
                 data = ModbusRTU.ParseRead03Response(receive);
                 if (data != null && data.Length == 2)
@@ -3037,7 +3054,7 @@ namespace WpfApp1.ViewModels
                 _pauseEvent.Wait(token);
                 //发送03功能码(查是16个电芯的电压)
                 Thread.Sleep(100);
-                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 2, 16), 37);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame((byte)SerialCommunicationService.address, 2, 16), 37);
                 //解析返回的报文
                 BMS_VM.MOD_CELL1_VOL_1_16(ModbusRTU.ParseRead03Response(receive));
 
@@ -3045,23 +3062,23 @@ namespace WpfApp1.ViewModels
                 _pauseEvent.Wait(token);
                 //查五个状态码(83)
                 Thread.Sleep(100);
-                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 80, 5), 15);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame((byte)SerialCommunicationService.address, 80, 5), 15);
                 data = ModbusRTU.ParseRead03Response(receive);
                 if (data != null)
                 {
                     BMS_VM.MOD_INST_STATE_Set(ModbusRTU.GetBits(data[3]));
 
                     //查告警(80)、保护(81)、硬件错误(82)信息
-                    BMS_VM.MOD_WARN_STATE_Set(ModbusRTU.GetBits(data[0]));
-                    BMS_VM.MOD_PROT_STATE_Set(ModbusRTU.GetBits(data[1]));
-                    BMS_VM.MOD_ERROR_STATE_Set(ModbusRTU.GetBits(data[2]));
+                    BMS_VM.MOD_WARN_STATE_Set_BMS01(ModbusRTU.GetBits(data[0]));
+                    BMS_VM.MOD_PROT_STATE_Set_BMS01(ModbusRTU.GetBits(data[1]));
+                    BMS_VM.MOD_ERROR_STATE_Set_BMS01(ModbusRTU.GetBits(data[2]));
                 }
 
                 // 等待暂停或取消信号
                 _pauseEvent.Wait(token);
                 //查电压  //查当前电流 //查温度
                 Thread.Sleep(100);
-                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 18, 18), 41);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame((byte)SerialCommunicationService.address, 18, 18), 41);
                 data = ModbusRTU.ParseRead03Response(receive);
                 BMS_VM.OverViewSet(data);
 
@@ -3069,7 +3086,7 @@ namespace WpfApp1.ViewModels
                 _pauseEvent.Wait(token);
                 //查系统信息
                 Thread.Sleep(100);
-                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 283, 14), 33);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame((byte)SerialCommunicationService.address, 283, 14), 33);
                 data = ModbusRTU.ParseRead03Response(receive);
                 BMS_VM.SystemInfoSet(data);
 
@@ -3077,7 +3094,7 @@ namespace WpfApp1.ViewModels
                 _pauseEvent.Wait(token);
                 //AFE_Protect
                 Thread.Sleep(100);
-                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 86, 1), 7);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame((byte)SerialCommunicationService.address, 86, 1), 7);
                 if (receive != null && receive.Length > 1)
                 {
                     data = ModbusRTU.ParseRead03Response(receive);
@@ -3132,6 +3149,14 @@ namespace WpfApp1.ViewModels
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 18, 18), 41);
                 data = ModbusRTU.ParseRead03Response(receive);
                 BMS_VM.OverViewSet(data);
+
+                _pauseEvent.Wait(token);
+                //查当前系统时间
+                Thread.Sleep(100);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 110, 3), 11);
+                data = ModbusRTU.ParseRead03Response(receive);
+                BMS_Setting.setSystem(data);
+
             }
             else if (SelectedMode == BatteryMode.Mode5)     //实时监控
             {
@@ -3179,9 +3204,9 @@ namespace WpfApp1.ViewModels
                     BMS_VM.MOD_INST_STATE_Set(ModbusRTU.GetBits(data[3]));
 
                     //查告警(80)、保护(81)、硬件错误(82)信息
-                    BMS_VM.MOD_WARN_STATE_Set(ModbusRTU.GetBits(data[0]));
-                    BMS_VM.MOD_PROT_STATE_Set(ModbusRTU.GetBits(data[1]));
-                    BMS_VM.MOD_ERROR_STATE_Set(ModbusRTU.GetBits(data[2]));
+                    BMS_VM.MOD_WARN_STATE_Set_BMS01(ModbusRTU.GetBits(data[0]));
+                    BMS_VM.MOD_PROT_STATE_Set_BMS01(ModbusRTU.GetBits(data[1]));
+                    BMS_VM.MOD_ERROR_STATE_Set_BMS01(ModbusRTU.GetBits(data[2]));
                 }
 
                 // 等待暂停或取消信号
@@ -3270,7 +3295,24 @@ namespace WpfApp1.ViewModels
                         RT_Monitor.SaveToExcel(polling);
                 });
             }
+            else if(SelectedMode == BatteryMode.Mode7)
+            {
+                while (i < 16)
+                {
+                    //并联监控
+                    // 等待暂停或取消信号
+                    _pauseEvent.Wait(token);
+                    //发送03功能码(查是16个电芯的电压)
+                    Thread.Sleep(100);
+                    receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame((byte)SerialCommunicationService.address, 2, 33), 71);
+                    //解析返回的报文
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    UnionVM.setElement(data, i);
 
+                    i++;
+                }
+                
+            }
         }
 
         /// <summary>

@@ -52,7 +52,9 @@ namespace WpfApp1.ViewModels
             LoadFromFile = new DelegateCommand((object ds) => { SendingCommands = LoadSettingsFromFile(); });
             // 初始化命令，传入异步操作和按钮状态判断
             WriteCommand = new RelayCommand(ExecuteWriteAsync, () => IsButtonEnabled);
+            WriteCommandByBMS01 = new RelayCommand(ExecuteWriteAsyncByBMS01, () => IsButtonEnabled);
             StopReadComamnd = new RelayCommand(StopReadOperation, () => !stopReadFlag_isWorking);
+            Command_SetSystemTime = new RelayCommand(SystemTimeOperation, () => !SystemTime_IsWorking);
 
             #region 初始化参数分类
 
@@ -381,6 +383,90 @@ namespace WpfApp1.ViewModels
                 execute: () => CancelSleepOperation(),
                 canExecute: () => !CancelSleep_IsWorking // 增加处理状态检查
             );
+            //电池组温度1+
+            Command_SetCellTemp1Inc = new RelayCommand(
+                execute: () => CellTemp1IncOperation(),
+                canExecute: () => !CellTemp1Inc_IsWorking // 增加处理状态检查
+            );
+            //电池组温度1-
+            Command_SetCellTemp1Dec = new RelayCommand(
+                execute: () => CellTemp1DecOperation(),
+                canExecute: () => !CellTemp1Dec_IsWorking // 增加处理状态检查
+            );
+            //电池组温度1 读取
+            Command_SetCellTemp1Read = new RelayCommand(
+                execute: () => CellTemp1ReadOperation(),
+                canExecute: () => !CellTemp1Read_IsWorking // 增加处理状态检查
+            ); 
+            //电池组温度1 写入
+            Command_SetCellTemp1Write = new RelayCommand(
+                execute: () => CellTemp1WriteOperation(),
+                canExecute: () => !CellTemp1Write_IsWorking // 增加处理状态检查
+            );
+
+            //电池组温度2+
+            Command_SetCellTemp2Inc = new RelayCommand(
+                execute: () => CellTemp2IncOperation(),
+                canExecute: () => !CellTemp2Inc_IsWorking // 增加处理状态检查
+            );
+            //电池组温度2-
+            Command_SetCellTemp2Dec = new RelayCommand(
+                execute: () => CellTemp2DecOperation(),
+                canExecute: () => !CellTemp2Dec_IsWorking // 增加处理状态检查
+            );
+            //电池组温度2 读取
+            Command_SetCellTemp2Read = new RelayCommand(
+                execute: () => CellTemp2ReadOperation(),
+                canExecute: () => !CellTemp2Read_IsWorking // 增加处理状态检查
+            );
+            //电池组温度2 写入
+            Command_SetCellTemp2Write = new RelayCommand(
+                execute: () => CellTemp2WriteOperation(),
+                canExecute: () => !CellTemp2Write_IsWorking // 增加处理状态检查
+            );
+
+            //电池组温度3+
+            Command_SetCellTemp3Inc = new RelayCommand(
+                execute: () => CellTemp3IncOperation(),
+                canExecute: () => !CellTemp3Inc_IsWorking // 增加处理状态检查
+            );
+            //电池组温度3-
+            Command_SetCellTemp3Dec = new RelayCommand(
+                execute: () => CellTemp3DecOperation(),
+                canExecute: () => !CellTemp3Dec_IsWorking // 增加处理状态检查
+            );
+            //电池组温度3 读取
+            Command_SetCellTemp3Read = new RelayCommand(
+                execute: () => CellTemp3ReadOperation(),
+                canExecute: () => !CellTemp3Read_IsWorking // 增加处理状态检查
+            );
+            //电池组温度3 写入
+            Command_SetCellTemp3Write = new RelayCommand(
+                execute: () => CellTemp3WriteOperation(),
+                canExecute: () => !CellTemp3Write_IsWorking // 增加处理状态检查
+            );
+
+            //电池组温度4+
+            Command_SetCellTemp4Inc = new RelayCommand(
+                execute: () => CellTemp4IncOperation(),
+                canExecute: () => !CellTemp4Inc_IsWorking // 增加处理状态检查
+            );
+            //电池组温度4-
+            Command_SetCellTemp4Dec = new RelayCommand(
+                execute: () => CellTemp4DecOperation(),
+                canExecute: () => !CellTemp4Dec_IsWorking // 增加处理状态检查
+            );
+            //电池组温度4 读取
+            Command_SetCellTemp4Read = new RelayCommand(
+                execute: () => CellTemp4ReadOperation(),
+                canExecute: () => !CellTemp4Read_IsWorking // 增加处理状态检查
+            );
+            //电池组温度4 写入
+            Command_SetCellTemp4Write = new RelayCommand(
+                execute: () => CellTemp4WriteOperation(),
+                canExecute: () => !CellTemp4Write_IsWorking // 增加处理状态检查
+            );
+
             #endregion
 
             #region 监控参数初始化
@@ -423,6 +509,7 @@ namespace WpfApp1.ViewModels
             };
 
             #endregion
+
         }
 
         public void setSystem(short[] data)
@@ -463,6 +550,225 @@ namespace WpfApp1.ViewModels
             }
         }
 
+        #region 系统时间
+
+        //系统时间
+        private string _SystemTime;
+
+        public string SystemTime
+        {
+            get { return _SystemTime; }
+            set
+            {
+                _SystemTime = value;
+                RaiseProperChanged(nameof(SystemTime));
+
+
+            }
+        }
+
+        public void setSystemTime(short[] time)
+        {
+            if (time.Length == 3)
+            {
+                SystemTime = ParseDateTimeRegistersLE(time[0], time[1], time[2]);
+            }
+        }
+        /// <summary>
+        /// 解析寄存器中的时间
+        /// </summary>
+        /// <param name="reg1"></param>
+        /// <param name="reg2"></param>
+        /// <param name="reg3"></param>
+        /// <returns></returns>
+        public string ParseDateTimeRegistersLE(short reg1, short reg2, short reg3)
+        {
+            byte month = (byte)(reg1 & 0xFF);       // 低字节
+            byte year = (byte)(reg1 >> 8);         // 高字节
+
+            byte hour = (byte)(reg2 & 0xFF);
+            byte day = (byte)(reg2 >> 8);
+
+            byte second = (byte)(reg3 & 0xFF);
+            byte minute = (byte)(reg3 >> 8);
+
+
+            return "20" + year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
+        }
+
+
+        /// <summary>
+        /// 创建时间字节数组
+        /// </summary>
+        /// <param name="year"></param>
+        /// <param name="month"></param>
+        /// <param name="day"></param>
+        /// <param name="hour"></param>
+        /// <param name="minute"></param>
+        /// <param name="second"></param>
+        /// <returns></returns>
+        public int[] BuildDateTimeRegistersLE(
+        byte year, byte month, byte day, byte hour, byte minute, byte second)
+        {
+            ushort reg1 = (ushort)((year << 8) | month);    // 月(低) 年(高)
+            ushort reg2 = (ushort)((day << 8) | hour);      // 时(低) 日(高)
+            ushort reg3 = (ushort)((minute << 8) | second); // 秒(低) 分(高)
+
+            return new int[] { reg1, reg2, reg3 };
+        }
+
+        /// <summary>
+        /// 获取现在的时间
+        /// </summary>
+        /// <returns></returns>
+        public int[] GetNowDateTimeRegistersLE()
+        {
+            DateTime now = DateTime.Now;
+
+            byte year = (byte)(now.Year % 100);
+            byte month = (byte)now.Month;
+            byte day = (byte)now.Day;
+            byte hour = (byte)now.Hour;
+            byte minute = (byte)now.Minute;
+            byte second = (byte)now.Second;
+
+            return BuildDateTimeRegistersLE(year, month, day, hour, minute, second);
+        }
+
+
+        private bool SystemTime_IsWorking;
+
+
+        //设置值
+        private string _SystemTime_Inputs;
+
+        public string SystemTime_Inputs
+        {
+            get { return _SystemTime_Inputs; }
+            set
+            {
+                _SystemTime_Inputs = value;
+                RaiseProperChanged(nameof(SystemTime_Inputs));
+                Command_SetSystemTime.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        public RelayCommand Command_SetSystemTime { get; }
+
+        /// <summary>
+        /// 点击设置
+        /// </summary>
+        private async void SystemTimeOperation()
+        {
+            try
+            {
+                SystemTime_IsWorking = true;
+                // 禁用按钮
+                Command_SetSystemTime.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(1000);//没有这个延时会报错
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteMultiRegisterFrame(1, 110, GetNowDateTimeRegistersLE()), 8);
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                SystemTime_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetSystemTime.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+        /// <summary>
+        /// 获取当前时间，并以特定格式返回
+        /// </summary>
+        /// <returns></returns>
+        private string GetTimeNow()
+        {
+            string timeNow = DateTime.Now.ToString("yy/MM/dd/HH/mm/ss");
+            if (string.IsNullOrEmpty(timeNow))
+            {
+                return "010719121212";
+            }
+            else
+            {
+                string result = timeNow.Replace("/", "");
+
+                return result;
+            }
+        }
+
+        #endregion
+
+        #region 选择Pack
+
+        //下拉选项
+        private List<string> _Pack = new List<string> { "Pack1", "Pack2", "Pack3", "Pack4", "Pack5", "Pack6", "Pack7", "Pack8", "Pack9", "Pack10", "Pack11", "Pack12", "Pack13", "Pack14", "Pack15", "Pack16" };
+
+        public List<string> Pack
+        {
+            get { return _Pack; }
+            set
+            {
+                _Pack = value;
+                RaiseProperChanged(nameof(Pack));
+            }
+        }
+
+        //已选项
+        private string selectedPack = "Pack1";
+
+        public string SelectedPack
+        {
+            get { return selectedPack; }
+            set
+            {
+                selectedPack = value;
+                SerialCommunicationService.address = getPackAddress(value);
+                this.RaiseProperChanged(nameof(SelectedPack));
+            }
+        }
+
+
+        /// <summary>
+        /// 获取地址
+        /// </summary>
+        /// <param name="pack"></param>
+        /// <returns></returns>
+        int getPackAddress(string pack)
+        {
+            return int.Parse(pack.Substring(4));
+        }
+
+
+        #endregion
 
         #region 历史记录
 
@@ -1515,7 +1821,7 @@ namespace WpfApp1.ViewModels
         }
 
         private bool ChgCalibFactorWrite_IsWorking;
-        // 读取
+        // 写入
         public RelayCommand Command_SetChgCalibFactorWrite { get; }
 
         private async void ChgCalibFactorWriteOperation()
@@ -1777,6 +2083,778 @@ namespace WpfApp1.ViewModels
                 UpdateState("设置指令已经执行完");
             }
         }
+
+        #endregion
+
+        #region 电池组温度系数1、+、-
+        //cellTemp1
+        //校准系数
+        private int _cellTemp1;
+
+        public int CellTemp1
+        {
+            get { return _cellTemp1; }
+            set
+            {
+                _cellTemp1 = value;
+                this.RaiseProperChanged(nameof(CellTemp1));
+            }
+        }
+
+        private bool CellTemp1Inc_IsWorking;
+        //增加
+        public RelayCommand Command_SetCellTemp1Inc { get; }
+
+        /// <summary>
+        /// 点击设置 +
+        /// </summary>
+        private async void CellTemp1IncOperation()
+        {
+            try
+            {
+                CellTemp1Inc_IsWorking = true;
+                // 禁用按钮
+                Command_SetCellTemp1Inc.RaiseCanExecuteChanged();
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    CellTemp1 = CellTemp1 + 1;
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                CellTemp1Inc_IsWorking = false;
+                // 重新启用按钮
+                Command_SetCellTemp1Inc.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        private bool CellTemp1Dec_IsWorking;
+        // 减少
+        public RelayCommand Command_SetCellTemp1Dec { get; }
+
+        /// <summary>
+        /// 点击设置 -
+        /// </summary>
+        private async void CellTemp1DecOperation()
+        {
+            try
+            {
+                CellTemp1Dec_IsWorking = true;
+                // 禁用按钮
+                Command_SetCellTemp1Dec.RaiseCanExecuteChanged();
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    CellTemp1 = CellTemp1 - 1;
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                CellTemp1Dec_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetCellTemp1Dec.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        private bool CellTemp1Read_IsWorking;
+        // 读取
+        public RelayCommand Command_SetCellTemp1Read { get; }
+
+        private async void CellTemp1ReadOperation()
+        {
+            try
+            {
+                CellTemp1Read_IsWorking = true;
+                // 禁用按钮
+                Command_SetCellTemp1Read.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(1000);//没有这个延时会报错
+                    //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "ChgCalibFactorInc_Inputs");
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 277, 1), 7);
+                    CellTemp1 = ModbusRTU.ParseRead03Response(receive)[0];
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                CellTemp1Read_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetCellTemp1Read.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+        private bool CellTemp1Write_IsWorking;
+        // 写入
+        public RelayCommand Command_SetCellTemp1Write { get; }
+
+        private async void CellTemp1WriteOperation()
+        {
+            try
+            {
+                CellTemp1Write_IsWorking = true;
+                // 禁用按钮
+                Command_SetCellTemp1Write.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(1000);//没有这个延时会报错
+                    //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "ChgCalibFactorInc_Inputs");
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 277, CellTemp1), 8);
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                CellTemp1Write_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetCellTemp1Write.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+
+        #endregion
+
+        #region 电池组温度系数2、+、-
+        //cellTemp1
+        //校准系数
+        private int _cellTemp2;
+
+        public int CellTemp2
+        {
+            get { return _cellTemp2; }
+            set
+            {
+                _cellTemp2 = value;
+                this.RaiseProperChanged(nameof(CellTemp2));
+            }
+        }
+
+        private bool CellTemp2Inc_IsWorking;
+        //增加
+        public RelayCommand Command_SetCellTemp2Inc { get; }
+
+        /// <summary>
+        /// 点击设置 +
+        /// </summary>
+        private async void CellTemp2IncOperation()
+        {
+            try
+            {
+                CellTemp2Inc_IsWorking = true;
+                // 禁用按钮
+                Command_SetCellTemp2Inc.RaiseCanExecuteChanged();
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    CellTemp2 = CellTemp2 + 1;
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                CellTemp2Inc_IsWorking = false;
+                // 重新启用按钮
+                Command_SetCellTemp2Inc.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        private bool CellTemp2Dec_IsWorking;
+        // 减少
+        public RelayCommand Command_SetCellTemp2Dec { get; }
+
+        /// <summary>
+        /// 点击设置 -
+        /// </summary>
+        private async void CellTemp2DecOperation()
+        {
+            try
+            {
+                CellTemp2Dec_IsWorking = true;
+                // 禁用按钮
+                Command_SetCellTemp2Dec.RaiseCanExecuteChanged();
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    CellTemp2 = CellTemp2 - 1;
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                CellTemp2Dec_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetCellTemp2Dec.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        private bool CellTemp2Read_IsWorking;
+        // 读取
+        public RelayCommand Command_SetCellTemp2Read { get; }
+
+        private async void CellTemp2ReadOperation()
+        {
+            try
+            {
+                CellTemp2Read_IsWorking = true;
+                // 禁用按钮
+                Command_SetCellTemp2Read.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(1000);//没有这个延时会报错
+                    //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "ChgCalibFactorInc_Inputs");
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 278, 1), 7);
+                    ChgCalibFactor = ModbusRTU.ParseRead03Response(receive)[0];
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                CellTemp2Read_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetCellTemp2Read.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+        private bool CellTemp2Write_IsWorking;
+        // 写入
+        public RelayCommand Command_SetCellTemp2Write { get; }
+
+        private async void CellTemp2WriteOperation()
+        {
+            try
+            {
+                CellTemp2Write_IsWorking = true;
+                // 禁用按钮
+                Command_SetCellTemp2Write.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(1000);//没有这个延时会报错
+                    //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "ChgCalibFactorInc_Inputs");
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 278, CellTemp2), 8);
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                CellTemp2Write_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetCellTemp2Write.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+
+        #endregion
+
+        #region 电池组温度系数3、+、-
+        //cellTemp1
+        //校准系数
+        private int _cellTemp3;
+
+        public int CellTemp3
+        {
+            get { return _cellTemp3; }
+            set
+            {
+                _cellTemp3 = value;
+                this.RaiseProperChanged(nameof(CellTemp3));
+            }
+        }
+
+        private bool CellTemp3Inc_IsWorking;
+        //增加
+        public RelayCommand Command_SetCellTemp3Inc { get; }
+
+        /// <summary>
+        /// 点击设置 +
+        /// </summary>
+        private async void CellTemp3IncOperation()
+        {
+            try
+            {
+                CellTemp3Inc_IsWorking = true;
+                // 禁用按钮
+                Command_SetCellTemp3Inc.RaiseCanExecuteChanged();
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    CellTemp3 = CellTemp3 + 1;
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                CellTemp3Inc_IsWorking = false;
+                // 重新启用按钮
+                Command_SetCellTemp3Inc.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        private bool CellTemp3Dec_IsWorking;
+        // 减少
+        public RelayCommand Command_SetCellTemp3Dec { get; }
+
+        /// <summary>
+        /// 点击设置 -
+        /// </summary>
+        private async void CellTemp3DecOperation()
+        {
+            try
+            {
+                CellTemp3Dec_IsWorking = true;
+                // 禁用按钮
+                Command_SetCellTemp3Dec.RaiseCanExecuteChanged();
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    CellTemp3 = CellTemp3 - 1;
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                CellTemp3Dec_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetCellTemp3Dec.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        private bool CellTemp3Read_IsWorking;
+        // 读取
+        public RelayCommand Command_SetCellTemp3Read { get; }
+
+        private async void CellTemp3ReadOperation()
+        {
+            try
+            {
+                CellTemp3Read_IsWorking = true;
+                // 禁用按钮
+                Command_SetCellTemp3Read.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(1000);//没有这个延时会报错
+                    //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "ChgCalibFactorInc_Inputs");
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 279, 1), 7);
+                    ChgCalibFactor = ModbusRTU.ParseRead03Response(receive)[0];
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                CellTemp3Read_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetCellTemp3Read.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+        private bool CellTemp3Write_IsWorking;
+        // 写入
+        public RelayCommand Command_SetCellTemp3Write { get; }
+
+        private async void CellTemp3WriteOperation()
+        {
+            try
+            {
+                CellTemp3Write_IsWorking = true;
+                // 禁用按钮
+                Command_SetCellTemp3Write.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(1000);//没有这个延时会报错
+                    //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "ChgCalibFactorInc_Inputs");
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 279, CellTemp3), 8);
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                CellTemp3Write_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetCellTemp3Write.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+
+        #endregion
+
+        #region 电池组温度系数4、+、-
+        //cellTemp1
+        //校准系数
+        private int _cellTemp4;
+
+        public int CellTemp4
+        {
+            get { return _cellTemp4; }
+            set
+            {
+                _cellTemp4 = value;
+                this.RaiseProperChanged(nameof(CellTemp4));
+            }
+        }
+
+        private bool CellTemp4Inc_IsWorking;
+        //增加
+        public RelayCommand Command_SetCellTemp4Inc { get; }
+
+        /// <summary>
+        /// 点击设置 +
+        /// </summary>
+        private async void CellTemp4IncOperation()
+        {
+            try
+            {
+                CellTemp4Inc_IsWorking = true;
+                // 禁用按钮
+                Command_SetCellTemp4Inc.RaiseCanExecuteChanged();
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    CellTemp3 = CellTemp3 + 1;
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                CellTemp4Inc_IsWorking = false;
+                // 重新启用按钮
+                Command_SetCellTemp4Inc.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        private bool CellTemp4Dec_IsWorking;
+        // 减少
+        public RelayCommand Command_SetCellTemp4Dec { get; }
+
+        /// <summary>
+        /// 点击设置 -
+        /// </summary>
+        private async void CellTemp4DecOperation()
+        {
+            try
+            {
+                CellTemp4Dec_IsWorking = true;
+                // 禁用按钮
+                Command_SetCellTemp4Dec.RaiseCanExecuteChanged();
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    CellTemp4 = CellTemp4 - 1;
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                CellTemp4Dec_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetCellTemp4Dec.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        private bool CellTemp4Read_IsWorking;
+        // 读取
+        public RelayCommand Command_SetCellTemp4Read { get; }
+
+        private async void CellTemp4ReadOperation()
+        {
+            try
+            {
+                CellTemp4Read_IsWorking = true;
+                // 禁用按钮
+                Command_SetCellTemp4Read.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(1000);//没有这个延时会报错
+                    //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "ChgCalibFactorInc_Inputs");
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 280, 1), 7);
+                    ChgCalibFactor = ModbusRTU.ParseRead03Response(receive)[0];
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                CellTemp4Read_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetCellTemp4Read.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+        private bool CellTemp4Write_IsWorking;
+        // 写入
+        public RelayCommand Command_SetCellTemp4Write { get; }
+
+        private async void CellTemp4WriteOperation()
+        {
+            try
+            {
+                CellTemp4Write_IsWorking = true;
+                // 禁用按钮
+                Command_SetCellTemp4Write.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(1000);//没有这个延时会报错
+                    //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "ChgCalibFactorInc_Inputs");
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 280, CellTemp4), 8);
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                CellTemp4Write_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetCellTemp4Write.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
 
         #endregion
 
@@ -2125,9 +3203,9 @@ namespace WpfApp1.ViewModels
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
                     ushort open = (ushort)(settingStatue[4] == 1 ? 0 : 1);
-                    
+
                     isSleeping = open;
-                    
+
                     byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, open), 8);
                     if (receive.Length == 8)
                     {
@@ -2254,7 +3332,7 @@ namespace WpfApp1.ViewModels
                     Thread.Sleep(2000);//没有这个延时会报错
                     ushort shutDown = (ushort)(settingStatue[2] == 1 ? 0 : 1);
                     byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 7, shutDown), 8);
-                    if(receive.Length == 8)
+                    if (receive.Length == 8)
                     {
                         settingStatue[2] = (ushort)(settingStatue[2] == 1 ? 0 : 1);
                     }
@@ -2841,6 +3919,8 @@ namespace WpfApp1.ViewModels
         public Action<string, int> ShowBoubleWithTime;
         //命令
         public RelayCommand WriteCommand { get; }
+        public RelayCommand WriteCommandByBMS01 { get; }
+
         //异步执行写入操作
         private async void ExecuteWriteAsync()
         {
@@ -2891,6 +3971,61 @@ namespace WpfApp1.ViewModels
                 // 恢复按钮可点击状态
                 IsButtonEnabled = true;
                 WriteCommand.RaiseCanExecuteChanged();
+                //关闭串口
+                //SerialCommunicationService.CloseCom();
+            }
+        }
+
+        //异步执行写入操作
+        private async void ExecuteWriteAsyncByBMS01()
+        {
+            try
+            {
+                // 更新按钮状态为"写入中"且不可点击
+                ButtonText = "ing...";
+                IsButtonEnabled = false;
+                //Debug.WriteLine($"ButtonText 设置为: {ButtonText}");
+
+                // 通知命令状态已更改
+                WriteCommandByBMS01.RaiseCanExecuteChanged();
+
+                //组装报文
+                byte[] sendBuffer = ModbusRTU.GetSendBytesByBMS01(SelectedMachineItem, SendingCommands);
+                byte[] receive = new byte[] { 0 };
+                // 模拟耗时操作（实际应用中替换为真实的写入逻辑）
+                await Task.Run(() =>
+                {
+                    // 模拟耗时操作，例如写入文件或网络请求
+                    System.Threading.Thread.Sleep(1000);
+                    receive = SerialCommunicationService.SendCommandToBMS(sendBuffer, 8);
+                    if (receive.Length != 8)
+                    {
+
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 8, 1), 8);
+                        if (receive.Length == 8)
+                        {
+                            OutIndex = receive[5];
+                            MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                });
+
+                ButtonText = receive.Length == 8 ? "成功" : "失败";
+                //ShowBoubleWithTime($"{ButtonText}", 1500);
+
+                await Task.Delay(500); // 短暂显示"完成"状态
+                ButtonText = "写入";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"{ex.Message}");
+                ButtonText = "写入";
+            }
+            finally
+            {
+                // 恢复按钮可点击状态
+                IsButtonEnabled = true;
+                WriteCommandByBMS01.RaiseCanExecuteChanged();
                 //关闭串口
                 //SerialCommunicationService.CloseCom();
             }

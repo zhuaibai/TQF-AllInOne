@@ -109,6 +109,10 @@
                 Content="实时监控"
                 IsChecked="{Binding SelectedMode, Converter={StaticResource EnumEqualsConverter}, ConverterParameter=Mode5}" />
             <RadioButton
+                Click="UnionMonitor_Click"
+                Content="并联监控"
+                IsChecked="{Binding SelectedMode, Converter={StaticResource EnumEqualsConverter}, ConverterParameter=Mode7}" />
+            <RadioButton
                 Click="AdminView_Click"
                 Content="前端芯片监控"
                 IsChecked="{Binding SelectedMode, Converter={StaticResource EnumEqualsConverter}, ConverterParameter=Mode6}"
@@ -442,6 +446,7 @@
         <Grid Grid.Row="1" Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="4*" MaxHeight="500" />
+                <RowDefinition Height="auto" />
                 <RowDefinition Height="auto" MinHeight="200" />
             </Grid.RowDefinitions>
             <!--  第一行 图标显示  -->
@@ -493,6 +498,14 @@
                         Text="&#xe62f;"
                         Visibility="{Binding BMS_VM.MOD_AFECOL_CUR, Converter={StaticResource IntToVisibilityConverter}}" />
                 </StackPanel>
+                <ComboBox
+                    Grid.Row="0"
+                    Width="100"
+                    Height="30"
+                    HorizontalAlignment="Left"
+                    ItemsSource="{Binding BMS_Setting.Pack}"
+                    SelectedItem="{Binding BMS_Setting.SelectedPack, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource SelectBox}" />
                 <!--  向上的箭头  -->
                 <StackPanel Grid.Row="1">
                     <TextBlock
@@ -536,265 +549,404 @@
                     FontSize="70"
                     Text="&#xe605;" />
             </Grid>
+            <GroupBox Grid.Row="1" Header="最高与最低电压">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+
+                    </Grid.ColumnDefinitions>
+                    <!--  最大电压  -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 最高电压}" />
+                    </StackPanel>
+                    <TextBlock
+                        Grid.Column="1"
+                        Foreground="Red"
+                        Style="{StaticResource ContentText}"
+                        Text="{Binding BMS_VM.MOD_MAXCELL_VOL, Converter={StaticResource DivideByThousandConverter}}" />
+                    <!--  最低电压  -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+
+                        <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 最低电压}" />
+                    </StackPanel>
+                    <TextBlock
+                        Grid.Column="3"
+                        Foreground="Orange"
+                        Style="{StaticResource ContentText}"
+                        Text="{Binding BMS_VM.MOD_MINCELL_VOL, Converter={StaticResource DivideByThousandConverter}}" />
+                    <!--  最大电压差  -->
+                    <StackPanel Grid.Column="4" Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 最大电压差}" />
+                    </StackPanel>
+                    <TextBlock
+                        Grid.Column="5"
+                        Foreground="Green"
+                        Style="{StaticResource ContentText}"
+                        Text="{Binding BMS_VM.MOD_CELL_VOLDIFF, Converter={StaticResource DivideByThousandConverter}}" />
+                </Grid>
+
+            </GroupBox>
             <!--  单体电压  -->
             <ScrollViewer
-                Grid.Row="1"
+                Grid.Row="2"
                 Grid.Column="1"
                 VerticalScrollBarVisibility="Auto">
                 <GroupBox Header="单体电压">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*" />
-                            <ColumnDefinition Width="1*" />
-                            <ColumnDefinition Width="2*" />
-                            <ColumnDefinition Width="1*" />
-                        </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Row="0"
+                                Style="{StaticResource HeaderText}"
+                                Text="{DynamicResource 属性}" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Style="{StaticResource HeaderText}"
+                                Text="{DynamicResource 均衡}" />
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="2"
+                                Style="{StaticResource HeaderText}"
+                                Text="{DynamicResource 当前值}" />
+
+                            <TextBlock
+                                Grid.Column="3"
+                                Style="{StaticResource HeaderText}"
+                                Text="{DynamicResource 属性}" />
+                            <TextBlock
+                                Grid.Column="4"
+                                Style="{StaticResource HeaderText}"
+                                Text="{DynamicResource 均衡}" />
+                            <TextBlock
+                                Grid.Column="5"
+                                Style="{StaticResource HeaderText}"
+                                Text="{DynamicResource 当前值}" />
+                        </Grid>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="1*" />
+                            </Grid.ColumnDefinitions>
 
 
 
-                        <!--  电池电压1  -->
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压1}" />
-                            <Border
-                                Width="15"
-                                Height="15"
-                                Margin="5,0"
-                                Background="{Binding BMS_Setting.JunHen[0], Converter={StaticResource IntToColorConverter}}"
-                                CornerRadius="10" />
-                        </StackPanel>
+                            <!--  电池电压1  -->
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压1}" />
+                                <Border
+                                    Width="15"
+                                    Height="15"
+                                    Margin="5,0"
+                                    Background="{Binding BMS_Setting.JunHen[0], Converter={StaticResource IntToColorConverter}}"
+                                    CornerRadius="10" />
+                            </StackPanel>
 
-                        <TextBlock
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.MOD_CELL1_VOL, Converter={StaticResource DivideByThousandConverter}}" />
+                            <TextBlock
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding BMS_VM.MOD_CELL1_VOL, Converter={StaticResource DivideByThousandConverter}}" />
 
-                        <!--  电池电压9  -->
-                        <StackPanel Grid.Column="2" Orientation="Horizontal">
-                            <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压9}" />
-                            <Border
-                                Width="15"
-                                Height="15"
-                                Margin="5,0"
-                                Background="{Binding BMS_Setting.JunHen[8], Converter={StaticResource IntToColorConverter}}"
-                                CornerRadius="10" />
-                        </StackPanel>
-                        <TextBlock
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.MOD_CELL9_VOL, Converter={StaticResource DivideByThousandConverter}}" />
-                        <!--  电池电压2  -->
-                        <StackPanel
-                            Grid.Row="1"
-                            Grid.Column="0"
-                            Orientation="Horizontal">
-                            <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压2}" />
-                            <Border
-                                Width="15"
-                                Height="15"
-                                Margin="5,0"
-                                Background="{Binding BMS_Setting.JunHen[1], Converter={StaticResource IntToColorConverter}}"
-                                CornerRadius="10" />
-                        </StackPanel>
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.MOD_CELL2_VOL, Converter={StaticResource DivideByThousandConverter}}" />
-                        <!--  电池电压10  -->
-                        <StackPanel
-                            Grid.Row="1"
-                            Grid.Column="2"
-                            Orientation="Horizontal">
-                            <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压10}" />
-                            <Border
-                                Width="15"
-                                Height="15"
-                                Margin="5,0"
-                                Background="{Binding BMS_Setting.JunHen[9], Converter={StaticResource IntToColorConverter}}"
-                                CornerRadius="10" />
-                        </StackPanel>
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.MOD_CELL10_VOL, Converter={StaticResource DivideByThousandConverter}}" />
-                        <!--  电池电压3  -->
-                        <StackPanel
-                            Grid.Row="2"
-                            Grid.Column="0"
-                            Orientation="Horizontal">
-                            <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压3}" />
-                            <Border
-                                Width="15"
-                                Height="15"
-                                Margin="5,0"
-                                Background="{Binding BMS_Setting.JunHen[2], Converter={StaticResource IntToColorConverter}}"
-                                CornerRadius="10" />
-                        </StackPanel>
-                        <TextBlock
-                            Grid.Row="2"
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.MOD_CELL3_VOL, Converter={StaticResource DivideByThousandConverter}}" />
-                        <!--  电池电压11  -->
-                        <StackPanel
-                            Grid.Row="2"
-                            Grid.Column="2"
-                            Orientation="Horizontal">
-                            <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压11}" />
-                            <Border
-                                Width="15"
-                                Height="15"
-                                Margin="5,0"
-                                Background="{Binding BMS_Setting.JunHen[2], Converter={StaticResource IntToColorConverter}}"
-                                CornerRadius="10" />
-                        </StackPanel>
-                        <TextBlock
-                            Grid.Row="2"
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.MOD_CELL11_VOL, Converter={StaticResource DivideByThousandConverter}}" />
-                        <!--  电池电压4  -->
-                        <StackPanel
-                            Grid.Row="3"
-                            Grid.Column="0"
-                            Orientation="Horizontal">
-                            <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压4}" />
-                            <Border
-                                Width="15"
-                                Height="15"
-                                Margin="5,0"
-                                Background="{Binding BMS_Setting.JunHen[2], Converter={StaticResource IntToColorConverter}}"
-                                CornerRadius="10" />
-                        </StackPanel>
-                        <TextBlock
-                            Grid.Row="3"
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.MOD_CELL4_VOL, Converter={StaticResource DivideByThousandConverter}}" />
-                        <!--  电池电压12  -->
-                        <StackPanel
-                            Grid.Row="3"
-                            Grid.Column="2"
-                            Orientation="Horizontal">
-                            <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压12}" />
-                            <Border
-                                Width="15"
-                                Height="15"
-                                Margin="5,0"
-                                Background="{Binding BMS_Setting.JunHen[2], Converter={StaticResource IntToColorConverter}}"
-                                CornerRadius="10" />
-                        </StackPanel>
-                        <TextBlock
-                            Grid.Row="3"
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.MOD_CELL12_VOL, Converter={StaticResource DivideByThousandConverter}}" />
-                        <!--  BMS温度过低  -->
-                        <TextBlock
-                            Grid.Row="4"
-                            Grid.Column="0"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 电池电压5}" />
-                        <TextBlock
-                            Grid.Row="4"
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.MOD_CELL5_VOL, Converter={StaticResource DivideByThousandConverter}}" />
-                        <!--  BMS温度过高  -->
-                        <TextBlock
-                            Grid.Row="4"
-                            Grid.Column="2"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 电池电压13}" />
-                        <TextBlock
-                            Grid.Row="4"
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.MOD_CELL13_VOL, Converter={StaticResource DivideByThousandConverter}}" />
-                        <!--  BMS充电电压限制  -->
-                        <TextBlock
-                            Grid.Row="8"
-                            Grid.Column="0"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 电池电压8}" />
-                        <TextBlock
-                            Grid.Row="8"
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.MOD_CELL8_VOL, Converter={StaticResource DivideByThousandConverter}}" />
-                        <!--  BMS放电电压限制  -->
-                        <TextBlock
-                            Grid.Row="8"
-                            Grid.Column="2"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 电池电压16}" />
-                        <TextBlock
-                            Grid.Row="8"
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.MOD_CELL16_VOL, Converter={StaticResource DivideByThousandConverter}}" />
-                        <!--  BMS充电电流限制  -->
-                        <TextBlock
-                            Grid.Row="6"
-                            Grid.Column="0"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 电池电压7}" />
-                        <TextBlock
-                            Grid.Row="6"
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.MOD_CELL7_VOL, Converter={StaticResource DivideByThousandConverter}}" />
-                        <!--  BMS当前SOC  -->
-                        <TextBlock
-                            Grid.Row="6"
-                            Grid.Column="2"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 电池电压15}" />
-                        <TextBlock
-                            Grid.Row="6"
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.MOD_CELL15_VOL, Converter={StaticResource DivideByThousandConverter}}" />
+                            <!--  电池电压9  -->
+                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压9}" />
+                                <Border
+                                    Width="15"
+                                    Height="15"
+                                    Margin="12,0"
+                                    Background="{Binding BMS_Setting.JunHen[8], Converter={StaticResource IntToColorConverter}}"
+                                    CornerRadius="10" />
+                            </StackPanel>
+                            <TextBlock
+                                Grid.Column="3"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding BMS_VM.MOD_CELL9_VOL, Converter={StaticResource DivideByThousandConverter}}" />
+                            <!--  电池电压2  -->
+                            <StackPanel
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压2}" />
+                                <Border
+                                    Width="15"
+                                    Height="15"
+                                    Margin="5,0"
+                                    Background="{Binding BMS_Setting.JunHen[1], Converter={StaticResource IntToColorConverter}}"
+                                    CornerRadius="10" />
+                            </StackPanel>
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding BMS_VM.MOD_CELL2_VOL, Converter={StaticResource DivideByThousandConverter}}" />
+                            <!--  电池电压10  -->
+                            <StackPanel
+                                Grid.Row="1"
+                                Grid.Column="2"
+                                Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压10}" />
+                                <Border
+                                    Width="15"
+                                    Height="15"
+                                    Margin="5,0"
+                                    Background="{Binding BMS_Setting.JunHen[9], Converter={StaticResource IntToColorConverter}}"
+                                    CornerRadius="10" />
+                            </StackPanel>
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="3"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding BMS_VM.MOD_CELL10_VOL, Converter={StaticResource DivideByThousandConverter}}" />
+                            <!--  电池电压3  -->
+                            <StackPanel
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压3}" />
+                                <Border
+                                    Width="15"
+                                    Height="15"
+                                    Margin="5,0"
+                                    Background="{Binding BMS_Setting.JunHen[2], Converter={StaticResource IntToColorConverter}}"
+                                    CornerRadius="10" />
+                            </StackPanel>
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding BMS_VM.MOD_CELL3_VOL, Converter={StaticResource DivideByThousandConverter}}" />
+                            <!--  电池电压11  -->
+                            <StackPanel
+                                Grid.Row="2"
+                                Grid.Column="2"
+                                Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压11}" />
+                                <Border
+                                    Width="15"
+                                    Height="15"
+                                    Margin="5,0"
+                                    Background="{Binding BMS_Setting.JunHen[10], Converter={StaticResource IntToColorConverter}}"
+                                    CornerRadius="10" />
+                            </StackPanel>
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="3"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding BMS_VM.MOD_CELL11_VOL, Converter={StaticResource DivideByThousandConverter}}" />
+                            <!--  电池电压4  -->
+                            <StackPanel
+                                Grid.Row="3"
+                                Grid.Column="0"
+                                Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压4}" />
+                                <Border
+                                    Width="15"
+                                    Height="15"
+                                    Margin="5,0"
+                                    Background="{Binding BMS_Setting.JunHen[3], Converter={StaticResource IntToColorConverter}}"
+                                    CornerRadius="10" />
+                            </StackPanel>
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding BMS_VM.MOD_CELL4_VOL, Converter={StaticResource DivideByThousandConverter}}" />
+                            <!--  电池电压12  -->
+                            <StackPanel
+                                Grid.Row="3"
+                                Grid.Column="2"
+                                Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压12}" />
+                                <Border
+                                    Width="15"
+                                    Height="15"
+                                    Margin="5,0"
+                                    Background="{Binding BMS_Setting.JunHen[11], Converter={StaticResource IntToColorConverter}}"
+                                    CornerRadius="10" />
+                            </StackPanel>
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="3"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding BMS_VM.MOD_CELL12_VOL, Converter={StaticResource DivideByThousandConverter}}" />
+                            <!--  电池电压5  -->
+                            <StackPanel
+                                Grid.Row="4"
+                                Grid.Column="0"
+                                Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压5}" />
+                                <Border
+                                    Width="15"
+                                    Height="15"
+                                    Margin="5,0"
+                                    Background="{Binding BMS_Setting.JunHen[4], Converter={StaticResource IntToColorConverter}}"
+                                    CornerRadius="10" />
+                            </StackPanel>
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding BMS_VM.MOD_CELL5_VOL, Converter={StaticResource DivideByThousandConverter}}" />
+                            <!--  电池电压13  -->
+                            <StackPanel
+                                Grid.Row="4"
+                                Grid.Column="2"
+                                Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压13}" />
+                                <Border
+                                    Width="15"
+                                    Height="15"
+                                    Margin="5,0"
+                                    Background="{Binding BMS_Setting.JunHen[12], Converter={StaticResource IntToColorConverter}}"
+                                    CornerRadius="10" />
+                            </StackPanel>
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="3"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding BMS_VM.MOD_CELL13_VOL, Converter={StaticResource DivideByThousandConverter}}" />
+                            <!--  电池电压8  -->
+                            <StackPanel
+                                Grid.Row="8"
+                                Grid.Column="0"
+                                Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压8}" />
+                                <Border
+                                    Width="15"
+                                    Height="15"
+                                    Margin="5,0"
+                                    Background="{Binding BMS_Setting.JunHen[7], Converter={StaticResource IntToColorConverter}}"
+                                    CornerRadius="10" />
+                            </StackPanel>
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding BMS_VM.MOD_CELL8_VOL, Converter={StaticResource DivideByThousandConverter}}" />
+                            <!--  电池电压16  -->
+                            <StackPanel
+                                Grid.Row="8"
+                                Grid.Column="2"
+                                Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压16}" />
+                                <Border
+                                    Width="15"
+                                    Height="15"
+                                    Margin="5,0"
+                                    Background="{Binding BMS_Setting.JunHen[15], Converter={StaticResource IntToColorConverter}}"
+                                    CornerRadius="10" />
+                            </StackPanel>
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="3"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding BMS_VM.MOD_CELL16_VOL, Converter={StaticResource DivideByThousandConverter}}" />
+                            <!--  电池电压7  -->
+                            <StackPanel
+                                Grid.Row="6"
+                                Grid.Column="0"
+                                Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压7}" />
+                                <Border
+                                    Width="15"
+                                    Height="15"
+                                    Margin="5,0"
+                                    Background="{Binding BMS_Setting.JunHen[6], Converter={StaticResource IntToColorConverter}}"
+                                    CornerRadius="10" />
+                            </StackPanel>
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding BMS_VM.MOD_CELL7_VOL, Converter={StaticResource DivideByThousandConverter}}" />
+                            <!--  电池电压15  -->
+                            <StackPanel
+                                Grid.Row="6"
+                                Grid.Column="2"
+                                Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压15}" />
+                                <Border
+                                    Width="15"
+                                    Height="15"
+                                    Margin="5,0"
+                                    Background="{Binding BMS_Setting.JunHen[14], Converter={StaticResource IntToColorConverter}}"
+                                    CornerRadius="10" />
+                            </StackPanel>
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="3"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding BMS_VM.MOD_CELL15_VOL, Converter={StaticResource DivideByThousandConverter}}" />
 
-                        <!--  BMS平均温度  -->
-                        <TextBlock
-                            Grid.Row="5"
-                            Grid.Column="0"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 电池电压6}" />
-                        <TextBlock
-                            Grid.Row="5"
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.MOD_CELL6_VOL, Converter={StaticResource DivideByThousandConverter}}" />
-                        <!--  BMS电流  -->
+                            <!--  电池电压6  -->
+                            <StackPanel
+                                Grid.Row="5"
+                                Grid.Column="0"
+                                Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压6}" />
+                                <Border
+                                    Width="15"
+                                    Height="15"
+                                    Margin="5,0"
+                                    Background="{Binding BMS_Setting.JunHen[5], Converter={StaticResource IntToColorConverter}}"
+                                    CornerRadius="10" />
+                            </StackPanel>
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding BMS_VM.MOD_CELL6_VOL, Converter={StaticResource DivideByThousandConverter}}" />
+                            <!--  电池电压14  -->
+                            <StackPanel
+                                Grid.Row="5"
+                                Grid.Column="2"
+                                Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电池电压14}" />
+                                <Border
+                                    Width="15"
+                                    Height="15"
+                                    Margin="5,0"
+                                    Background="{Binding BMS_Setting.JunHen[5], Converter={StaticResource IntToColorConverter}}"
+                                    CornerRadius="10" />
+                            </StackPanel>
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="3"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding BMS_VM.MOD_CELL14_VOL, Converter={StaticResource DivideByThousandConverter}}" />
 
-                        <TextBlock
-                            Grid.Row="5"
-                            Grid.Column="2"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 电池电压14}" />
-                        <TextBlock
-                            Grid.Row="5"
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.MOD_CELL14_VOL, Converter={StaticResource DivideByThousandConverter}}" />
-                    </Grid>
+                        </Grid>
+                    </StackPanel>
+
                 </GroupBox>
             </ScrollViewer>
-
         </Grid>
 
         <!--  第二行 第三列 状态  -->
@@ -810,117 +962,10 @@
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
-            <!--  AFE 状态  -->
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <GroupBox Header="AFE 状态">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*" />
-                            <ColumnDefinition Width="1*" />
-                            <ColumnDefinition Width="2*" />
-                            <ColumnDefinition Width="1*" />
-                        </Grid.ColumnDefinitions>
 
-
-
-                        <!--  协议类型  -->
-                        <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource AFE过充保护}" />
-                        <TextBlock
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.AFE_Protect[3]}" />
-                        <!--  BMS通信  -->
-                        <TextBlock
-                            Grid.Column="2"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource AFE过放保护}" />
-                        <TextBlock
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.AFE_Protect[4]}" />
-                        <!--  BMS低电报警  -->
-                        <TextBlock
-                            Grid.Row="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 充电过流保护}" />
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.AFE_Protect[5]}" />
-                        <!--  BMS低电故障  -->
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="2"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 放电过流保护}" />
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.AFE_Protect[6]}" />
-                        <!--  BMS允许充电  -->
-                        <TextBlock
-                            Grid.Row="2"
-                            Grid.Column="0"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 前端芯片中断}" />
-                        <TextBlock
-                            Grid.Row="2"
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.AFE_Protect[2]}" />
-                        <!--  BMS允许放电  -->
-                        <TextBlock
-                            Grid.Row="2"
-                            Grid.Column="2"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 短路保护}" />
-                        <TextBlock
-                            Grid.Row="2"
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.AFE_Protect[7]}" />
-                        <!--  BMS充电过流  -->
-                        <TextBlock
-                            Grid.Row="3"
-                            Grid.Column="0"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 前端芯片触发保护}" />
-                        <TextBlock
-                            Grid.Row="3"
-                            Grid.Column="1"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.AFE_Protect[0]}" />
-                        <!--  BMS放电过流  -->
-                        <TextBlock
-                            Grid.Row="3"
-                            Grid.Column="2"
-                            Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 前端芯片告警下拉}" />
-                        <TextBlock
-                            Grid.Row="3"
-                            Grid.Column="3"
-                            Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.AFE_Protect[1]}" />
-
-                    </Grid>
-                </GroupBox>
-            </ScrollViewer>
             <!--  机器状态  -->
             <ScrollViewer
-                Grid.Row="1"
+                Grid.Row="0"
                 VerticalAlignment="Bottom"
                 VerticalScrollBarVisibility="Auto">
                 <GroupBox FontSize="16" Header="{DynamicResource 机器状态}">
@@ -953,7 +998,7 @@
                             <RowDefinition />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-                        <!--  PV温度  -->
+                        <!--  充电MOS  -->
                         <TextBlock
                             Grid.Row="1"
                             Style="{StaticResource ContentText}"
@@ -963,7 +1008,7 @@
                             Grid.Column="1"
                             Style="{StaticResource ContentText}"
                             Text="{Binding BMS_VM.MOD_INST_STATE[0]}" />
-                        <!--  故障代码  -->
+                        <!--  放电MOS  -->
                         <TextBlock
                             Grid.Row="1"
                             Grid.Column="2"
@@ -975,7 +1020,7 @@
                             Style="{StaticResource ContentText}"
                             Text="{Binding BMS_VM.MOD_INST_STATE[1]}" />
 
-                        <!--  逆变温度  -->
+                        <!--  充电  -->
                         <TextBlock
                             Grid.Row="2"
                             Style="{StaticResource ContentText}"
@@ -985,7 +1030,7 @@
                             Grid.Column="1"
                             Style="{StaticResource ContentText}"
                             Text="{Binding BMS_VM.MOD_INST_STATE[4]}" />
-                        <!--  升压温度  -->
+                        <!--  放电  -->
                         <TextBlock
                             Grid.Row="2"
                             Grid.Column="2"
@@ -1023,34 +1068,57 @@
                             Grid.Row="4"
                             Grid.Column="0"
                             Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 容量学习}" />
+                            Text="{DynamicResource 充电限流开关}" />
                         <TextBlock
                             Grid.Row="4"
                             Grid.Column="1"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.MOD_INST_STATE[10]}" />
+                            Text="{Binding BMS_VM.MOD_INST_STATE[2]}" />
                         <!--  通讯  -->
                         <TextBlock
                             Grid.Row="4"
                             Grid.Column="2"
                             Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 正在通讯}" />
+                            Text="{DynamicResource 预充电开关}" />
                         <TextBlock
                             Grid.Row="4"
                             Grid.Column="3"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding BMS_VM.MOD_INST_STATE[2]}" />
-                        <!--  通讯  -->
+                            Text="{Binding BMS_VM.MOD_INST_STATE[3]}" />
+                        <!--  日历时钟故障  -->
                         <TextBlock
                             Grid.Row="5"
                             Grid.Column="0"
                             Style="{StaticResource ContentText}"
-                            Text="{DynamicResource 历史低电}" />
+                            Text="{DynamicResource 日历时钟故障}" />
                         <TextBlock
                             Grid.Row="5"
                             Grid.Column="1"
                             Style="{StaticResource ContentText}"
+                            Text="{Binding BMS_VM.MOD_INST_STATE[6]}" />
+
+                        <!--  日历时钟故障  -->
+                        <TextBlock
+                            Grid.Row="5"
+                            Grid.Column="2"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource 存储功能故障}" />
+                        <TextBlock
+                            Grid.Row="5"
+                            Grid.Column="3"
+                            Style="{StaticResource ContentText}"
                             Text="{Binding BMS_VM.MOD_INST_STATE[7]}" />
+                        <!--  预充电检测  -->
+                        <TextBlock
+                            Grid.Row="6"
+                            Grid.Column="0"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource 预充电检测}" />
+                        <TextBlock
+                            Grid.Row="6"
+                            Grid.Column="1"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding BMS_VM.MOD_INST_STATE[10]}" />
 
                     </Grid>
                 </GroupBox>
@@ -1167,14 +1235,14 @@
                         Content="关机"
                         FontFamily="../Resource/Fonts/#iconfont"
                         Style="{StaticResource ActionButton}" />
-                    <Button
+                    <!--<Button
                         Width="auto"
                         Height="30"
                         Background="{Binding BMS_Setting.SettingStatue[4], Converter={StaticResource IntToColorConverter}}"
                         Command="{Binding BMS_Setting.SleepCommand}"
                         Content="休眠"
                         FontFamily="../Resource/Fonts/#iconfont"
-                        Style="{StaticResource ActionButton}" />
+                        Style="{StaticResource ActionButton}" />-->
 
                     <!--<Button
                         Height="30"
@@ -1245,6 +1313,8 @@
                                             Binding="{Binding ReturnCount}"
                                             FontSize="15"
                                             Header="设置值" />
+
+
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
@@ -1392,7 +1462,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="充电过流2">
+                            <!--<GroupBox Margin="10,0" Header="充电过流2">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -1427,7 +1497,7 @@
                                             Header="设置值" />
                                     </DataGrid.Columns>
                                 </DataGrid>
-                            </GroupBox>
+                            </GroupBox>-->
                             <GroupBox Margin="10,0" Header="放电过流">
                                 <DataGrid
                                     Margin="0,0"
@@ -1932,186 +2002,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="AFE 短路保护参数">
-                                <DataGrid
-                                    Margin="0,0"
-                                    VerticalAlignment="Top"
-                                    AutoGenerateColumns="False"
-                                    Background="Transparent"
-                                    ItemsSource="{Binding BMS_Setting.SendingCommandsView_21, Mode=TwoWay}"
-                                    PreviewMouseWheel="DataGrid_PreviewMouseWheel"
-                                    RowHeaderWidth="0"
-                                    VerticalScrollBarVisibility="Hidden">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn
-                                            Width="auto"
-                                            Binding="{Binding AnalysisMethod}"
-                                            FontSize="15"
-                                            Header="序号" />
-                                        <DataGridTextColumn
-                                            Width="1*"
-                                            Binding="{Binding Command}"
-                                            FontSize="15"
-                                            Header="设置项" />
 
-
-                                        <DataGridTextColumn
-                                            Width="0.3*"
-                                            Binding="{Binding Enable}"
-                                            FontSize="15"
-                                            Header="当前值" />
-                                        <DataGridTextColumn
-                                            Width="0.3*"
-                                            Binding="{Binding ReturnCount}"
-                                            FontSize="15"
-                                            Header="设置值" />
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                            </GroupBox>
-                            <GroupBox Margin="10,0" Header="AFE 过充保护参数">
-                                <DataGrid
-                                    Margin="0,0"
-                                    VerticalAlignment="Top"
-                                    AutoGenerateColumns="False"
-                                    Background="Transparent"
-                                    ItemsSource="{Binding BMS_Setting.SendingCommandsView_22, Mode=TwoWay}"
-                                    PreviewMouseWheel="DataGrid_PreviewMouseWheel"
-                                    RowHeaderWidth="0"
-                                    VerticalScrollBarVisibility="Hidden">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn
-                                            Width="auto"
-                                            Binding="{Binding AnalysisMethod}"
-                                            FontSize="15"
-                                            Header="序号" />
-                                        <DataGridTextColumn
-                                            Width="1*"
-                                            Binding="{Binding Command}"
-                                            FontSize="15"
-                                            Header="设置项" />
-
-
-                                        <DataGridTextColumn
-                                            Width="0.3*"
-                                            Binding="{Binding Enable}"
-                                            FontSize="15"
-                                            Header="当前值" />
-                                        <DataGridTextColumn
-                                            Width="0.3*"
-                                            Binding="{Binding ReturnCount}"
-                                            FontSize="15"
-                                            Header="设置值" />
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                            </GroupBox>
-                            <GroupBox Margin="10,0" Header="AFE 过放保护参数">
-                                <DataGrid
-                                    Margin="0,0"
-                                    VerticalAlignment="Top"
-                                    AutoGenerateColumns="False"
-                                    Background="Transparent"
-                                    ItemsSource="{Binding BMS_Setting.SendingCommandsView_23, Mode=TwoWay}"
-                                    PreviewMouseWheel="DataGrid_PreviewMouseWheel"
-                                    RowHeaderWidth="0"
-                                    VerticalScrollBarVisibility="Hidden">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn
-                                            Width="auto"
-                                            Binding="{Binding AnalysisMethod}"
-                                            FontSize="15"
-                                            Header="序号" />
-                                        <DataGridTextColumn
-                                            Width="1*"
-                                            Binding="{Binding Command}"
-                                            FontSize="15"
-                                            Header="设置项" />
-
-
-                                        <DataGridTextColumn
-                                            Width="0.3*"
-                                            Binding="{Binding Enable}"
-                                            FontSize="15"
-                                            Header="当前值" />
-                                        <DataGridTextColumn
-                                            Width="0.3*"
-                                            Binding="{Binding ReturnCount}"
-                                            FontSize="15"
-                                            Header="设置值" />
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                            </GroupBox>
-                            <GroupBox Margin="10,0" Header="AFE 充电过流保护参数">
-                                <DataGrid
-                                    Margin="0,0"
-                                    VerticalAlignment="Top"
-                                    AutoGenerateColumns="False"
-                                    Background="Transparent"
-                                    ItemsSource="{Binding BMS_Setting.SendingCommandsView_24, Mode=TwoWay}"
-                                    PreviewMouseWheel="DataGrid_PreviewMouseWheel"
-                                    RowHeaderWidth="0"
-                                    VerticalScrollBarVisibility="Hidden">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn
-                                            Width="auto"
-                                            Binding="{Binding AnalysisMethod}"
-                                            FontSize="15"
-                                            Header="序号" />
-                                        <DataGridTextColumn
-                                            Width="1*"
-                                            Binding="{Binding Command}"
-                                            FontSize="15"
-                                            Header="设置项" />
-
-
-                                        <DataGridTextColumn
-                                            Width="0.3*"
-                                            Binding="{Binding Enable}"
-                                            FontSize="15"
-                                            Header="当前值" />
-                                        <DataGridTextColumn
-                                            Width="0.3*"
-                                            Binding="{Binding ReturnCount}"
-                                            FontSize="15"
-                                            Header="设置值" />
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                            </GroupBox>
-                            <GroupBox Margin="10,0" Header="AFE 放电过流保护参数">
-                                <DataGrid
-                                    Margin="0,0"
-                                    VerticalAlignment="Top"
-                                    AutoGenerateColumns="False"
-                                    Background="Transparent"
-                                    ItemsSource="{Binding BMS_Setting.SendingCommandsView_25, Mode=TwoWay}"
-                                    PreviewMouseWheel="DataGrid_PreviewMouseWheel"
-                                    RowHeaderWidth="0"
-                                    VerticalScrollBarVisibility="Hidden">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn
-                                            Width="auto"
-                                            Binding="{Binding AnalysisMethod}"
-                                            FontSize="15"
-                                            Header="序号" />
-                                        <DataGridTextColumn
-                                            Width="1*"
-                                            Binding="{Binding Command}"
-                                            FontSize="15"
-                                            Header="设置项" />
-
-
-                                        <DataGridTextColumn
-                                            Width="0.3*"
-                                            Binding="{Binding Enable}"
-                                            FontSize="15"
-                                            Header="当前值" />
-                                        <DataGridTextColumn
-                                            Width="0.3*"
-                                            Binding="{Binding ReturnCount}"
-                                            FontSize="15"
-                                            Header="设置值" />
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                            </GroupBox>
                         </UniformGrid>
 
                     </ScrollViewer>
@@ -2158,15 +2049,22 @@
                             FontSize="30"
                             Style="{StaticResource BtnStyle5}"
                             Tag="&#xe936;" />
-                        <Button
+                        <!--<Button
                             Grid.Row="3"
                             Margin="10"
                             Background="Cyan"
-                            Command="{Binding BMS_Setting.WriteCommand}"
+                            Command="{Binding BMS_Setting.WriteCommandByBMS01}"
                             Content="{Binding BMS_Setting.ButtonText}"
                             FontSize="30"
                             Style="{StaticResource BtnStyle5}"
-                            Tag="&#xe6ba;" />
+                            Tag="&#xe6ba;" />-->
+                        <Button
+                            Grid.Row="3"
+                            Margin="10"
+                            Command="{Binding BMS_Setting.Command_SetResetSysParams}"
+                            Content="{DynamicResource 重置系统参数}"
+                            FontSize="5"
+                            Style="{StaticResource BtnStyle}" />
 
                     </Grid>
                 </Border>
@@ -2347,25 +2245,28 @@
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
 
-                            <!--  获取超出范围数据索引  -->
-                            <!--
+                            <!--  系统时间  -->
                             <TextBlock
                                 Grid.Row="8"
                                 Style="{StaticResource ContentText}"
-                                Text="超出数据范围索引" />
+                                Text="{DynamicResource 系统时间}" />
                             <TextBlock
                                 Grid.Row="8"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding BMS_Setting.OutIndex}" />
-
+                                Text="{Binding BMS_Setting.SystemTime}" />
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="2"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding Clock.CurrentTime, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
                                 Grid.Row="8"
                                 Grid.Column="3"
-                                Command="{Binding BMS_Setting.GetOutIndexCommand}"
+                                Height="30"
+                                Command="{Binding DataContext.BMS_Setting.Command_SetSystemTime, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
-                                Style="{StaticResource ActionButton}" />-->
-
+                                Style="{StaticResource ActionButton}" />
                         </Grid>
                     </Border>
                     <!--  第二列  -->
@@ -2596,9 +2497,277 @@
                                     Text="{Binding BMS_VM.MOD_AFECOL_CUR, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DivideByHundredConverter}}" />
 
                             </Grid>
+                            <!--  电芯温度1  -->
+                            <Grid Grid.Row="4" Grid.ColumnSpan="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <!--  放电电流  -->
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电芯温度1}" />
+
+
+                                <StackPanel
+                                    Grid.Column="1"
+                                    Margin="42,0,0,0"
+                                    Orientation="Horizontal">
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        Command="{Binding BMS_Setting.Command_SetCellTemp1Read}"
+                                        Content="读取"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        Command="{Binding BMS_Setting.Command_SetCellTemp1Dec}"
+                                        Content="&#xe62b;"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Center"
+                                        Orientation="Horizontal">
+
+                                        <TextBox
+                                            Width="80"
+                                            Style="{StaticResource InputBox}"
+                                            Text="{Binding BMS_Setting.CellTemp1, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DivideByThousandWithoutEnumConverter}}" />
+
+                                    </StackPanel>
+
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        HorizontalAlignment="Right"
+                                        Command="{Binding BMS_Setting.Command_SetCellTemp1Inc}"
+                                        Content="&#xe606;"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        Command="{Binding BMS_Setting.Command_SetCellTemp1Write}"
+                                        Content="写入"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                </StackPanel>
+
+                                <TextBox
+                                    Grid.Column="2"
+                                    Width="80"
+                                    IsEnabled="False"
+                                    Style="{StaticResource InputBox}"
+                                    Text="{Binding BMS_VM.MOD_GROUD1_TEMP, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DivideByHundredConverter}}" />
+
+                            </Grid>
+                            <!--  电芯温度2  -->
+                            <Grid Grid.Row="5" Grid.ColumnSpan="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <!--  放电电流  -->
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电芯温度2}" />
+
+
+                                <StackPanel
+                                    Grid.Column="1"
+                                    Margin="42,0,0,0"
+                                    Orientation="Horizontal">
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        Command="{Binding BMS_Setting.Command_SetCellTemp2Read}"
+                                        Content="读取"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        Command="{Binding BMS_Setting.Command_SetCellTemp2Dec}"
+                                        Content="&#xe62b;"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Center"
+                                        Orientation="Horizontal">
+
+                                        <TextBox
+                                            Width="80"
+                                            Style="{StaticResource InputBox}"
+                                            Text="{Binding BMS_Setting.CellTemp2, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DivideByThousandWithoutEnumConverter}}" />
+
+                                    </StackPanel>
+
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        HorizontalAlignment="Right"
+                                        Command="{Binding BMS_Setting.Command_SetCellTemp2Inc}"
+                                        Content="&#xe606;"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        Command="{Binding BMS_Setting.Command_SetCellTemp2Write}"
+                                        Content="写入"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                </StackPanel>
+
+                                <TextBox
+                                    Grid.Column="2"
+                                    Width="80"
+                                    IsEnabled="False"
+                                    Style="{StaticResource InputBox}"
+                                    Text="{Binding BMS_VM.MOD_GROUD2_TEMP, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DivideByHundredConverter}}" />
+
+                            </Grid>
+                            <!--  电芯温度3  -->
+                            <Grid Grid.Row="6" Grid.ColumnSpan="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <!--  放电电流  -->
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电芯温度3}" />
+
+
+                                <StackPanel
+                                    Grid.Column="1"
+                                    Margin="42,0,0,0"
+                                    Orientation="Horizontal">
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        Command="{Binding BMS_Setting.Command_SetCellTemp3Read}"
+                                        Content="读取"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        Command="{Binding BMS_Setting.Command_SetCellTemp3Dec}"
+                                        Content="&#xe62b;"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Center"
+                                        Orientation="Horizontal">
+
+                                        <TextBox
+                                            Width="80"
+                                            Style="{StaticResource InputBox}"
+                                            Text="{Binding BMS_Setting.CellTemp3, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DivideByThousandWithoutEnumConverter}}" />
+
+                                    </StackPanel>
+
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        HorizontalAlignment="Right"
+                                        Command="{Binding BMS_Setting.Command_SetCellTemp3Inc}"
+                                        Content="&#xe606;"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        Command="{Binding BMS_Setting.Command_SetCellTemp3Write}"
+                                        Content="写入"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                </StackPanel>
+
+                                <TextBox
+                                    Grid.Column="2"
+                                    Width="80"
+                                    IsEnabled="False"
+                                    Style="{StaticResource InputBox}"
+                                    Text="{Binding BMS_VM.MOD_GROUD3_TEMP, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DivideByHundredConverter}}" />
+
+                            </Grid>
+                            <!--  电芯温度4  -->
+                            <Grid Grid.Row="7" Grid.ColumnSpan="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <!--  放电电流  -->
+                                <TextBlock Style="{StaticResource ContentText}" Text="{DynamicResource 电芯温度4}" />
+
+
+                                <StackPanel
+                                    Grid.Column="1"
+                                    Margin="42,0,0,0"
+                                    Orientation="Horizontal">
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        Command="{Binding BMS_Setting.Command_SetCellTemp4Read}"
+                                        Content="读取"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        Command="{Binding BMS_Setting.Command_SetCellTemp4Dec}"
+                                        Content="&#xe62b;"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Center"
+                                        Orientation="Horizontal">
+
+                                        <TextBox
+                                            Width="80"
+                                            Style="{StaticResource InputBox}"
+                                            Text="{Binding BMS_Setting.CellTemp4, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DivideByThousandWithoutEnumConverter}}" />
+
+                                    </StackPanel>
+
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        HorizontalAlignment="Right"
+                                        Command="{Binding BMS_Setting.Command_SetCellTemp4Inc}"
+                                        Content="&#xe606;"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                    <Button
+                                        Width="50"
+                                        Height="30"
+                                        Command="{Binding BMS_Setting.Command_SetCellTemp4Write}"
+                                        Content="写入"
+                                        FontFamily="../Resource/Fonts/#iconfont"
+                                        Style="{StaticResource ActionButton}" />
+                                </StackPanel>
+
+                                <TextBox
+                                    Grid.Column="2"
+                                    Width="80"
+                                    IsEnabled="False"
+                                    Style="{StaticResource InputBox}"
+                                    Text="{Binding BMS_VM.MOD_GROUD4_TEMP, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DivideByHundredConverter}}" />
+
+                            </Grid>
                             <!--  清除历史记录  -->
                             <Button
-                                Grid.Row="4"
+                                Grid.Row="8"
                                 Grid.ColumnSpan="4"
                                 Height="30"
                                 Command="{Binding BMS_Setting.Command_SetClearHistory}"
@@ -2606,7 +2775,7 @@
                                 Style="{StaticResource ActionButton}" />
                             <!--  重置用户参数  -->
                             <Button
-                                Grid.Row="5"
+                                Grid.Row="9"
                                 Grid.ColumnSpan="4"
                                 Height="30"
                                 Command="{Binding BMS_Setting.Command_SetResetUserParams}"
@@ -2614,7 +2783,7 @@
                                 Style="{StaticResource ActionButton}" />
                             <!--  重置系统参数  -->
                             <Button
-                                Grid.Row="6"
+                                Grid.Row="10"
                                 Grid.ColumnSpan="4"
                                 Height="30"
                                 Command="{Binding BMS_Setting.Command_SetResetSysParams}"
@@ -2819,10 +2988,10 @@
                                     Binding="{Binding ProtectCount[13]}"
                                     FontSize="15"
                                     Header="{DynamicResource 满充保护次数}" />
-                                <DataGridTextColumn
+                                <!--<DataGridTextColumn
                                     Binding="{Binding AFE_ProtStatus}"
                                     FontSize="15"
-                                    Header="{DynamicResource 前端芯片保护状态}" />
+                                    Header="{DynamicResource 前端芯片保护状态}" />-->
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>
@@ -3093,6 +3262,165 @@
             </Grid>
         </Grid>
 
+        <!--  并联监控  -->
+        <Grid
+            x:Name="UnionMonitor"
+            Grid.Row="1"
+            Grid.RowSpan="2"
+            Grid.ColumnSpan="4"
+            Background="White"
+            Visibility="Collapsed">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="10*" />
+
+                </Grid.ColumnDefinitions>
+                <!--  第一列  -->
+                <Grid Background="{StaticResource LightBackground}">
+
+                    <!--  主表格  -->
+                    <DataGrid
+                        Grid.Row="1"
+                        ItemsSource="{Binding UnionVM.PollingList}"
+                        Style="{StaticResource BlueWhiteDataGrid}">
+
+                        <DataGrid.Columns>
+                            <!--  日期  -->
+                            <DataGridTextColumn
+                                Width="50"
+                                Binding="{Binding pack}"
+                                Header="Pack" />
+                            <DataGridTextColumn
+                                Width="120"
+                                Binding="{Binding TotalVolt}"
+                                Header="Pack Voltage(V)" />
+                            <DataGridTextColumn
+                                Width="100"
+                                Binding="{Binding Current}"
+                                Header="Current(A)" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding SOC}"
+                                Header="SOC(%)" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding SOH}"
+                                Header="SOH(%)" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding FullCap}"
+                                Header="满充容量(A)" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding RemainCap}"
+                                Header="剩余容量(A)" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding MaxVolt}"
+                                Header="最高电压(V)" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding MinVolt}"
+                                Header="最低电压(V)" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding CellTemp1}"
+                                Header="电芯温度1" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding CellTemp2}"
+                                Header="电芯温度2" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding CellTemp3}"
+                                Header="电芯温度3" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding CellTemp4}"
+                                Header="电芯温度4" />
+                            <DataGridTextColumn
+                                Width="100"
+                                Binding="{Binding MosTemp}"
+                                Header="MosTemp(℃)" />
+                            <DataGridTextColumn
+                                Width="110"
+                                Binding="{Binding BatBackTemp}"
+                                Header="BatPackTemp(℃)" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding Cell1}"
+                                Header="电芯1" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding Cell2}"
+                                Header="电芯2" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding Cell3}"
+                                Header="电芯3" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding Cell4}"
+                                Header="电芯4" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding Cell4}"
+                                Header="电芯5" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding Cell6}"
+                                Header="电芯6" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding Cell7}"
+                                Header="电芯7" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding Cell8}"
+                                Header="电芯8" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding Cell9}"
+                                Header="电芯9" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding Cell10}"
+                                Header="电芯10" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding Cell11}"
+                                Header="电芯11" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding Cell12}"
+                                Header="电芯12" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding Cell13}"
+                                Header="电芯13" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding Cell14}"
+                                Header="电芯14" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding Cell15}"
+                                Header="电芯15" />
+                            <DataGridTextColumn
+                                Width="80"
+                                Binding="{Binding Cell16}"
+                                Header="电芯16" />
+
+                            <!--  按你需求继续添加每个显示项...  -->
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                </Grid>
+
+
+
+            </Grid>
+        </Grid>
         <!--  前端芯片监控 界面  -->
         <Grid
             x:Name="AdminView"

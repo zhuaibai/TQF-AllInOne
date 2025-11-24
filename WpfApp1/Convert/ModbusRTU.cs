@@ -399,7 +399,96 @@ namespace WpfApp1.Convert
             byte[] data = ms.ToArray();
             return data;
         }
- 
+
+
+        /// <summary>
+        /// 自动生成发送包方法【8位帧头 + 一位数据长度(106) + 数据 + CRC校验(数据长度+数据)】
+        /// </summary>
+        /// <param name="HeadBytes">帧头字符串</param>
+        /// <param name="sendingCommands">发送的数据</param>
+        /// <returns>需要发送的一帧</returns>
+        /// <exception cref="ArgumentException"></exception>
+        public static byte[] GetSendBytesByBMS01(string HeadBytes, ObservableCollection<SendingCommand> sendingCommands)
+        {
+            using var ms = new MemoryStream();//进行校验位的缓存
+            ObservableCollection<SendingCommand> resultCommand = new ObservableCollection<SendingCommand>();//转换回原来的地址顺序
+
+
+            //一、 帧头
+            byte[] bytes = new byte[] { 0x01, 0x10, 0x00, 0x82, 0x00, 0x5B, 0xB6 };
+            // msCRC.Write(bytes);
+
+            //二、 数据长度  固定182
+            ms.Write(bytes);
+
+
+            //三、 数据
+
+            //复原原来的数据地址
+            //for (int i = 0; i < sendingCommands.Count; i++)
+            //{
+
+            //    if (i >= 22 && i <= 90)
+            //    {
+            //        //跳过四个
+            //        resultCommand.Add(sendingCommands[i + 4]);
+            //    }
+            //    else if (i >= 91)
+            //    {
+            //        resultCommand.Add(sendingCommands[i - 69]);
+            //    }
+            //    else
+            //        resultCommand.Add(sendingCommands[i]);
+            //}
+            int i = 0;
+            foreach (var sendingCommand in sendingCommands)
+            {
+                if (i > 90)
+                {
+                    break;
+                }
+                if (ModbusRTU.ContainsDegreeSymbol(sendingCommand.Command))
+                {
+                    //包含℃符号，也就是温度，进行处理
+                    if (double.TryParse(sendingCommand.ReturnCount, out double doubleValue))
+                    {
+                        short.TryParse((doubleValue * 10).ToString("F0"), out short valueE);
+                        ms.WriteByte((byte)(valueE & 0xFF)); // 低字节
+                        ms.WriteByte((byte)(valueE >> 8));  // 高字节
+                    }
+                }
+                else if (ModbusRTU.ContainsPercentSymbol(sendingCommand.Command))
+                {
+                    //包含%符号，也就是百分比，进行处理
+                    if (double.TryParse(sendingCommand.ReturnCount, out double doubleValue))
+                    {
+                        short.TryParse((doubleValue * 100).ToString("F0"), out short valueE);
+                        ms.WriteByte((byte)(valueE & 0xFF)); // 低字节
+                        ms.WriteByte((byte)(valueE >> 8));  // 高字节
+                    }
+                }
+                else
+                {
+                    // 尝试解析字符串为整数
+                    if (!short.TryParse(sendingCommand.ReturnCount, out short value))
+                    {
+                        throw new ArgumentException($"无法将 '{sendingCommand.ReturnCount}' 解析为整数。", sendingCommand.Command);
+                    }
+                    ms.WriteByte((byte)(value & 0xFF)); // 低字节
+                    ms.WriteByte((byte)(value >> 8));  // 高字节
+                }
+                i++;
+
+            }
+
+            //四、CRC校验
+            //计算CRC校验值
+            byte[] crc = SerialCommunicationService.getCRC16(ms.ToArray(), ms.ToArray().Length);
+            ms.Write(crc);
+
+            byte[] data = ms.ToArray();
+            return data;
+        }
 
         /// <summary>
         /// 把130-235(106个数据)的数据进行解析

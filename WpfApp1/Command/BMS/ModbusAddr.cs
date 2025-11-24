@@ -38,6 +38,9 @@ namespace WpfApp1.Command.BMS
             MOD_CELL16_VOL = data[15];               //17
         }
 
+
+
+
         /// <summary>
         /// 16位进行赋值(状态)
         /// </summary>
@@ -72,6 +75,28 @@ namespace WpfApp1.Command.BMS
         }
 
         /// <summary>
+        /// 告警
+        /// </summary>
+        /// <param name="data"></param>
+        public void MOD_WARN_STATE_Set_BMS01(int[] data)
+        {
+            MOD_WARN_STATE = "";
+            if (data == null)
+            {
+                MOD_WARN_STATE = "和上位机通讯异常";
+                return;
+            }
+
+            //根据标志位获取告警信息并拼接
+            for (int i = 0; i < data.Length; i++)
+            {
+                MOD_WARN_STATE = data[i] == 1 ? MOD_WARN_STATE + getWarningByBMS01(i) : MOD_WARN_STATE;
+            }
+
+        }
+
+
+        /// <summary>
         /// 保护
         /// </summary>
         /// <param name="data"></param>
@@ -92,6 +117,26 @@ namespace WpfApp1.Command.BMS
         }
 
         /// <summary>
+        /// 保护
+        /// </summary>
+        /// <param name="data"></param>
+        public void MOD_PROT_STATE_Set_BMS01(int[] data)
+        {
+            MOD_PROT_STATE = "";
+            if (data == null)
+            {
+                MOD_PROT_STATE = "和上位机通讯异常";
+                return;
+            }
+
+            //根据标志位获取告警信息并拼接
+            for (int i = 0; i < data.Length; i++)
+            {
+                MOD_PROT_STATE = data[i] == 1 ? MOD_PROT_STATE + getProtectByBMS01(i) : MOD_PROT_STATE;
+            }
+        }
+
+        /// <summary>
         /// 错误
         /// </summary>
         /// <param name="data"></param>
@@ -108,6 +153,27 @@ namespace WpfApp1.Command.BMS
             for (int i = 0; i < data.Length; i++)
             {
                 MOD_ERROR_STATE = data[i] == 1 ? MOD_ERROR_STATE + getERROR(i) : MOD_ERROR_STATE;
+            }
+
+        }
+
+        /// <summary>
+        /// 错误
+        /// </summary>
+        /// <param name="data"></param>
+        public void MOD_ERROR_STATE_Set_BMS01(int[] data)
+        {
+            MOD_ERROR_STATE = "";
+            if (data == null)
+            {
+                MOD_ERROR_STATE = "和上位机通讯异常";
+                return;
+            }
+
+            //根据标志位获取告警信息并拼接
+            for (int i = 0; i < data.Length; i++)
+            {
+                MOD_ERROR_STATE = data[i] == 1 ? MOD_ERROR_STATE + getERRORByBMS01(i) : MOD_ERROR_STATE;
             }
 
         }
@@ -148,6 +214,53 @@ namespace WpfApp1.Command.BMS
                     return "";
                 case 13:
                     return "";
+                case 14:
+                    return "放电高温 ";
+                case 15:
+                    return "低电量 ";
+                default:
+                    return "索引错误 ";
+
+            }
+        }
+
+
+        /// <summary>
+        /// 获取对应标志位的告警信息
+        /// </summary>
+        /// <param name="i">索引</param>
+        private string getWarningByBMS01(int i)
+        {
+            switch (i)
+            {
+                case 0:
+                    return "单体过压 ";
+                case 1:
+                    return "单体欠压 ";
+                case 2:
+                    return "总体过压 ";
+                case 3:
+                    return "总体欠压 ";
+                case 4:
+                    return "电芯压差过大 ";
+                case 5:
+                    return "充电过流 ";
+                case 6:
+                    return "放电过流 ";
+                case 7:
+                    return "充电高温1 ";
+                case 8:
+                    return "充电高温2";
+                case 9:
+                    return "充电低温 ";
+                case 10:
+                    return "放电低温 ";
+                case 11:
+                    return "电芯温差过大 ";
+                case 12:
+                    return "MOS高温";
+                case 13:
+                    return "环境高温";
                 case 14:
                     return "放电高温 ";
                 case 15:
@@ -205,6 +318,52 @@ namespace WpfApp1.Command.BMS
         }
 
         /// <summary>
+        /// 获取对应标志位的保护信息
+        /// </summary>
+        /// <param name="i">索引</param>
+        private string getProtectByBMS01(int i)
+        {
+            switch (i)
+            {
+                case 0:
+                    return "单体过压 ";
+                case 1:
+                    return "单体欠压 ";
+                case 2:
+                    return "总体过压 ";
+                case 3:
+                    return "总体欠压 ";//
+                case 4:
+                    return "满充保护 ";
+                case 5:
+                    return "充电过流 ";
+                case 6:
+                    return "放电过流 ";
+                case 7:
+                    return "短路保护 ";
+                case 8:
+                    return "充电高温1 ";
+                case 9:
+                    return "充电高温2 ";
+                case 10:
+                    return "充电低温 ";//
+                case 11:
+                    return "放电低温 ";
+                case 12:
+                    return "MOS高温 ";
+                case 13:
+                    return "请立即充电";
+                case 14:
+                    return "放电高温 ";
+                case 15:
+                    return "电芯压差过大 ";
+                default:
+                    return "";
+
+            }
+        }
+
+        /// <summary>
         /// 获取对应标志位的错误信息
         /// </summary>
         /// <param name="i">索引</param>
@@ -234,6 +393,52 @@ namespace WpfApp1.Command.BMS
                     return "NTC故障 ";
                 case 10:
                     return "FLASH读写故障 ";
+                case 11:
+                    return "";
+                case 12:
+                    return "";
+                case 13:
+                    return "";
+                case 14:
+                    return "";
+                case 15:
+                    return "";
+                default:
+                    return "";
+
+            }
+        }
+
+        /// <summary>
+        /// 获取对应标志位的错误信息
+        /// </summary>
+        /// <param name="i">索引</param>
+        private string getERRORByBMS01(int i)
+        {
+            switch (i)
+            {
+                case 0:
+                    return "充电MOS故障 ";
+                case 1:
+                    return "放电MOS故障 ";
+                case 2:
+                    return "限流板故障 ";
+                case 3:
+                    return "ADC采集故障 ";
+                case 4:
+                    return "电芯失效故障 ";
+                case 5:
+                    return "前端芯片通信故障 ";
+                case 6:
+                    return "电池电压故障 ";
+                case 7:
+                    return "预充电阻故障 ";
+                case 8:
+                    return "3V3辅源故障 ";
+                case 9:
+                    return "NTC故障 ";
+                case 10:
+                    return "脱扣器故障 ";
                 case 11:
                     return "";
                 case 12:

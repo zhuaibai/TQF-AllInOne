@@ -8,6 +8,7 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using WpfApp1.Command;
 using WpfApp1.Models;
 
@@ -17,7 +18,8 @@ namespace WpfApp1.Services
     {
        //串口
         static SerialPort SerialPort { get; set; }
-
+        //从机地址
+        public static int address {get;set;}
         //串口类
         static SerialPortSettings SerialPortModel { get; set; }
 
