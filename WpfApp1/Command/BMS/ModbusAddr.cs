@@ -187,37 +187,37 @@ namespace WpfApp1.Command.BMS
             switch (i)
             {
                 case 0:
-                    return "单体过压 ";
+                    return App.GetText("单体过压");
                 case 1:
-                    return "单体欠压 ";
+                    return App.GetText("单体欠压");
                 case 2:
-                    return "总体过压 ";
+                    return App.GetText("总体过压");
                 case 3:
-                    return "总体欠压 ";
+                    return App.GetText("总体欠压");
                 case 4:
-                    return "电芯压差过大 ";
+                    return App.GetText("电芯压差过大");
                 case 5:
-                    return "充电过流 ";
+                    return App.GetText("充电过流");
                 case 6:
-                    return "放电过流 ";
+                    return App.GetText("放电过流");
                 case 7:
-                    return "充电高温 ";
+                    return App.GetText("充电高温");
                 case 8:
                     return "";
                 case 9:
-                    return "充电低温 ";
+                    return App.GetText("充电低温");
                 case 10:
-                    return "放电低温 ";
+                    return App.GetText("放电低温");
                 case 11:
-                    return "电芯温差过大 ";
+                    return App.GetText("电芯温差过大");
                 case 12:
                     return "";
                 case 13:
                     return "";
                 case 14:
-                    return "放电高温 ";
+                    return App.GetText("放电高温");
                 case 15:
-                    return "低电量 ";
+                    return App.GetText("低电量");
                 default:
                     return "索引错误 ";
 
@@ -234,37 +234,37 @@ namespace WpfApp1.Command.BMS
             switch (i)
             {
                 case 0:
-                    return "单体过压 ";
+                    return App.GetText("单体过压");
                 case 1:
-                    return "单体欠压 ";
+                    return App.GetText("单体欠压");
                 case 2:
-                    return "总体过压 ";
+                    return App.GetText("总体过压");
                 case 3:
-                    return "总体欠压 ";
+                    return App.GetText("总体欠压");
                 case 4:
-                    return "电芯压差过大 ";
+                    return App.GetText("电芯压差过大");
                 case 5:
-                    return "充电过流 ";
+                    return App.GetText("充电过流");
                 case 6:
-                    return "放电过流 ";
+                    return App.GetText("放电过流");
                 case 7:
-                    return "充电高温1 ";
+                    return App.GetText("充电高温1");
                 case 8:
-                    return "充电高温2";
+                    return App.GetText("充电高温2");
                 case 9:
-                    return "充电低温 ";
+                    return App.GetText("充电低温");
                 case 10:
-                    return "放电低温 ";
+                    return App.GetText("放电低温");
                 case 11:
-                    return "电芯温差过大 ";
+                    return App.GetText("电芯温差过大");
                 case 12:
-                    return "MOS高温";
+                    return App.GetText("MOS高温");
                 case 13:
-                    return "环境高温";
+                    return App.GetText("环境高温");
                 case 14:
-                    return "放电高温 ";
+                    return App.GetText("放电高温");
                 case 15:
-                    return "低电量 ";
+                    return App.GetText("低电量");
                 default:
                     return "索引错误 ";
 
@@ -280,35 +280,35 @@ namespace WpfApp1.Command.BMS
             switch (i)
             {
                 case 0:
-                    return "单体过压 ";
+                    return App.GetText("单体过压");
                 case 1:
-                    return "单体欠压 ";
+                    return App.GetText("单体欠压");
                 case 2:
-                    return "总体过压 ";
+                    return App.GetText("总体过压");
                 case 3:
-                    return "总体欠压 ";//
+                    return App.GetText("总体欠压");//
                 case 4:
-                    return "充电过流 ";
+                    return App.GetText("充电过流");
                 case 5:
-                    return "放电过流 ";
+                    return App.GetText("放电过流");
                 case 6:
                     return "";
                 case 7:
-                    return "满充保护 ";
+                    return App.GetText("满充保护");
                 case 8:
                     return "";
                 case 9:
                     return "";
                 case 10:
-                    return "充电高温 ";//
+                    return App.GetText("充电高温");//
                 case 11:
-                    return "充电低温 ";
+                    return App.GetText("充电低温");
                 case 12:
-                    return "放电低温 ";
+                    return App.GetText("放电低温");
                 case 13:
                     return "";
                 case 14:
-                    return "放电高温 ";
+                    return App.GetText("放电高温");
                 case 15:
                     return "";
                 default:
@@ -326,37 +326,37 @@ namespace WpfApp1.Command.BMS
             switch (i)
             {
                 case 0:
-                    return "单体过压 ";
+                    return App.GetText("单体过压");
                 case 1:
-                    return "单体欠压 ";
+                    return App.GetText("单体欠压");
                 case 2:
-                    return "总体过压 ";
+                    return App.GetText("总体过压");
                 case 3:
-                    return "总体欠压 ";//
+                    return App.GetText("总体欠压");//
                 case 4:
-                    return "满充保护 ";
+                    return App.GetText("满充保护");
                 case 5:
-                    return "充电过流 ";
+                    return App.GetText("充电过流");
                 case 6:
-                    return "放电过流 ";
+                    return App.GetText("放电过流");
                 case 7:
-                    return "短路保护 ";
+                    return App.GetText("短路保护");
                 case 8:
-                    return "充电高温1 ";
+                    return App.GetText("充电高温1");
                 case 9:
-                    return "充电高温2 ";
+                    return App.GetText("充电高温2");
                 case 10:
-                    return "充电低温 ";//
+                    return App.GetText("充电低温");//
                 case 11:
-                    return "放电低温 ";
+                    return App.GetText("放电低温");
                 case 12:
-                    return "MOS高温 ";
+                    return App.GetText("MOS高温");
                 case 13:
-                    return "请立即充电";
+                    return App.GetText("请立即充电");
                 case 14:
-                    return "放电高温 ";
+                    return App.GetText("放电高温");
                 case 15:
-                    return "电芯压差过大 ";
+                    return App.GetText("电芯压差过大");
                 default:
                     return "";
 
@@ -372,27 +372,27 @@ namespace WpfApp1.Command.BMS
             switch (i)
             {
                 case 0:
-                    return "充电MOS故障 ";
+                    return App.GetText("充电MOS故障");
                 case 1:
-                    return "放电MOS故障 ";
+                    return App.GetText("放电MOS故障");
                 case 2:
                     return "";
                 case 3:
                     return "";
                 case 4:
-                    return "电芯失效故障 ";
+                    return App.GetText("电芯失效故障");
                 case 5:
-                    return "前端芯片通信故障 ";
+                    return App.GetText("前端芯片通信故障");
                 case 6:
-                    return "电芯温差过大故障 ";
+                    return App.GetText("电芯温差过大故障");
                 case 7:
-                    return "前端芯片电流传感器故障 ";
+                    return App.GetText("前端芯片电流传感器故障");
                 case 8:
-                    return "前端芯片电压传感器故障 ";
+                    return App.GetText("前端芯片电压传感器故障");
                 case 9:
-                    return "NTC故障 ";
+                    return App.GetText("NTC故障");
                 case 10:
-                    return "FLASH读写故障 ";
+                    return App.GetText("FLASH读写故障");
                 case 11:
                     return "";
                 case 12:
@@ -418,27 +418,27 @@ namespace WpfApp1.Command.BMS
             switch (i)
             {
                 case 0:
-                    return "充电MOS故障 ";
+                    return App.GetText("充电MOS故障");
                 case 1:
-                    return "放电MOS故障 ";
+                    return App.GetText("放电MOS故障");
                 case 2:
-                    return "限流板故障 ";
+                    return App.GetText("限流板故障");
                 case 3:
-                    return "ADC采集故障 ";
+                    return App.GetText("ADC采集故障");
                 case 4:
-                    return "电芯失效故障 ";
+                    return App.GetText("电芯失效故障");
                 case 5:
-                    return "前端芯片通信故障 ";
+                    return App.GetText("前端芯片通信故障");
                 case 6:
-                    return "电池电压故障 ";
+                    return App.GetText("电池电压故障");
                 case 7:
-                    return "预充电阻故障 ";
+                    return App.GetText("预充电阻故障");
                 case 8:
-                    return "3V3辅源故障 ";
+                    return App.GetText("3V3辅源故障");
                 case 9:
-                    return "NTC故障 ";
+                    return App.GetText("NTC故障");
                 case 10:
-                    return "脱扣器故障 ";
+                    return App.GetText("脱扣器故障");
                 case 11:
                     return "";
                 case 12:
@@ -549,7 +549,6 @@ namespace WpfApp1.Command.BMS
             {
                 _MOD_LOCAL_ADDR = value;
                 this.RaiseProperChanged(nameof(MOD_LOCAL_ADDR));
-
             }
         }
 

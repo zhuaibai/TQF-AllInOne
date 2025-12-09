@@ -48,6 +48,44 @@ namespace WpfApp1.Convert
         }
     }
 
+    public class IntToHiddenConverterZero : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int intValue)
+            {
+                return intValue == 0 ? Visibility.Hidden : Visibility.Visible;
+            }
+
+            // 如果绑定类型不是int，也返回Hidden避免异常
+            return Visibility.Hidden;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class IntToHiddenConverterEight : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int intValue)
+            {
+                return intValue > 8 ? Visibility.Collapsed : Visibility.Visible;
+            }
+
+            // 如果绑定类型不是int，也返回Hidden避免异常
+            return Visibility.Hidden;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class IntToColorConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

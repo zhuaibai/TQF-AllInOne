@@ -560,7 +560,16 @@ namespace WpfApp1.Convert
         {
             
             for (int i = 0; i < sendingCommands.Count; i++) {
-                sendingCommands[i].ReturnCount = sendingCommands[i].Enable;
+                sendingCommands[i].ReturnCount =  sendingCommands[i].Enable;
+            }
+        }
+
+        public static void FirstSetReceive_Enum(ObservableCollection<SendingCommand> sendingCommands, ObservableCollection<SendingCommand> origin)
+        {
+
+            for (int i = 0; i < sendingCommands.Count; i++)
+            {
+                sendingCommands[i].Command = App.GetText(origin[i].Command);
             }
         }
 

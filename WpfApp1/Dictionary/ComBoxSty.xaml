@@ -359,7 +359,7 @@
         <Setter Property="CanUserAddRows" Value="False" />
         <Setter Property="CanUserDeleteRows" Value="False" />
         <Setter Property="CanUserResizeRows" Value="False" />
-        <Setter Property="CanUserResizeColumns" Value="False" />
+        <Setter Property="CanUserResizeColumns" Value="True" />
         <Setter Property="CanUserSortColumns" Value="False" />
         <Setter Property="HorizontalGridLinesBrush" Value="#E2E8F0" />
         <Setter Property="VerticalGridLinesBrush" Value="#E2E8F0" />

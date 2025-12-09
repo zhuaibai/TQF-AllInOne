@@ -19,7 +19,7 @@ namespace WpfApp1.Services
        //串口
         static SerialPort SerialPort { get; set; }
         //从机地址
-        public static int address {get;set;}
+        public static int address { get; set; } = 1;
         //串口类
         static SerialPortSettings SerialPortModel { get; set; }
 
@@ -443,7 +443,7 @@ namespace WpfApp1.Services
                 int bytesToRead = returnCount;
 
                 // 设置读取超时时间
-                SerialPort.ReadTimeout = 1000;
+                SerialPort.ReadTimeout = 100;
 
                 // 使用动态缓冲区收集数据
                 var receivedData = new List<byte>();

@@ -14,6 +14,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Xml.Serialization;
+using DocumentFormat.OpenXml.Bibliography;
 using Microsoft.Win32;
 using WpfApp1.Command;
 using WpfApp1.Command.BMS;
@@ -106,6 +107,13 @@ namespace WpfApp1.ViewModels
             {
                 var index = SendingCommands.IndexOf((SendingCommand)item);
                 return index >= 22 && index <= 27;
+            };
+            //短路保护
+            SendingCommandsView_30 = new ListCollectionView(SendingCommands);
+            SendingCommandsView_30.Filter = (object item) =>
+            {
+                var index = SendingCommands.IndexOf((SendingCommand)item);
+                return index >= 28 && index <= 28;
             };
             //均衡
             SendingCommandsView_7 = new ListCollectionView(SendingCommands);
@@ -327,9 +335,14 @@ namespace WpfApp1.ViewModels
                 execute: () => ResetSysParamsOperation(),
                 canExecute: () => !ResetSysParams_IsWorking // 增加处理状态检查
             );
-            //重置系统参数
+            //读取历史记录
             HistoryReadCommand = new RelayCommand(
                 execute: () => HistoryReadOperation(),
+                canExecute: () => !HistoryRead_IsWorking // 增加处理状态检查
+            );
+            //读取历史记录BMS01
+            HistoryReadCommandBMS01 = new RelayCommand(
+                execute: () => HistoryReadOperationBMS01(),
                 canExecute: () => !HistoryRead_IsWorking // 增加处理状态检查
             );
             //读取充电电流校准系数
@@ -365,9 +378,13 @@ namespace WpfApp1.ViewModels
             //关机
             TurnOffCommand = new RelayCommand(
               execute: () => TurnOffOperation(),
-              canExecute: () => !CloseDisCharMOS_IsWorking // 增加处理状态检查
+              canExecute: () => !TurnOff_IsWorking // 增加处理状态检查
             );
-
+            //限流板
+            LimitCommand  = new RelayCommand(
+                 execute: () => LimitOperation(),
+              canExecute: () => !Limit_IsWorking // 增加处理状态检查
+            );
             //获取超出范围数据索引
             GetOutIndexCommand = new RelayCommand(
                 execute: () => GetOutIndexOperation(),
@@ -525,7 +542,7 @@ namespace WpfApp1.ViewModels
         }
 
         //电芯数量
-        private int cellNum;
+        private int cellNum = 16;
 
         public int CellNum
         {
@@ -569,7 +586,7 @@ namespace WpfApp1.ViewModels
 
         public void setSystemTime(short[] time)
         {
-            if (time.Length == 3)
+            if (time!=null && time.Length == 3)
             {
                 SystemTime = ParseDateTimeRegistersLE(time[0], time[1], time[2]);
             }
@@ -583,14 +600,14 @@ namespace WpfApp1.ViewModels
         /// <returns></returns>
         public string ParseDateTimeRegistersLE(short reg1, short reg2, short reg3)
         {
-            byte month = (byte)(reg1 & 0xFF);       // 低字节
-            byte year = (byte)(reg1 >> 8);         // 高字节
+            byte year = (byte)(reg1 & 0xFF);       // 低字节
+            byte  month = (byte)(reg1 >> 8);         // 高字节
 
-            byte hour = (byte)(reg2 & 0xFF);
-            byte day = (byte)(reg2 >> 8);
+            byte  day = (byte)(reg2 & 0xFF);
+            byte hour = (byte)(reg2 >> 8);
 
-            byte second = (byte)(reg3 & 0xFF);
-            byte minute = (byte)(reg3 >> 8);
+            byte minute = (byte)(reg3 & 0xFF);
+            byte  second = (byte)(reg3 >> 8);
 
 
             return "20" + year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
@@ -610,9 +627,9 @@ namespace WpfApp1.ViewModels
         public int[] BuildDateTimeRegistersLE(
         byte year, byte month, byte day, byte hour, byte minute, byte second)
         {
-            ushort reg1 = (ushort)((year << 8) | month);    // 月(低) 年(高)
-            ushort reg2 = (ushort)((day << 8) | hour);      // 时(低) 日(高)
-            ushort reg3 = (ushort)((minute << 8) | second); // 秒(低) 分(高)
+            ushort reg1 = (ushort)((month << 8) | year);    // 月(低) 年(高)
+            ushort reg2 = (ushort)((hour << 8) | day);      // 时(低) 日(高)
+            ushort reg3 = (ushort)((second << 8) | minute); // 秒(低) 分(高)
 
             return new int[] { reg1, reg2, reg3 };
         }
@@ -730,7 +747,7 @@ namespace WpfApp1.ViewModels
         #region 选择Pack
 
         //下拉选项
-        private List<string> _Pack = new List<string> { "Pack1", "Pack2", "Pack3", "Pack4", "Pack5", "Pack6", "Pack7", "Pack8", "Pack9", "Pack10", "Pack11", "Pack12", "Pack13", "Pack14", "Pack15", "Pack16" };
+        private List<string> _Pack = new List<string> { "Pack1", "Pack2", "Pack3", "Pack4", "Pack5", "Pack6", "Pack7", "Pack8", "Pack9", "Pack10", "Pack11", "Pack12", "Pack13", "Pack14", "Pack15" };
 
         public List<string> Pack
         {
@@ -813,6 +830,8 @@ namespace WpfApp1.ViewModels
 
         public RelayCommand HistoryReadCommand { get; }
 
+        public RelayCommand HistoryReadCommandBMS01 { get; }
+
         private bool stopReadFlag;
         private bool stopReadFlag_isWorking;
 
@@ -889,6 +908,76 @@ namespace WpfApp1.ViewModels
             }
         }
 
+
+        private async void HistoryReadOperationBMS01()
+        {
+            try
+            {
+                HistoryRead_IsWorking = true;
+                stopReadFlag = false;
+                // 禁用按钮
+                HistoryReadCommand.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在读取历史记录");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+                HistoryLods.Clear();
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    for (int i = ReadCounts; ; i++)
+                    {
+                        //读取指令
+                        Thread.Sleep(100);//没有这个延时会报错
+                        short[] data = ModbusRTU.ParseRead20Response(SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 4, (ushort)i), 133));
+                        if (data.Length == 64)
+                        {
+                            var model = new HistoryLodModel(data, cellNum,1);
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                HistoryLods.Add(model);
+                            });
+                        }
+                        else
+                        {
+                            break;
+                        }
+                        if (stopReadFlag)
+                        {
+                            break;
+                        }
+                        //HistoryLods.Add(new HistoryLodModel(data));
+                    }
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                HistoryRead_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                HistoryReadCommand.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                stopReadFlag = true;
+                UpdateState("历史记录读取完成");
+            }
+        }
 
         /// <summary>
         /// 停止读取历史记录
@@ -1267,7 +1356,16 @@ namespace WpfApp1.ViewModels
                     //执行设置指令
                     Thread.Sleep(2000);//没有这个延时会报错
                     byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 252, (int)getDoubleValue(DesignCap_Inputs) * 100), 8);
+                    if (receive.Length != 8)
+                    {
 
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8);
+                        if (receive.Length == 8)
+                        {
+                            OutIndex = receive[5];
+                            MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -1355,7 +1453,16 @@ namespace WpfApp1.ViewModels
                     Thread.Sleep(2000);//没有这个延时会报错
                     //string receive = SerialCommunicationService.SendSettingCommand("设置指令", FullCap_Inputs);
                     byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 253, (int)getDoubleValue(FullCap_Inputs) * 100), 8);
+                    if (receive.Length != 8)
+                    {
 
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8);
+                        if (receive.Length == 8)
+                        {
+                            OutIndex = receive[5];
+                            MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -1443,6 +1550,16 @@ namespace WpfApp1.ViewModels
                     Thread.Sleep(2000);//没有这个延时会报错
                     //string receive = SerialCommunicationService.SendSettingCommand("设置指令", RemainCap_Inputs);
                     byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 254, (int)getDoubleValue(RemainCap_Inputs) * 100), 8);
+                    if (receive.Length != 8)
+                    {
+
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8);
+                        if (receive.Length == 8)
+                        {
+                            OutIndex = receive[5];
+                            MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -1531,7 +1648,16 @@ namespace WpfApp1.ViewModels
                     Thread.Sleep(2000);//没有这个延时会报错
                     //string receive = SerialCommunicationService.SendSettingCommand("设置指令", CycleCount_Inputs);
                     byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 255, (int)getDoubleValue(CycleCount_Inputs)), 8);
+                    if (receive.Length != 8)
+                    {
 
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8);
+                        if (receive.Length == 8)
+                        {
+                            OutIndex = receive[5];
+                            MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -2253,7 +2379,16 @@ namespace WpfApp1.ViewModels
                     Thread.Sleep(1000);//没有这个延时会报错
                     //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "ChgCalibFactorInc_Inputs");
                     byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 277, CellTemp1), 8);
+                    if (receive.Length != 8)
+                    {
 
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8);
+                        if (receive.Length == 8)
+                        {
+                            OutIndex = receive[5];
+                            MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -2278,7 +2413,7 @@ namespace WpfApp1.ViewModels
 
 
         #endregion
-
+        
         #region 电池组温度系数2、+、-
         //cellTemp1
         //校准系数
@@ -2394,7 +2529,7 @@ namespace WpfApp1.ViewModels
                     Thread.Sleep(1000);//没有这个延时会报错
                     //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "ChgCalibFactorInc_Inputs");
                     byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 278, 1), 7);
-                    ChgCalibFactor = ModbusRTU.ParseRead03Response(receive)[0];
+                    CellTemp2 = ModbusRTU.ParseRead03Response(receive)[0];
                 })
                 , timeoutCts.Token);
             }
@@ -2446,7 +2581,16 @@ namespace WpfApp1.ViewModels
                     Thread.Sleep(1000);//没有这个延时会报错
                     //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "ChgCalibFactorInc_Inputs");
                     byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 278, CellTemp2), 8);
+                    if (receive.Length != 8)
+                    {
 
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8);
+                        if (receive.Length == 8)
+                        {
+                            OutIndex = receive[5];
+                            MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -2587,7 +2731,7 @@ namespace WpfApp1.ViewModels
                     Thread.Sleep(1000);//没有这个延时会报错
                     //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "ChgCalibFactorInc_Inputs");
                     byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 279, 1), 7);
-                    ChgCalibFactor = ModbusRTU.ParseRead03Response(receive)[0];
+                    CellTemp3 = ModbusRTU.ParseRead03Response(receive)[0];
                 })
                 , timeoutCts.Token);
             }
@@ -2639,7 +2783,16 @@ namespace WpfApp1.ViewModels
                     Thread.Sleep(1000);//没有这个延时会报错
                     //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "ChgCalibFactorInc_Inputs");
                     byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 279, CellTemp3), 8);
+                    if (receive.Length != 8)
+                    {
 
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8);
+                        if (receive.Length == 8)
+                        {
+                            OutIndex = receive[5];
+                            MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -2698,7 +2851,7 @@ namespace WpfApp1.ViewModels
                 using var timeoutCts = new CancellationTokenSource(5000);
                 await Task.Run(new Action(() =>
                 {
-                    CellTemp3 = CellTemp3 + 1;
+                    CellTemp4 = CellTemp4 + 1;
                 })
                 , timeoutCts.Token);
             }
@@ -2780,7 +2933,7 @@ namespace WpfApp1.ViewModels
                     Thread.Sleep(1000);//没有这个延时会报错
                     //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "ChgCalibFactorInc_Inputs");
                     byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 280, 1), 7);
-                    ChgCalibFactor = ModbusRTU.ParseRead03Response(receive)[0];
+                    CellTemp4 = ModbusRTU.ParseRead03Response(receive)[0];
                 })
                 , timeoutCts.Token);
             }
@@ -2832,7 +2985,16 @@ namespace WpfApp1.ViewModels
                     Thread.Sleep(1000);//没有这个延时会报错
                     //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "ChgCalibFactorInc_Inputs");
                     byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 280, CellTemp4), 8);
+                    if (receive.Length != 8)
+                    {
 
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8);
+                        if (receive.Length == 8)
+                        {
+                            OutIndex = receive[5];
+                            MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -3235,7 +3397,7 @@ namespace WpfApp1.ViewModels
 
         #endregion
 
-        #region 取消休眠
+        #region 深度睡眠
 
 
         public RelayCommand CancelSleepCommand
@@ -3273,7 +3435,7 @@ namespace WpfApp1.ViewModels
                 {
                     //执行设置指令
                     Thread.Sleep(2000);//没有这个延时会报错
-                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 0), 8);
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 11, 1), 8);
                 })
                 , timeoutCts.Token);
             }
@@ -3357,6 +3519,70 @@ namespace WpfApp1.ViewModels
                 UpdateState("设置指令已经执行完");
             }
         }
+
+        #endregion
+
+        #region 限流板
+
+        public RelayCommand LimitCommand { get; set; }
+
+
+        private bool Limit_IsWorking;
+
+        /// <summary>
+        /// 点击设置
+        /// </summary>
+        private async void LimitOperation()
+        {
+            try
+            {
+                Limit_IsWorking = true;
+                // 禁用按钮
+                LimitCommand.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(2000);//没有这个延时会报错
+                    ushort shutDown = (ushort)(settingStatue[3] == 1 ? 0 : 1);
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 9, shutDown), 8);
+                    if (receive.Length == 8)
+                    {
+                        settingStatue[2] = (ushort)(settingStatue[2] == 1 ? 0 : 1);
+                    }
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                Limit_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                LimitCommand.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
 
         #endregion
 
@@ -3464,6 +3690,81 @@ namespace WpfApp1.ViewModels
                 //Status = "就绪";
                 // 重新启用按钮
                 GetOutIndexCommand.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+        #endregion
+
+        #region 获取超出范围数据索引2
+
+        private int outIndex2;
+
+        public int OutIndex2
+        {
+            get { return outIndex2; }
+            set
+            {
+                outIndex2 = value;
+                this.RaiseProperChanged(nameof(OutIndex2));
+            }
+        }
+
+
+        public RelayCommand GetOutIndexCommand2 { get; set; }
+
+
+        private bool GetOutIndex_IsWorking2;
+
+        /// <summary>
+        /// 点击设置
+        /// </summary>
+        private async void GetOutIndexOperation2()
+        {
+            try
+            {
+                GetOutIndex_IsWorking2 = true;
+                // 禁用按钮
+                GetOutIndexCommand2.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(2000);//没有这个延时会报错
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 8, 1), 8);
+                    if (receive.Length == 8)
+                    {
+                        OutIndex2 = receive[5];
+                    }
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                GetOutIndex_IsWorking2 = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                GetOutIndexCommand2.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
                 UpdateState("设置指令已经执行完");
@@ -3622,6 +3923,9 @@ namespace WpfApp1.ViewModels
         //AFE 放电过流保护恢复时间
         public ListCollectionView SendingCommandsView_29 { get; set; }
 
+        //短路保护延时
+        public ListCollectionView SendingCommandsView_30 { get; set; }
+
         //保存
         public ICommand SaveCommand { get; }
         //导出
@@ -3658,11 +3962,51 @@ namespace WpfApp1.ViewModels
         /// 加载默认配置文件
         /// </summary>
         /// <returns></returns>
-        private ObservableCollection<SendingCommand> LoadSettings()
+        public ObservableCollection<SendingCommand> LoadSettings()
         {
             try
             {
                 string path = "default.xml";
+                filePathToSave = path;
+                if (File.Exists(path))
+                {
+                    // 1. 读取文件内容
+                    using var fileStream = new FileStream(path, FileMode.Open);
+                    var wrapperSerializer = new XmlSerializer(typeof(ConfigWrapper));
+                    var wrapper = (ConfigWrapper)wrapperSerializer.Deserialize(fileStream);
+
+                    // 2. 计算读取数据的哈希（直接对字节数组计算）
+                    using var sha256 = SHA256.Create();
+                    string computedHashString = System.Convert.ToBase64String(sha256.ComputeHash(wrapper.DataBytes));
+
+                    // 3. 验证哈希
+                    if (computedHashString != wrapper.Hash)
+                    {
+                        MessageBox.Show("配置文件已损坏或被篡改！", "错误",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                        return new ObservableCollection<SendingCommand>();
+                    }
+
+                    // 4. 反序列化原始数据
+                    using var dataStream = new MemoryStream(wrapper.DataBytes);
+                    var serializer = new XmlSerializer(typeof(ObservableCollection<SendingCommand>));
+                    return (ObservableCollection<SendingCommand>)serializer.Deserialize(dataStream);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("配置文件已损坏或被篡改！", "错误",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                Console.WriteLine($"加载设置时出错: {ex.Message}");
+            }
+            return new ObservableCollection<SendingCommand>();
+        }
+
+        public ObservableCollection<SendingCommand> LoadSettings2()
+        {
+            try
+            {
+                string path = "default2.xml";
                 filePathToSave = path;
                 if (File.Exists(path))
                 {

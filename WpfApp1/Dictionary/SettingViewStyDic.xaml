@@ -47,12 +47,22 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                    <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="4">
                         <ContentPresenter
                             Margin="{TemplateBinding Padding}"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center" />
                     </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#FF9479FA" />
+                           
+                            <Setter Property="Cursor" Value="Hand" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="Background" Value="Gray"></Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -63,7 +73,7 @@
 
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Background" Value="Gray" />
+                <Setter  Property="Background" Value="Gray" />
             </Trigger>
         </Style.Triggers>
     </Style>

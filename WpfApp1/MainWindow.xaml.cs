@@ -29,13 +29,15 @@ namespace WpfApp1
         {
            
             InitializeComponent();
-            ChangeLanguageToChinese(Owner,new RoutedEventArgs());
+           
 
             this.DataContext = new MainWindowVM(new MessageDialogService());
 
             LoadLanguage();
 
         }
+
+       
 
         /// <summary>
         /// 根据系统语言切换语言
@@ -174,6 +176,7 @@ namespace WpfApp1
             App.UpdateLanguage("Lan-en-us");
             EnglishBtn.Visibility = Visibility.Collapsed;
             ChineseBtn.Visibility = Visibility.Visible;
+             
             
         }
 
@@ -187,6 +190,7 @@ namespace WpfApp1
             ChineseBtn.Visibility = Visibility.Collapsed;
             EnglishBtn.Visibility = Visibility.Visible;
             App.UpdateLanguage("Lan-zh-cn");
+            
         }
     }
 }

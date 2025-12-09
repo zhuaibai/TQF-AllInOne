@@ -1,4 +1,5 @@
-﻿<UserControl
+﻿
+<UserControl
     x:Class="WpfApp1.UserControls.BMS_UserControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -106,11 +107,11 @@
                 IsChecked="{Binding SelectedMode, Converter={StaticResource EnumEqualsConverter}, ConverterParameter=Mode4}" />
             <RadioButton
                 Click="RealTimeMonitor_Click"
-                Content="实时监控"
+                Content="{DynamicResource 实时监控}"
                 IsChecked="{Binding SelectedMode, Converter={StaticResource EnumEqualsConverter}, ConverterParameter=Mode5}" />
             <RadioButton
                 Click="AdminView_Click"
-                Content="前端芯片监控"
+                Content="{DynamicResource 前端芯片监控}"
                 IsChecked="{Binding SelectedMode, Converter={StaticResource EnumEqualsConverter}, ConverterParameter=Mode6}"
                 Visibility="{Binding ShowAdmin}" />
 
@@ -536,7 +537,7 @@
                     Text="&#xe605;" />
 
             </Grid>
-            <GroupBox Grid.Row="1" Header="最高与最低电压">
+            <GroupBox Grid.Row="1" Header="{DynamicResource 最高与最低电压}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
@@ -583,7 +584,7 @@
                 Grid.Row="2"
                 Grid.Column="1"
                 VerticalScrollBarVisibility="Auto">
-                <GroupBox Header="单体电压">
+                <GroupBox Header="{DynamicResource 单体电压}">
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -715,7 +716,6 @@
 
                 </GroupBox>
             </ScrollViewer>
-
         </Grid>
 
         <!--  第二行 第三列 状态  -->
@@ -1061,7 +1061,7 @@
                 </Grid>
             </GroupBox>
             <!--  设置  -->
-            <GroupBox Grid.Row="5" Header="设置">
+            <GroupBox Grid.Row="5" Header="{DynamicResource 设置}">
                 <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal">
                     <Button
                         Width="auto"
@@ -1069,32 +1069,44 @@
                         Margin="0"
                         Background="{Binding BMS_Setting.SettingStatue[0], Converter={StaticResource IntToColorConverter}}"
                         Command="{Binding BMS_Setting.CloseCharMOSCommand}"
-                        Content="关闭充电MOS"
+                        Content="{DynamicResource 关闭充电MOS}"
                         FontFamily="../Resource/Fonts/#iconfont"
+                        IsEnabled="{Binding Administration}"
                         Style="{StaticResource ActionButton}" />
                     <Button
                         Width="auto"
                         Height="30"
                         Background="{Binding BMS_Setting.SettingStatue[1], Converter={StaticResource IntToColorConverter}}"
                         Command="{Binding BMS_Setting.CloseDisCharMOSCommand}"
-                        Content="关闭放电MOS"
+                        Content="{DynamicResource 关闭放电MOS}"
                         FontFamily="../Resource/Fonts/#iconfont"
+                        IsEnabled="{Binding Administration}"
                         Style="{StaticResource ActionButton}" />
                     <Button
                         Height="30"
                         HorizontalAlignment="Right"
                         Background="{Binding BMS_Setting.SettingStatue[2], Converter={StaticResource IntToColorConverter}}"
                         Command="{Binding BMS_Setting.TurnOffCommand}"
-                        Content="关机"
+                        Content="{DynamicResource 关机}"
                         FontFamily="../Resource/Fonts/#iconfont"
+                        IsEnabled="{Binding Administration}"
                         Style="{StaticResource ActionButton}" />
                     <Button
                         Width="auto"
                         Height="30"
                         Background="{Binding BMS_Setting.SettingStatue[4], Converter={StaticResource IntToColorConverter}}"
                         Command="{Binding BMS_Setting.SleepCommand}"
-                        Content="休眠"
+                        Content="{DynamicResource 休眠}"
                         FontFamily="../Resource/Fonts/#iconfont"
+                        IsEnabled="{Binding Administration}"
+                        Style="{StaticResource ActionButton}" />
+                    <Button
+                        Width="auto"
+                        Height="30"
+                        Command="{Binding BMS_Setting.CancelSleepCommand}"
+                        Content="{DynamicResource 深度休眠}"
+                        FontFamily="../Resource/Fonts/#iconfont"
+                        IsEnabled="{Binding Administration}"
                         Style="{StaticResource ActionButton}" />
 
                     <!--<Button
@@ -1139,6 +1151,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_1}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1175,6 +1188,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_2, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1211,6 +1225,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_3, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1247,6 +1262,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_4, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1283,6 +1299,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_5, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1319,6 +1336,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_20, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1355,6 +1373,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_6, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1391,6 +1410,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_7, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1427,6 +1447,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_8, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1463,6 +1484,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_9, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1499,6 +1521,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_10, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1535,6 +1558,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_11, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1571,6 +1595,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_12, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1607,6 +1632,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_13, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1643,6 +1669,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_14, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1679,6 +1706,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_15, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1715,6 +1743,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_16, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1751,6 +1780,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_17, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1787,6 +1817,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_18, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1859,6 +1890,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_21, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1895,6 +1927,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_22, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1931,6 +1964,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_23, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -1967,6 +2001,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_24, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -2003,6 +2038,7 @@
                                     VerticalAlignment="Top"
                                     AutoGenerateColumns="False"
                                     Background="Transparent"
+                                    CanUserAddRows="False"
                                     ItemsSource="{Binding BMS_Setting.SendingCommandsView_25, Mode=TwoWay}"
                                     PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                     RowHeaderWidth="0"
@@ -2058,7 +2094,8 @@
                             Background="AntiqueWhite"
                             Command="{Binding BMS_Setting.LoadFromFile}"
                             Content="{DynamicResource 导入}"
-                            FontSize="30"
+                            FontSize="20"
+                            IsEnabled="{Binding Administration}"
                             Style="{StaticResource BtnStyle5}"
                             Tag="&#xe659;" />
                         <Button
@@ -2068,6 +2105,7 @@
                             Command="{Binding BMS_Setting.SaveCommandToFile}"
                             Content="{DynamicResource 导出}"
                             FontSize="30"
+                            IsEnabled="{Binding Administration}"
                             Style="{StaticResource BtnStyle5}"
                             Tag="&#xe627;" />
                         <Button
@@ -2077,6 +2115,7 @@
                             Command="{Binding BMS_Setting.SaveCommand}"
                             Content="{DynamicResource 保存}"
                             FontSize="30"
+                            IsEnabled="{Binding Administration}"
                             Style="{StaticResource BtnStyle5}"
                             Tag="&#xe936;" />
                         <Button
@@ -2084,8 +2123,9 @@
                             Margin="10"
                             Background="Cyan"
                             Command="{Binding BMS_Setting.WriteCommand}"
-                            Content="{Binding BMS_Setting.ButtonText}"
+                            Content="{DynamicResource 写入}"
                             FontSize="30"
+                            IsEnabled="{Binding Administration}"
                             Style="{StaticResource BtnStyle5}"
                             Tag="&#xe6ba;" />
 
@@ -2096,7 +2136,7 @@
 
         </Grid>
 
-        <!--  系统参数 界面  -->
+        <!--  系统设置 界面  -->
         <Grid
             x:Name="SystemSettingView"
             Grid.Row="1"
@@ -2203,6 +2243,7 @@
                                 Grid.Column="3"
                                 Command="{Binding BMS_Setting.Command_SetDesignCap}"
                                 Content="{DynamicResource 设置}"
+                                IsEnabled="{Binding Administration}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  满充容量  -->
                             <TextBlock
@@ -2224,6 +2265,7 @@
                                 Grid.Column="3"
                                 Command="{Binding BMS_Setting.Command_SetFullCap}"
                                 Content="{DynamicResource 设置}"
+                                IsEnabled="{Binding Administration}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  剩余容量  -->
                             <TextBlock
@@ -2245,6 +2287,7 @@
                                 Grid.Column="3"
                                 Command="{Binding BMS_Setting.Command_SetRemainCap}"
                                 Content="{DynamicResource 设置}"
+                                IsEnabled="{Binding Administration}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  循环次数  -->
                             <TextBlock
@@ -2266,6 +2309,7 @@
                                 Grid.Column="3"
                                 Command="{Binding BMS_Setting.Command_SetCycleCount}"
                                 Content="{DynamicResource 设置}"
+                                IsEnabled="{Binding Administration}"
                                 Style="{StaticResource ActionButton}" />
 
                             <!--  获取超出范围数据索引  -->
@@ -2387,7 +2431,7 @@
                             <!--  充电校准系数  -->
                             <Grid Grid.Row="2" Grid.ColumnSpan="4">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition Width="80" />
                                     <ColumnDefinition />
                                     <ColumnDefinition Width="auto" />
                                 </Grid.ColumnDefinitions>
@@ -2404,7 +2448,7 @@
                                         Width="50"
                                         Height="30"
                                         Command="{Binding BMS_Setting.Command_SetChgCalibFactorRead}"
-                                        Content="读取"
+                                        Content="{DynamicResource 读取}"
                                         FontFamily="../Resource/Fonts/#iconfont"
                                         Style="{StaticResource ActionButton}" />
                                     <Button
@@ -2437,8 +2481,9 @@
                                         Width="50"
                                         Height="30"
                                         Command="{Binding BMS_Setting.Command_SetChgCalibFactorWrite}"
-                                        Content="写入"
+                                        Content="{DynamicResource 写入}"
                                         FontFamily="../Resource/Fonts/#iconfont"
+                                        IsEnabled="{Binding Administration}"
                                         Style="{StaticResource ActionButton}" />
                                 </StackPanel>
 
@@ -2453,7 +2498,7 @@
                             <!--  放电校准系数  -->
                             <Grid Grid.Row="3" Grid.ColumnSpan="4">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition Width="80" />
                                     <ColumnDefinition />
                                     <ColumnDefinition Width="auto" />
                                 </Grid.ColumnDefinitions>
@@ -2470,7 +2515,7 @@
                                         Width="50"
                                         Height="30"
                                         Command="{Binding BMS_Setting.Command_SetDisCalibFactorRead}"
-                                        Content="读取"
+                                        Content="{DynamicResource 读取}"
                                         FontFamily="../Resource/Fonts/#iconfont"
                                         Style="{StaticResource ActionButton}" />
                                     <Button
@@ -2504,8 +2549,9 @@
                                         Width="50"
                                         Height="30"
                                         Command="{Binding BMS_Setting.Command_SetDisCalibFactorWrite}"
-                                        Content="写入"
+                                        Content="{DynamicResource 写入}"
                                         FontFamily="../Resource/Fonts/#iconfont"
+                                        IsEnabled="{Binding Administration}"
                                         Style="{StaticResource ActionButton}" />
                                 </StackPanel>
 
@@ -2524,6 +2570,7 @@
                                 Height="30"
                                 Command="{Binding BMS_Setting.Command_SetClearHistory}"
                                 Content="{DynamicResource 清除历史记录}"
+                                IsEnabled="{Binding Administration}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  重置用户参数  -->
                             <Button
@@ -2532,6 +2579,7 @@
                                 Height="30"
                                 Command="{Binding BMS_Setting.Command_SetResetUserParams}"
                                 Content="{DynamicResource 重置用户参数}"
+                                IsEnabled="{Binding Administration}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  重置系统参数  -->
                             <Button
@@ -2540,6 +2588,7 @@
                                 Height="30"
                                 Command="{Binding BMS_Setting.Command_SetResetSysParams}"
                                 Content="{DynamicResource 重置系统参数}"
+                                IsEnabled="{Binding Administration}"
                                 Style="{StaticResource ActionButton}" />
 
                             <!--  管理员模式  -->
@@ -2548,7 +2597,7 @@
                                 Grid.ColumnSpan="4"
                                 Height="30"
                                 Command="{Binding ShowMessageCommand}"
-                                Content="管理员模式"
+                                Content="{DynamicResource 管理员模式}"
                                 Style="{StaticResource ActionButton2}" />
                         </Grid>
                     </Border>
@@ -2767,7 +2816,7 @@
                             <TextBlock
                                 Margin="10"
                                 FontSize="15"
-                                Text="读取条数:" />
+                                Text="{DynamicResource 从第几条开始读:}" />
                             <TextBox
                                 Margin="5"
                                 Style="{StaticResource InputBox}"
@@ -2779,7 +2828,7 @@
                             Margin="10"
                             Background="AntiqueWhite"
                             Command="{Binding BMS_Setting.HistoryReadCommand}"
-                            Content="读取"
+                            Content="{DynamicResource 读取}"
                             FontSize="30"
                             Style="{StaticResource BtnStyle5}"
                             Tag="&#xe659;" />
@@ -2797,7 +2846,7 @@
                             Margin="10"
                             Background="Yellow"
                             Command="{Binding BMS_Setting.StopReadComamnd}"
-                            Content="停止"
+                            Content="{DynamicResource 停止}"
                             FontSize="30"
                             Style="{StaticResource BtnStyle5}"
                             Tag="&#xe936;" />
@@ -2838,14 +2887,14 @@
                         <StackPanel>
 
                             <StackPanel
-                                Margin="10,0,0,0"
+                                Margin="0,-30,0,0"
                                 HorizontalAlignment="Right"
                                 Orientation="Horizontal">
 
                                 <!--  保存复选框  -->
                                 <CheckBox
                                     VerticalAlignment="Center"
-                                    Content="保存数据到 Excel"
+                                    Content="{DynamicResource 保存数据到Excel}"
                                     FontSize="15"
                                     IsChecked="{Binding RT_Monitor.IsSaving}" />
 
@@ -2854,7 +2903,7 @@
                                     Background="{StaticResource PrimaryBlue}"
                                     BorderThickness="0"
                                     Command="{Binding RT_Monitor.ClearData}"
-                                    Content="清空"
+                                    Content="{DynamicResource 清空}"
                                     Foreground="White"
                                     Style="{StaticResource OperateBtnStyle}" />
                             </StackPanel>
@@ -2864,7 +2913,7 @@
                     <!--  主表格  -->
                     <DataGrid
                         Grid.Row="1"
-                        Margin="0,30,0,0"
+                        Margin="0,5,0,0"
                         ItemsSource="{Binding RT_Monitor.PollingList}"
                         Style="{StaticResource BlueWhiteDataGrid}">
 

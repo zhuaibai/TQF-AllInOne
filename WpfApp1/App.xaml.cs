@@ -12,7 +12,9 @@ namespace WpfApp1
     {
 
         public static ResourceDictionary resourceDictionary;
-        
+
+        public static Action<string> ChangeLanguageWithSetting;
+
         /// <summary>
         /// 切换界面语言
         /// </summary>
@@ -39,6 +41,10 @@ namespace WpfApp1
                 ConfigurationManager.RefreshSection("appSettings");
 
                 res = true;
+                if (res)
+                {
+                    ChangeLanguageWithSetting?.Invoke("");
+                }
             }
 
             return res;
@@ -66,7 +72,6 @@ namespace WpfApp1
                     res = "key搞错了";
                 }
             }
-
             return res;
         }
 

@@ -48,11 +48,11 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border
-                     Name="border"
-                     Padding="20,10"
-                     Background="#1677FF"
-                     BorderThickness="1"
-                     CornerRadius="5">
+                        Name="border"
+                        Padding="20,10"
+                        Background="#1677FF"
+                        BorderThickness="1"
+                        CornerRadius="5">
                         <Border.BorderBrush>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                 <GradientStop Offset="0" Color="#22ffffff" />
@@ -61,21 +61,21 @@
                             </LinearGradientBrush>
                         </Border.BorderBrush>
                         <StackPanel
-                         HorizontalAlignment="Center"
-                         VerticalAlignment="Center"
-                         Orientation="Horizontal">
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal">
                             <TextBlock
-                             VerticalAlignment="Center"
-                             FontFamily="../Resource/Fonts/#iconfont"
-                             Foreground="{TemplateBinding Background}"
-                             Text="{TemplateBinding Tag}" />
+                                VerticalAlignment="Center"
+                                FontFamily="../Resource/Fonts/#iconfont"
+                                Foreground="{TemplateBinding Background}"
+                                Text="{TemplateBinding Tag}" />
                             <TextBlock
-                             x:Name="txt"
-                             Margin="5,0"
-                             VerticalAlignment="Center"
-                             FontSize="40"
-                             Foreground="White"
-                             Text="{TemplateBinding Content}" />
+                                x:Name="txt"
+                                Margin="5,0"
+                                VerticalAlignment="Center"
+                                FontSize="20"
+                                Foreground="White"
+                                Text="{TemplateBinding Content}" />
                         </StackPanel>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -85,7 +85,7 @@
                             <Setter Property="Cursor" Value="Hand" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="border" Property="Background" Value="Gray"></Setter>
+                            <Setter TargetName="border" Property="Background" Value="Gray" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

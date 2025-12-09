@@ -22,6 +22,18 @@ namespace WpfApp1.Models
         public double Cell2 { get; set; }
         public double Cell3 { get; set; }
         public double Cell4 { get; set; }
+        public double Cell5 { get; set; }
+        public double Cell6 { get; set; }
+        public double Cell7 { get; set; }
+        public double Cell8 { get; set; }
+        public double Cell9 { get; set; }
+        public double Cell10 { get; set; }
+        public double Cell11 { get; set; }
+        public double Cell12 { get; set; }
+        public double Cell13 { get; set; }
+        public double Cell14 { get; set; }
+        public double Cell15 { get; set; }
+        public double Cell16 { get; set; }
         public double AvgVolt { get; set; }
         public double MaxVolt { get; set; }
         public double MinVolt { get; set; }
@@ -30,12 +42,15 @@ namespace WpfApp1.Models
         public double RatedCap { get; set; }
         public int CycleCount { get; set; }
         public double Temp1 { get; set; }
+        public double Temp2 { get; set; }
+        public double Temp3 { get; set; }
+        public double Temp4 { get; set; }
         public string CFET { get; set; }
         public string DFET { get; set; }
         public string ProtectStatus { get; set; }
         public string BalanceStatus { get; set; }
-        public double FullCap { get; set; }
-        public double FullRemainCap { get; set; }
+        public string FullCap { get; set; }
+        public string FullRemainCap { get; set; }
         public double BalanceCurrent { get; set; }
         public string AlarmStatus { get; set; }
         //SOC
@@ -51,7 +66,7 @@ namespace WpfApp1.Models
         //放电
         public string Dis_Statues { get; set; }
         //AFE过充保护
-        public string AFE_OverChg_Pro    { get; set; }
+        public string AFE_OverChg_Pro { get; set; }
         //AFE过放保护
         public string AFE_OverDis_Pro { get; set; }
         //充电过流保护

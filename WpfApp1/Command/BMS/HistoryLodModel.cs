@@ -65,6 +65,72 @@ namespace WpfApp1.Command.BMS
             AFE_ProtStatus = getAFE_ProtStatus(ModbusRTU.GetBits(data[56]));
         }
 
+        public HistoryLodModel(short[] data, int cellNum,int flag)
+        {
+
+            //进行解析数据
+            //历史记录数
+            
+            byte year = (byte)(data[1] & 0xFF);       // 低字节
+            byte month = (byte)(data[1] >> 8);         // 高字节
+
+            byte day = (byte)(data[2] & 0xFF);
+            byte hour = (byte)(data[2] >> 8);
+
+            byte minute = (byte)(data[3] & 0xFF);
+            byte second = (byte)(data[3] >> 8);
+
+
+            Time = "20" + year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
+            //16节电芯
+            for (int i = 4; i < 4 + cellNum; i++)
+            {
+                CellVoltage += data[i].ToString() + ";";
+            }
+            //单体最高电压
+            MaxCellVolt = data[20].ToString();
+            //单体最低电压
+            MinCellVolt = data[21].ToString();
+            //电芯压差
+            CellDiff = data[22].ToString();
+            //电流
+            Current = (data[23] / 100.0).ToString("F2");
+            //电池包总电压
+            PackVoltage = (data[24] / 100.0).ToString("F2");
+            //OSFET温度
+            MOSTemp = data[25].ToString();
+            //累计充电容量
+            TotalChgCap = (data[26] / 100.0).ToString("F2");
+            //NTC温度传感器值
+            NTCTemp = ((data[27] * 1000 + data[28] * 100 + data[29] * 10 + data[30]) / 10000.0).ToString("F1");
+            //当前电量SOC
+            SOC = (data[31] / 100.0).ToString("F2");
+            //电池健康SOH
+            SOH = (data[32] / 100.0).ToString("F2");
+            //剩余容量(mAh)
+            RemainCap = (data[33] / 100.0).ToString("F2");
+            //满充容量(mAh)
+            FullCap = (data[34] / 100.0).ToString("F2");
+            //充电循环次数
+            CycleCount = data[35].ToString();
+            //BMS告警
+            BMS_Alarm = MOD_WARN_STATE_Set_BMS01(ModbusRTU.GetBits(data[36]));
+            //BMS保护
+            BMS_Protect = MOD_PROT_STATE_Set_BMS01(ModbusRTU.GetBits(data[37]));
+            //BMS错误
+            BMS_Error = MOD_ERROR_STATE_Set_BMS01(ModbusRTU.GetBits(data[38]));
+            //BMS状态
+            int[] flags = ModbusRTU.GetBits((short)data[39]);
+            BMS_Status = getBMS_Status(flags);
+            //保护次数
+            for (int i = 0; i < 16; i++)
+            {
+                ProtectCount[i] = data[i + 40];
+            }
+            //前端芯片保护状态
+            AFE_ProtStatus = getAFE_ProtStatus(ModbusRTU.GetBits(data[56]));
+        }
+
         /// <summary>
         /// 获取BMS状态
         /// </summary>
@@ -617,6 +683,211 @@ namespace WpfApp1.Command.BMS
 
             }
         }
+
+
+        /// <summary>
+        /// 获取对应标志位的错误信息
+        /// </summary>
+        /// <param name="i">索引</param>
+        private string getERRORByBMS01(int i)
+        {
+            switch (i)
+            {
+                case 0:
+                    return "充电MOS故障 ";
+                case 1:
+                    return "放电MOS故障 ";
+                case 2:
+                    return "限流板故障 ";
+                case 3:
+                    return "ADC采集故障 ";
+                case 4:
+                    return "电芯失效故障 ";
+                case 5:
+                    return "前端芯片通信故障 ";
+                case 6:
+                    return "电池电压故障 ";
+                case 7:
+                    return "预充电阻故障 ";
+                case 8:
+                    return "3V3辅源故障 ";
+                case 9:
+                    return "NTC故障 ";
+                case 10:
+                    return "脱扣器故障 ";
+                case 11:
+                    return "";
+                case 12:
+                    return "";
+                case 13:
+                    return "";
+                case 14:
+                    return "";
+                case 15:
+                    return "";
+                default:
+                    return "";
+
+            }
+        }
+
+        /// <summary>
+        /// 获取对应标志位的保护信息
+        /// </summary>
+        /// <param name="i">索引</param>
+        private string getProtectByBMS01(int i)
+        {
+            switch (i)
+            {
+                case 0:
+                    return "单体过压 ";
+                case 1:
+                    return "单体欠压 ";
+                case 2:
+                    return "总体过压 ";
+                case 3:
+                    return "总体欠压 ";//
+                case 4:
+                    return "满充保护 ";
+                case 5:
+                    return "充电过流 ";
+                case 6:
+                    return "放电过流 ";
+                case 7:
+                    return "短路保护 ";
+                case 8:
+                    return "充电高温1 ";
+                case 9:
+                    return "充电高温2 ";
+                case 10:
+                    return "充电低温 ";//
+                case 11:
+                    return "放电低温 ";
+                case 12:
+                    return "MOS高温 ";
+                case 13:
+                    return "请立即充电";
+                case 14:
+                    return "放电高温 ";
+                case 15:
+                    return "电芯压差过大 ";
+                default:
+                    return "";
+
+            }
+        }
+
+        /// <summary>
+        /// 获取对应标志位的告警信息
+        /// </summary>
+        /// <param name="i">索引</param>
+        private string getWarningByBMS01(int i)
+        {
+            switch (i)
+            {
+                case 0:
+                    return "单体过压 ";
+                case 1:
+                    return "单体欠压 ";
+                case 2:
+                    return "总体过压 ";
+                case 3:
+                    return "总体欠压 ";
+                case 4:
+                    return "电芯压差过大 ";
+                case 5:
+                    return "充电过流 ";
+                case 6:
+                    return "放电过流 ";
+                case 7:
+                    return "充电高温1 ";
+                case 8:
+                    return "充电高温2";
+                case 9:
+                    return "充电低温 ";
+                case 10:
+                    return "放电低温 ";
+                case 11:
+                    return "电芯温差过大 ";
+                case 12:
+                    return "MOS高温";
+                case 13:
+                    return "环境高温";
+                case 14:
+                    return "放电高温 ";
+                case 15:
+                    return "低电量 ";
+                default:
+                    return "索引错误 ";
+
+            }
+        }
+
+        /// <summary>
+        /// 告警
+        /// </summary>
+        /// <param name="data"></param>
+        public string MOD_WARN_STATE_Set_BMS01(int[] data)
+        {
+            string MOD_WARN_STATE = "";
+            if (data == null)
+            {
+                MOD_WARN_STATE = "和上位机通讯异常";
+                return MOD_WARN_STATE;
+            }
+
+            //根据标志位获取告警信息并拼接
+            for (int i = 0; i < data.Length; i++)
+            {
+                MOD_WARN_STATE = data[i] == 1 ? MOD_WARN_STATE + getWarningByBMS01(i) : MOD_WARN_STATE;
+            }
+            return MOD_WARN_STATE;
+
+        }
+
+
+        /// <summary>
+        /// 保护
+        /// </summary>
+        /// <param name="data"></param>
+        public string MOD_PROT_STATE_Set_BMS01(int[] data)
+        {
+            string MOD_PROT_STATE = "";
+            if (data == null)
+            {
+                MOD_PROT_STATE = "和上位机通讯异常";
+                return MOD_PROT_STATE;
+            }
+
+            //根据标志位获取告警信息并拼接
+            for (int i = 0; i < data.Length; i++)
+            {
+                MOD_PROT_STATE = data[i] == 1 ? MOD_PROT_STATE + getProtectByBMS01(i) : MOD_PROT_STATE;
+            }
+            return MOD_PROT_STATE;
+        }
+
+        /// <summary>
+        /// 错误
+        /// </summary>
+        /// <param name="data"></param>
+        public string MOD_ERROR_STATE_Set_BMS01(int[] data)
+        {
+            string MOD_ERROR_STATE = "";
+            if (data == null)
+            {
+                MOD_ERROR_STATE = "和上位机通讯异常";
+                return MOD_ERROR_STATE;
+            }
+
+            //根据标志位获取告警信息并拼接
+            for (int i = 0; i < data.Length; i++)
+            {
+                MOD_ERROR_STATE = data[i] == 1 ? MOD_ERROR_STATE + getERRORByBMS01(i) : MOD_ERROR_STATE;
+            }
+            return MOD_ERROR_STATE;
+        }
+
 
     }
 }
