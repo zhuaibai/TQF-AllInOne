@@ -564,6 +564,8 @@ namespace WpfApp1.Convert
             }
         }
 
+
+
         public static void FirstSetReceive_Enum(ObservableCollection<SendingCommand> sendingCommands, ObservableCollection<SendingCommand> origin)
         {
 

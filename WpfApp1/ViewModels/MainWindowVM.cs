@@ -1614,7 +1614,7 @@ namespace WpfApp1.ViewModels
                 {
                     //补丁，BMS01时单位稍作修改
                     ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings2());
-                    SelectedMode = BatteryMode.Mode1;
+                   
                 }
                 else
                     ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings());
@@ -3072,7 +3072,7 @@ namespace WpfApp1.ViewModels
                 {
                     //补丁，BMS01时单位稍作修改
                     ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings2());
-                    SelectedMode = BatteryMode.Mode1;
+                    
                 }
                 else
                     ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings());

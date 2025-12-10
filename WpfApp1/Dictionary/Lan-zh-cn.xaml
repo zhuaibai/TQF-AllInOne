@@ -515,27 +515,28 @@
     <s:String x:Key="AFE 放电过流保护电流档位">AFE 放电过流保护电流档位</s:String>
     <s:String x:Key="AFE 放电过流保护延时档位">AFE 放电过流保护延时档位</s:String>
     <s:String x:Key="AFE 放电过流保护恢复时间(S)">AFE 放电过流保护恢复时间(S)</s:String>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    <s:String x:Key="AFE 状态">AFE 状态</s:String>
+    <s:String x:Key="单体过充">单体过充</s:String>
+    <s:String x:Key="总体过充">总体过充</s:String>
+    <s:String x:Key="单体过放">单体过放</s:String>
+    <s:String x:Key="总体过放">总体过放</s:String>
+    <s:String x:Key="充电过流1">充电过流1</s:String>
+    <s:String x:Key="充电过流2">充电过流2</s:String>
+    <s:String x:Key="放电过流1">放电过流1</s:String>
+    <s:String x:Key="单体休眠和电池包">单体休眠和电池包</s:String>
+    <s:String x:Key="充电高温3">充电高温1</s:String>
+    <s:String x:Key="充电低温1">充电低温</s:String>
+    <s:String x:Key="充电高温4">充电高温2</s:String>
+    <s:String x:Key="放电低温1">放电低温</s:String>
+    <s:String x:Key="放电高温1">放电高温</s:String>
+    <s:String x:Key="环境高温1">环境高温</s:String>
+    <s:String x:Key="电芯、预充与限流">电芯、预充与限流</s:String>
+    <s:String x:Key="散热与加热">散热与加热</s:String>
+    <s:String x:Key="其他">其他</s:String>
+    <s:String x:Key="AFE 短路保护参数">AFE 短路保护参数</s:String>
+    <s:String x:Key="AFE 过充保护参数">AFE 过充保护参数</s:String>
+    <s:String x:Key="AFE 过放保护参数">AFE 过放保护参数</s:String>
+    <s:String x:Key="AFE 充电过流保护参数">AFE 充电过流保护参数</s:String>
+    <s:String x:Key="AFE 放电过流保护参数">AFE 放电过流保护参数</s:String>
 
 </ResourceDictionary>

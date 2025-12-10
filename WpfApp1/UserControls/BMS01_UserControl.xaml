@@ -1317,7 +1317,7 @@
                     CornerRadius="5">
                     <ScrollViewer>
                         <UniformGrid Columns="2">
-                            <GroupBox Margin="10,0" Header=" 单体过充">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 单体过充}">
                                 <DataGrid
                                     Margin="0,00"
                                     VerticalAlignment="Top"
@@ -1356,7 +1356,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="总体过充">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 总体过充}">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -1393,7 +1393,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="单体过放">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 单体过放}">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -1430,7 +1430,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="总体过放">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 总体过放}">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -1467,7 +1467,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="充电过流">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 充电过流1}">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -1505,7 +1505,7 @@
                                 </DataGrid>
                             </GroupBox>
 
-                            <GroupBox Margin="10,0" Header="放电过流">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 放电过流1}">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -1542,7 +1542,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="短路保护">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 短路保护}">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -1579,7 +1579,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="均衡">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 均衡}">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -1616,7 +1616,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="单体休眠和电池包">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 单体休眠和电池包}">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -1653,7 +1653,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="充电高温1">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 充电高温3}">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -1690,7 +1690,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="充电低温">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 充电低温1}">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -1727,7 +1727,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="充电高温2">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 充电高温4}">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -1764,7 +1764,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="放电低温">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 放电低温1}">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -1838,7 +1838,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="放电高温">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 放电高温1}">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -1875,7 +1875,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="环境高温">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 环境高温1}">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -1912,7 +1912,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="电芯、预充与限流">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 电芯、预充与限流}">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -1949,7 +1949,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="散热与加热">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 散热与加热}">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -1986,7 +1986,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="其他">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 其他}">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -2023,7 +2023,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
-                            <GroupBox Margin="10,0" Header="其他">
+                            <GroupBox Margin="10,0" Header="{DynamicResource 其他}">
                                 <DataGrid
                                     Margin="0,0"
                                     VerticalAlignment="Top"
@@ -2918,7 +2918,7 @@
                             <RowDefinition />
 
                         </Grid.RowDefinitions>
-                        <GroupBox Header="历史记录" />
+                        <GroupBox Header="{DynamicResource 历史记录}" />
                         <DataGrid
                             Grid.Row="1"
                             Margin="0,00"
