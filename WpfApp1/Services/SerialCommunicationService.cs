@@ -443,7 +443,7 @@ namespace WpfApp1.Services
                 int bytesToRead = returnCount;
 
                 // 设置读取超时时间
-                SerialPort.ReadTimeout = 100;
+                SerialPort.ReadTimeout = 1000;
 
                 // 使用动态缓冲区收集数据
                 var receivedData = new List<byte>();

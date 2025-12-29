@@ -3054,7 +3054,7 @@ namespace WpfApp1.ViewModels
             // 等待暂停或取消信号
            
             //发送03功能码(查是91个设置项的电压)
-            Thread.Sleep(200);
+            Thread.Sleep(500);
             byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame((byte)SerialCommunicationService.address, 130, 112), 229);
             ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
             //初始化设置值

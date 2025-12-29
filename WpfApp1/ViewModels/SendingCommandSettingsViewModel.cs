@@ -4289,7 +4289,7 @@ namespace WpfApp1.ViewModels
                     receive = SerialCommunicationService.SendCommandToBMS(sendBuffer, 8);
                     if (receive.Length != 8)
                     {
-
+                        Thread.Sleep(500);
                         receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 8, 1), 8);
                         if (receive.Length == 8)
                         {
