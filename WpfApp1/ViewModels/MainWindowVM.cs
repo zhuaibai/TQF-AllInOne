@@ -49,6 +49,8 @@ namespace WpfApp1.ViewModels
             //初始化串口信息
             IniCom();
             OpenCom = new RelayCommand(openCom);
+            // 创建串口实例
+            _serialPortSetting = new SerialPortSettingViewModel();
             //发送帧，接收帧
             SerialCountVM = new SerialCountVM();
             //绑定发送接收帧计数委托
@@ -89,7 +91,7 @@ namespace WpfApp1.ViewModels
             HPV_PDF = new HPV_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             HTEMP_PDF = new HTEMP_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             HIGSG2_PDF = new HIMSG2_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-
+            HEEP1_LB6 = new HEEP1_LB6_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             //初始化 CYJ ViewModel
             HGRID_CYJ = new HGRID_CYJ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             HEEP1_CYJ = new HEEP1_CYJ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
@@ -116,11 +118,64 @@ namespace WpfApp1.ViewModels
             //timer.Start();
             //实时监控列表
             RT_Monitor.PollingList = new ObservableCollection<PollingData>();
+            //实例化数据记录列表
+            DR_Monitor.CommonDataList = new ObservableCollection<Common_Data>();
             //并联监控
             UnionVM = new UnionMonitorVM();
-
+            // 初始化ComboBox的可用状态
+            UpdateComboBoxEnabledState();
             App.ChangeLanguageWithSetting = RefleshSettingParamToLanguage;
         }
+
+        #region 数据记录VM
+
+        private DataRecrodingVM _DR_Monitor = new DataRecrodingVM();
+
+        public DataRecrodingVM DR_Monitor
+        {
+            get { return _DR_Monitor; }
+            set
+            {
+                _DR_Monitor = value;
+                this.RaiseProperChanged(nameof(DR_Monitor));
+            }
+        }
+        #endregion
+
+        #region 串口下拉框设置
+        private SerialPortSettingViewModel _serialPortSetting;
+        public SerialPortSettingViewModel SerialPortSetting
+        {
+            get
+            {
+                return _serialPortSetting;
+            }
+            set
+            {
+                _serialPortSetting = value;
+                OnPropertyChanged(nameof(SerialPortSetting));
+            }
+        }
+
+        private bool _isEnableComboBox = true;
+        public bool IsEnableComboBox
+        {
+            get
+            {
+                return _isEnableComboBox;
+            }
+            set
+            {
+                _isEnableComboBox = value;
+                OnPropertyChanged(nameof(IsEnableComboBox));
+            }
+        }
+
+        private void UpdateComboBoxEnabledState()
+        {
+            IsEnableComboBox = !SerialCommunicationService.IsOpen();
+        }
+        #endregion
 
         #region 小标题选项
 
@@ -1169,6 +1224,28 @@ namespace WpfApp1.ViewModels
 
         #endregion
 
+        /// <summary>
+        /// 重新配置串口参数 - 应用最新的设置
+        /// 当用户通过下拉框选择了新串口后，调用此方法更新配置
+        /// </summary>
+        private void ReconfigureSerialPort()
+        {
+            try
+            {
+                // 获取到最新值
+                var settings = SerialPortSetting.GetCurrentSettings();
+
+                // 重新初始化串口
+                SerialCommunicationService.InitiateCom(settings);
+
+                AddLog($"串口参数已更新: {settings.PortName}, {settings.BaudRate}bps");
+            }
+            catch (Exception ex)
+            {
+                AddLog($"更新串口参数失败: {ex.Message}");
+            }
+        }
+
 
         /// <summary>
         /// 从文件加载串口通讯信息
@@ -1228,6 +1305,8 @@ namespace WpfApp1.ViewModels
                     UpdateState(App.GetText("串口已关闭"));
                     comStateColor(false);
                     AddLog($"关闭串口{SerialCommunicationService.getComName()}成功");
+                    //更新combobox状态
+                    UpdateComboBoxEnabledState();   
                 }
                 catch (Exception ex)
                 {
@@ -1242,7 +1321,8 @@ namespace WpfApp1.ViewModels
             }
             else
             {
-                IniCom();
+                
+                ReconfigureSerialPort();
                 if (!SerialCommunicationService.OpenCom())
                 {
                     MessageBox.Show("串口打开失败！");
@@ -1251,9 +1331,6 @@ namespace WpfApp1.ViewModels
                 ChangeComIcon(true);
                 comStateColor(true);
                 AddLog($"打开串口{SerialCommunicationService.getComName()}成功");
-
-
-
                 string machine;
                 //自动识别机器
                 if (!AutoSelectedMachineType(out machine))
@@ -1271,6 +1348,8 @@ namespace WpfApp1.ViewModels
                     return;
                     //}
                 }
+                //更新combobox状态
+                UpdateComboBoxEnabledState();
                 //开始通讯
                 StartBackgroundThread();
             }
@@ -1639,8 +1718,8 @@ namespace WpfApp1.ViewModels
                     }
                     else if (SelectedMachineItem == "HPVINV04")
                     {
-                        //GB6042通讯
-                        CommunicationWithGB6042(token);
+                        //HPVINV04通讯
+                        CommunicationWithHPVINV04(token);
 
                     }
                     else if (SelectedMachineItem == "HPVINV06")
@@ -1727,6 +1806,26 @@ namespace WpfApp1.ViewModels
 
         #region 通讯实现方法
 
+        /// <summary>
+        /// 异常解析显示
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="name"></param>
+        private void ShowError(string value, string name)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                AddLog($"{name}返回超时");
+            }
+            else if (value.Length >= 2 && value.StartsWith("-1"))
+            {
+                AddLog($"{name}CRC异常:{value}");
+            }
+
+
+        }
+
+        #region VDF3024通讯
         /// <summary>
         /// VDF3024通讯
         /// </summary>
@@ -1876,38 +1975,78 @@ namespace WpfApp1.ViewModels
             HGEN.AnalyseStringToElement(receive);
             ShowError(receive, "HGEN");
 
-
             //机器型号
             MachineModel = StringToIntConversion(HOP_PDF.RatedPwr) + StringToIntConversion(HBAT_VQ.BattCells) * 12;
-        }
 
-        /// <summary>
-        /// 异常解析显示
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="name"></param>
-        private void ShowError(string value, string name)
-        {
-            if (string.IsNullOrEmpty(value))
+            //数据
+            var Common_Data = new Common_Data
             {
-                AddLog($"{name}返回超时");
-            }
-            else if (value.Length >= 2 && value.StartsWith("-1"))
+                DataNow = DateTime.Now,//日期
+                GridConnectedFunction = HEEP1_PDF.GridConnectedFunction,//并网功能
+                CT_Enable = HEEP1_PDF.CT_Enable,//CT功能开关
+                PV_GridConnectionProtocol = HEEP1_PDF.PV_GridConnectionProtocol,//并网协议
+                GridCurrent = HEEP1_PDF.GridCurrent,//并网电流
+                ZeroAdjPwr = HEEP3_PDF.ZeroAdjPwr,//调零功率
+                CTCurr = HCTMSG1_PDF.CTCurr,//CT电流
+                CTPwr = HCTMSG1_PDF.CTPwr,//CT功率
+                MaxInvPower = HGRID_PDF.MaxInvPower,//当前允许最大逆变功率
+
+                MainsVoltage = HGRID_GB.MainsVoltage,//市电电压
+                MainsFrequency = HGRID_GB.MainsFrequency,//市电频率
+                ACPower = HGRID_GB.ACPower,//市电功率
+
+                OutVolt = HOP_PDF.OutVolt,//输出电压
+                OutFreq = HOP_PDF.OutFreq,//输出频率
+                ApparentPwr = HOP_PDF.ApparentPwr,//视在功率
+                ActivePwr = HOP_PDF.ActivePwr,//有功功率
+                LoadPercent = HOP_PDF.LoadPercent,//负载百分比
+                DCOffset = HOP_PDF.DCOffset,//直流分量
+                InductorCurr = HOP_PDF.InductorCurr,//电感电流
+                InductorPwr = HOP_PDF.InductorPwr,//电感功率
+
+                PVVolt = HPV_PDF.PVVolt,//PV电压
+                PVPwr = HPV_PDF.PVPwr,//PV功率
+                PVCurr = HPV_PDF.PVCurr,//PV电流
+                DailyGen = HGEN.DailyGen,//日发电量
+                MonthlyGen = HGEN.MonthlyGen,//月发电量
+                AnnualGen = HGEN.AnnualGen,//年发电量
+                TotalGen = HGEN.TotalGen,//总发电量
+
+                BusVolt = HBAT_VQ.BusVolt, //母线电压
+                InvTemp = HTEMP_PDF.InvTemp,//逆变温度
+                MaxTemp = HTEMP_PDF.MaxTemp,//当前最高温度
+                PFCStatus = HBAT_PDF.PFCStatus,//PFC工作状态
+                FanSpeed = HTEMP_PDF.FanSpeed,//风扇转速
+                FanEnable = HTEMP_PDF.FanEnable,//风扇使能
+            };
+
+            // 最新在最前
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                AddLog($"{name}CRC异常:{value}");
-            }
+                // 添加到界面
+                DR_Monitor.CommonDataList.Insert(0, Common_Data);
 
+                // 保证最多 100 条
+                if (DR_Monitor.CommonDataList.Count > 100)
+                    DR_Monitor.CommonDataList.RemoveAt(DR_Monitor.CommonDataList.Count - 1);
 
+                if (DR_Monitor.IsSaving && DR_Monitor._savePath != null)
+                {
+                    DR_Monitor.SaveToExcel(Common_Data);
+                }
+
+            });
         }
+        #endregion
 
+
+        #region GB3024通讯
         /// <summary>
         /// GB3024通讯
         /// </summary>
         /// <param name="token"></param>
         private void CommunicationWithGB3024(CancellationToken token)
         {
-
-
             string receive = string.Empty;
 
             Thread.Sleep(100);
@@ -1932,7 +2071,7 @@ namespace WpfApp1.ViewModels
             Thread.Sleep(100);
             // 等待暂停或取消信号
             _pauseEvent.Wait(token);
-            //发送查询机器指令
+            //发送查询机器版本指令
             string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
             MachineType = receive_MachineType.Substring(1, 8);
             //解析指令
@@ -2030,10 +2169,106 @@ namespace WpfApp1.ViewModels
             //机器型号
             MachineModel = StringToIntConversion(HOP_PDF.RatedPwr) + StringToIntConversion(HBAT_VQ.BattCells) * 12;
 
-        }
+            //数据
+            var Common_Data = new Common_Data
+            {
+                DataNow = DateTime.Now,
+                MainsVoltage = HGRID_GB.MainsVoltage,//市电电压
+                MainsFrequency = HGRID_GB.MainsFrequency,//市电频率
+                ACPower = HGRID_GB.ACPower,//市电功率
 
+                OutVolt = HOP_PDF.OutVolt,//输出电压
+                OutFreq = HOP_PDF.OutFreq,//输出频率
+                ApparentPwr = HOP_PDF.ApparentPwr,//视在功率
+                ActivePwr = HOP_PDF.ActivePwr,//有功功率
+                LoadPercent = HOP_PDF.LoadPercent,//负载百分比
+
+                PVVolt = HPV_PDF.PVVolt,//PV电压
+                PVPwr = HPV_PDF.PVPwr,//PV功率
+                PVCurr = HPV_PDF.PVCurr,//PV电流
+                TotalGen = HGEN.TotalGen,//总发电量
+                DailyGen = HGEN.DailyGen,//日发电量
+                MonthlyGen = HGEN.MonthlyGen,//月发电量
+                AnnualGen = HGEN.AnnualGen,//年发电量
+
+                BattVolt = HBAT_VQ.BattVolt,//电池电压
+                BatCurr = HBAT_VQ.BatCurr, //电池电流
+                BattCapacity = HBAT_VQ.BattCapacity,//电池容量
+                BusVolt = HBAT_VQ.BusVolt, //母线电压
+
+                ProtocolType = HBMS1_VQ.ProtocolType,//协议类型
+                BMS_ComOK = HBMS1_VQ.BMS_ComOK,//BMS通信正常
+                BMS_LowBattAlarm = HBMS1_VQ.BMS_LowBattAlarm,//BMS低电报警
+                BMS_LowBattFault = HBMS1_VQ.BMS_LowBattFault,//BMS低电故障
+                BMS_ChgEnable = HBMS1_VQ.BMS_ChgEnable,//BMS允许充电
+                BMS_DisEnable = HBMS1_VQ.BMS_DisEnable,//BMS允许放电
+                BMS_ChgOC = HBMS1_VQ.BMS_ChgOC,//BMS充电过流
+                BMS_DisOC = HBMS1_VQ.BMS_DisOC,//BMS放电过流
+                BMS_UnderTemp = HBMS1_VQ.BMS_UnderTemp,//BMS温度过低
+                BMS_OverTemp = HBMS1_VQ.BMS_OverTemp,//BMS温度过高
+                BMS_AvgTemp = HBMS1_VQ.BMS_AvgTemp,//BMS平均温度
+                BMS_ChgCurrLimit = HBMS1_VQ.BMS_ChgCurrLimit,//BMS充电电流限制
+                BMS_SOC = HBMS1_VQ.BMS_SOC,//BMS当前SOC
+                BMS_ChgVoltLimit = HBMS1_VQ.BMS_ChgVoltLimit,//BMS充电电压限制
+                BMS_DisVoltLimit = HBMS1_VQ.BMS_DisVoltLimit,//BMS放电电压限制
+
+                FaultCode = HSTS_GB.FaultCode,//故障代码
+                PVTemp = HTEMP_PDF.PVTemp,//PV温度
+                InvTemp = HTEMP_PDF.InvTemp,//逆变温度
+                BoostTemp = HTEMP_PDF.BoostTemp,//升压温度
+                XfmrTemp = HTEMP_PDF.XfmrTemp,//变压器温度
+                MaxTemp = HTEMP_PDF.MaxTemp,//当前最高温度
+                FanSpeed = HTEMP_PDF.FanSpeed,//风扇转速
+                FanEnable = HTEMP_PDF.FanEnable,//风扇使能
+                Mode = HSTS_GB.Mode,//模式
+                PVToLoadAC = HSTS_GB.PVToLoadAC,//AC状态下PV馈能到负载
+                OutputStatus = HSTS_GB.OutputStatus,//机器是否有输出
+                BattLowAlarm = HSTS_GB.BattLowAlarm,//电池低电报警
+                BattDisconnected = HSTS_GB.BattDisconnected,//电池未接
+                OutputOverload = HSTS_GB.OutputOverload,//输出过载
+                OverTemp = HSTS_GB.OverTemp,//机器过温
+                EEPROM_DataErr = HSTS_GB.EEPROM_DataErr,//EEPROM数据异常
+                EEPROM_IOErr = HSTS_GB.EEPROM_IOErr,//EEPROM读写异常
+                PVLowPwrFault = HSTS_GB.PVLowPwrFault,//PV功率过低异常
+                InputOV = HSTS_GB.InputOV,//输入电压过高
+                BattOV = HSTS_GB.BattOV,//电池电压过高
+                FanSpeedFault = HSTS_GB.FanSpeedFault,//风扇转速异常
+                ParallelUnits = HSTS_GB.ParallelUnits,//并机系统里机器的总数
+                GridTieFlag = HSTS_GB.GridTieFlag,//并网标志
+                ParallelRole = HSTS_GB.ParallelRole,//并机系统中角色
+                MainRelayStat = HSTS_GB.MainRelayStat,//主输出继电器状态
+                SecOutStat = HSTS_GB.SecOutStat,//第二输出当前状态
+                BMS_ComFault = HSTS_GB.BMS_ComFault,//BMS通讯异常
+                TempSensorFault = HSTS_GB.TempSensorFault,//温度传感器异常
+                ACLED = HSTS_GB.ACLED,//市电灯状态
+                InvLED = HSTS_GB.InvLED,//逆变灯状态
+                ChgLED = HSTS_GB.ChgLED,//充电灯状态
+                AlarmLED = HSTS_GB.AlarmLED//报警灯状态
+            };
+
+            // 最新在最前
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                // 添加到界面
+                DR_Monitor.CommonDataList.Insert(0, Common_Data);
+
+                // 保证最多 100 条
+                if (DR_Monitor.CommonDataList.Count > 100)
+                    DR_Monitor.CommonDataList.RemoveAt(DR_Monitor.CommonDataList.Count - 1);
+
+                if (DR_Monitor.IsSaving && DR_Monitor._savePath != null)
+                {
+                    DR_Monitor.SaveToExcel(Common_Data);
+                }
+
+            });
+
+        }
+        #endregion
+
+        #region LPVINV02通讯
         /// <summary>
-        /// VQ3024通讯
+        /// LPVINV02通讯
         /// </summary>
         /// <param name="token"></param>
         private void CommunicationWithVQ3024(CancellationToken token)
@@ -2119,13 +2354,76 @@ namespace WpfApp1.ViewModels
             receive = SerialCommunicationService.SendCommand(HIMSG1.Command, 21);
             HIMSG1.AnalysisStringToElement(receive);
 
-        }
+            //数据
+            var Common_Data = new Common_Data
+            {
+                DataNow = DateTime.Now,//日期
 
+                MainsVoltage = HGRID_GB.MainsVoltage,//市电电压
+                MainsFrequency = HGRID_GB.MainsFrequency,//市电频率
+
+                OutVolt = HOP_PDF.OutVolt,//输出电压
+                OutFreq = HOP_PDF.OutFreq,//输出频率
+                ApparentPwr = HOP_PDF.ApparentPwr,//视在功率
+                ActivePwr = HOP_PDF.ActivePwr,//有功功率
+                LoadPercent = HOP_PDF.LoadPercent,//负载百分比
+
+                BattVolt = HBAT_VQ.BattVolt,//电池电压
+                BattCapacity = HBAT_VQ.BattCapacity,//电池容量
+                BusVolt = HBAT_VQ.BusVolt, //母线电压
+                BattCells = HBAT_VQ2.BattCells,//电池节数
+                BattChgCurr = HBAT_VQ2.BattChgCurr,//电池充电电流
+                BattDisCurr = HBAT_VQ2.BattDisCurr,//电池放电电流
+                ChgMasterSW = HBAT_VQ2.ChgMasterSW,//充电总开关
+                ACChgSW = HBAT_VQ2.ACChgSW,//AC充电开关
+                SolarChgSW = HBAT_VQ2.SolarChgSW,//太阳能充电开关
+
+                ProtocolType = HBMS1_VQ.ProtocolType,//协议类型
+                BMS_ComOK = HBMS1_VQ.BMS_ComOK,//BMS通信正常
+                BMS_LowBattAlarm = HBMS1_VQ.BMS_LowBattAlarm,//BMS低电报警
+                BMS_LowBattFault = HBMS1_VQ.BMS_LowBattFault,//BMS低电故障
+                BMS_ChgEnable = HBMS1_VQ.BMS_ChgEnable,//BMS允许充电
+                BMS_DisEnable = HBMS1_VQ.BMS_DisEnable,//BMS允许放电
+                BMS_ChgOC = HBMS1_VQ.BMS_ChgOC,//BMS充电过流
+                BMS_DisOC = HBMS1_VQ.BMS_DisOC,//BMS放电过流
+                BMS_UnderTemp = HBMS1_VQ.BMS_UnderTemp,//BMS温度过低
+                BMS_OverTemp = HBMS1_VQ.BMS_OverTemp,//BMS温度过高
+                BMS_AvgTemp = HBMS1_VQ.BMS_AvgTemp,//BMS平均温度
+                BMS_ChgCurrLimit = HBMS1_VQ.BMS_ChgCurrLimit,//BMS充电电流限制
+                BMS_SOC = HBMS1_VQ.BMS_SOC,//BMS当前SOC
+                BMS_ChgCurr = HBMS1_VQ.BMS_ChgCurr,//BMS充电电流
+                BMS_DisCurr = HBMS1_VQ.BMS_DisCurr,//BMS放电电流
+                BMS_ChgVoltLimit = HBMS1_VQ.BMS_ChgVoltLimit,//BMS充电电压限制
+                BMS_DisVoltLimit = HBMS1_VQ.BMS_DisVoltLimit,//BMS放电电压限制
+
+                PVTemp = HTEMP_PDF.PVTemp,//PV温度
+                BoostTemp = HTEMP_PDF.BoostTemp,//升压温度
+                InvTemp = HTEMP_PDF.InvTemp,//逆变温度
+                XfmrTemp = HTEMP_PDF.XfmrTemp,//变压器温度
+                MaxTemp = HTEMP_PDF.MaxTemp,//当前最高温度
+                FanSpeed = HTEMP_PDF.FanSpeed,//风扇转速
+                FanEnable = HTEMP_PDF.FanEnable//风扇使能
+            };
+
+            // 最新在最前
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (DR_Monitor.IsSaving && DR_Monitor._savePath != null)
+                {
+                    DR_Monitor.SaveToExcel(Common_Data);
+                }
+
+            });
+
+        }
+        #endregion
+
+        #region HPVINV04通讯
         /// <summary>
-        /// GB6042通讯
+        /// HPVINV04通讯
         /// </summary>
         /// <param name="token"></param>
-        private void CommunicationWithGB6042(CancellationToken token)
+        private void CommunicationWithHPVINV04(CancellationToken token)
         {
 
             string receive = "";
@@ -2239,8 +2537,8 @@ namespace WpfApp1.ViewModels
             //发送HSTS指令
             Thread.Sleep(100);
             _pauseEvent.Wait(token);
-            receive = SerialCommunicationService.SendCommand(HSTS_GB.Command, 40);
-            HSTS_GB.AnalyseStringToElement(receive);
+            receive = SerialCommunicationService.SendCommand(HSTS_GB.Command, 40);//接收下位机的回复数据
+            HSTS_GB.AnalyseStringToElement(receive);//解析回复
 
             //发送HPV指令
             Thread.Sleep(100);
@@ -2256,8 +2554,101 @@ namespace WpfApp1.ViewModels
 
             //机器型号
             MachineModel = StringToIntConversion(HOP_PDF.RatedPwr) + StringToIntConversion(HBAT_VQ.BattCells) * 12;
-        }
 
+            //数据
+            var Common_Data = new Common_Data
+            {
+                DataNow = DateTime.Now,
+                MainsVoltage = HGRID_GB.MainsVoltage,//市电电压
+                MainsFrequency = HGRID_GB.MainsFrequency,//市电频率
+                ACPower = HGRID_GB.ACPower,//市电功率
+
+                OutVolt = HOP_PDF.OutVolt,//输出电压
+                OutFreq = HOP_PDF.OutFreq,//输出频率
+                ApparentPwr = HOP_PDF.ApparentPwr,//视在功率
+                ActivePwr = HOP_PDF.ActivePwr,//有功功率
+                LoadPercent = HOP_PDF.LoadPercent,//负载百分比
+
+                PVVolt = HPV_PDF.PVVolt,//PV电压
+                PVVolt2 = HPVB_GB.PV2Volt,//PV2电压
+                PVPwr = HPV_PDF.PVPwr,//PV功率
+                PVPwr2 = HPVB_GB.PV2Pwr,//PV2功率
+                PVCurr2 = HPVB_GB.PV2Curr,//PV2电流
+                PVCurr = HPV_PDF.PVCurr,//PV电流
+                TotalGen = HGEN.TotalGen,//总发电量
+                DailyGen = HGEN.DailyGen,//日发电量
+                MonthlyGen = HGEN.MonthlyGen,//月发电量
+                AnnualGen = HGEN.AnnualGen,//年发电量
+
+                BattVolt = HBAT_VQ.BattVolt,//电池电压
+                BatCurr = HBAT_VQ.BatCurr, //电池电流
+                BattCapacity = HBAT_VQ.BattCapacity,//电池容量
+                BusVolt = HBAT_VQ.BusVolt, //母线电压
+
+                ProtocolType = HBMS1_VQ.ProtocolType,//协议类型
+                BMS_ComOK = HBMS1_VQ.BMS_ComOK,//BMS通信正常
+                BMS_LowBattAlarm = HBMS1_VQ.BMS_LowBattAlarm,//BMS低电报警
+                BMS_LowBattFault = HBMS1_VQ.BMS_LowBattFault,//BMS低电故障
+                BMS_ChgEnable = HBMS1_VQ.BMS_ChgEnable,//BMS允许充电
+                BMS_DisEnable = HBMS1_VQ.BMS_DisEnable,//BMS允许放电
+                BMS_ChgOC = HBMS1_VQ.BMS_ChgOC,//BMS充电过流
+                BMS_DisOC = HBMS1_VQ.BMS_DisOC,//BMS放电过流
+                BMS_UnderTemp = HBMS1_VQ.BMS_UnderTemp,//BMS温度过低
+                BMS_OverTemp = HBMS1_VQ.BMS_OverTemp,//BMS温度过高
+                BMS_AvgTemp = HBMS1_VQ.BMS_AvgTemp,//BMS平均温度
+                BMS_ChgCurrLimit = HBMS1_VQ.BMS_ChgCurrLimit,//BMS充电电流限制
+                BMS_SOC = HBMS1_VQ.BMS_SOC,//BMS当前SOC
+                BMS_ChgVoltLimit = HBMS1_VQ.BMS_ChgVoltLimit,//BMS充电电压限制
+                BMS_DisVoltLimit = HBMS1_VQ.BMS_DisVoltLimit,//BMS放电电压限制
+
+                FaultCode = HSTS_GB.FaultCode,//故障代码
+                PVTemp = HTEMP_PDF.PVTemp,//PV温度
+                InvTemp = HTEMP_PDF.InvTemp,//逆变温度
+                BoostTemp = HTEMP_PDF.BoostTemp,//升压温度
+                XfmrTemp = HTEMP_PDF.XfmrTemp,//变压器温度
+                MaxTemp = HTEMP_PDF.MaxTemp,//当前最高温度
+                FanSpeed = HTEMP_PDF.FanSpeed,//风扇转速
+                FanEnable = HTEMP_PDF.FanEnable,//风扇使能
+                Mode = HSTS_GB.Mode,//模式
+                PVToLoadAC = HSTS_GB.PVToLoadAC,//AC状态下PV馈能到负载
+                OutputStatus = HSTS_GB.OutputStatus,//机器是否有输出
+                BattLowAlarm = HSTS_GB.BattLowAlarm,//电池低电报警
+                BattDisconnected = HSTS_GB.BattDisconnected,//电池未接
+                OutputOverload = HSTS_GB.OutputOverload,//输出过载
+                OverTemp = HSTS_GB.OverTemp,//机器过温
+                EEPROM_DataErr = HSTS_GB.EEPROM_DataErr,//EEPROM数据异常
+                EEPROM_IOErr = HSTS_GB.EEPROM_IOErr,//EEPROM读写异常
+                PVLowPwrFault = HSTS_GB.PVLowPwrFault,//PV功率过低异常
+                InputOV = HSTS_GB.InputOV,//输入电压过高
+                BattOV = HSTS_GB.BattOV,//电池电压过高
+                FanSpeedFault = HSTS_GB.FanSpeedFault,//风扇转速异常
+                ParallelUnits = HSTS_GB.ParallelUnits,//并机系统里机器的总数
+                GridTieFlag = HSTS_GB.GridTieFlag,//并网标志
+                ParallelRole = HSTS_GB.ParallelRole,//并机系统中角色
+                MainRelayStat = HSTS_GB.MainRelayStat,//主输出继电器状态
+                SecOutStat = HSTS_GB.SecOutStat,//第二输出当前状态
+                BMS_ComFault = HSTS_GB.BMS_ComFault,//BMS通讯异常
+                TempSensorFault = HSTS_GB.TempSensorFault,//温度传感器异常
+                ACLED = HSTS_GB.ACLED,//市电灯状态
+                InvLED = HSTS_GB.InvLED,//逆变灯状态
+                ChgLED = HSTS_GB.ChgLED,//充电灯状态
+                AlarmLED = HSTS_GB.AlarmLED//报警灯状态
+            };
+
+            // 最新在最前
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                // 保存
+                if (DR_Monitor.IsSaving && DR_Monitor._savePath != null)
+                {
+                    DR_Monitor.SaveToExcel(Common_Data);
+                }
+
+            });
+        }
+        #endregion
+
+        #region HPVINV08通讯
         /// <summary>
         /// HPVINV08通讯
         /// </summary>
@@ -2293,7 +2684,6 @@ namespace WpfApp1.ViewModels
             MachineType = receive_MachineType.Substring(1, 8);
             SerialCommunicationService.MachineType = receive_MachineType;
 
-
             //发送HSTS2指令
             Thread.Sleep(100);
             _pauseEvent.Wait(token); // 等待暂停或取消信号
@@ -2328,8 +2718,6 @@ namespace WpfApp1.ViewModels
             receive = SerialCommunicationService.SendCommand(HEEP3_PDF.Command, 80);
             HEEP3_PDF.AnalysisStringToElement(receive);
 
-
-
             //发送HOP指令
             Thread.Sleep(100);
             // 等待暂停或取消信号
@@ -2340,7 +2728,6 @@ namespace WpfApp1.ViewModels
             //逆变百分比
             InvTotalPwr = StringToIntConversion(HOP_PDF.LoadPercent);
 
-
             //发送HPV指令
             Thread.Sleep(100);
             _pauseEvent.Wait(token);
@@ -2348,7 +2735,6 @@ namespace WpfApp1.ViewModels
             HPV_PDF.AnalysisStringToElement(receive);
             //MPPT百分比
             MPPTTotalPwr = CountPercent(HPV_PDF.PVPwr, HIGSG2_PDF.MPPTTotalPwr);
-
 
             //发送HIMSG2N指令
             Thread.Sleep(100);
@@ -2428,9 +2814,107 @@ namespace WpfApp1.ViewModels
 
             //机器型号
             MachineModel = StringToIntConversion(HOP_PDF.RatedPwr) + StringToIntConversion(HBAT_VQ.BattCells) * 12;
+
+            //数据
+            var Common_Data = new Common_Data
+            {
+                DataNow = DateTime.Now,//日期
+
+                MainsVoltage = HGRID_GB.MainsVoltage,//市电电压
+                MainsFrequency = HGRID_GB.MainsFrequency,//市电频率
+                ACPower = HGRID_GB.ACPower,//市电功率
+
+                OutVolt = HOP_PDF.OutVolt,//输出电压
+                OutFreq = HOP_PDF.OutFreq,//输出频率
+                ApparentPwr = HOP_PDF.ApparentPwr,//视在功率
+                ActivePwr = HOP_PDF.ActivePwr,//有功功率
+                LoadPercent = HOP_PDF.LoadPercent,//负载百分比
+                ZeroAdjPwr = HEEP3_PDF.ZeroAdjPwr,//调零功率
+                CTCurr = HCTMSG1_PDF.CTCurr,//CT电流
+                CTPwr = HCTMSG1_PDF.CTPwr,//CT功率
+
+                PVVolt = HPV_PDF.PVVolt,//PV电压
+                PVPwr = HPV_PDF.PVPwr,//PV功率
+                PVCurr = HPV_PDF.PVCurr,//PV电流
+                TotalGen = HGEN.TotalGen,//总发电量
+                DailyGen = HGEN.DailyGen,//日发电量
+                MonthlyGen = HGEN.MonthlyGen,//月发电量
+                AnnualGen = HGEN.AnnualGen,//年发电量
+
+                BattVolt = HBAT_VQ.BattVolt,//电池电压
+                BatCurr = HBAT_VQ.BatCurr, //电池电流
+                BattCapacity = HBAT_VQ.BattCapacity,//电池容量
+                BusVolt = HBAT_VQ.BusVolt, //母线电压
+
+                ProtocolType = HBMS1_VQ.ProtocolType,//协议类型
+                BMS_ComOK = HBMS1_VQ.BMS_ComOK,//BMS通信正常
+                BMS_LowBattAlarm = HBMS1_VQ.BMS_LowBattAlarm,//BMS低电报警
+                BMS_LowBattFault = HBMS1_VQ.BMS_LowBattFault,//BMS低电故障
+                BMS_ChgEnable = HBMS1_VQ.BMS_ChgEnable,//BMS允许充电
+                BMS_DisEnable = HBMS1_VQ.BMS_DisEnable,//BMS允许放电
+                BMS_ChgOC = HBMS1_VQ.BMS_ChgOC,//BMS充电过流
+                BMS_DisOC = HBMS1_VQ.BMS_DisOC,//BMS放电过流
+                BMS_UnderTemp = HBMS1_VQ.BMS_UnderTemp,//BMS温度过低
+                BMS_OverTemp = HBMS1_VQ.BMS_OverTemp,//BMS温度过高
+                BMS_AvgTemp = HBMS1_VQ.BMS_AvgTemp,//BMS平均温度
+                BMS_ChgCurrLimit = HBMS1_VQ.BMS_ChgCurrLimit,//BMS充电电流限制
+                BMS_SOC = HBMS1_VQ.BMS_SOC,//BMS当前SOC
+                BMS_ChgVoltLimit = HBMS1_VQ.BMS_ChgVoltLimit,//BMS充电电压限制
+                BMS_DisVoltLimit = HBMS1_VQ.BMS_DisVoltLimit,//BMS放电电压限制
+
+                FaultCode = HSTS_GB.FaultCode,//故障代码
+                PVTemp = HTEMP_PDF.PVTemp,//PV温度
+                InvTemp = HTEMP_PDF.InvTemp,//逆变温度
+                BoostTemp = HTEMP_PDF.BoostTemp,//升压温度
+                XfmrTemp = HTEMP_PDF.XfmrTemp,//变压器温度
+                MaxTemp = HTEMP_PDF.MaxTemp,//当前最高温度
+                FanSpeed = HTEMP_PDF.FanSpeed,//风扇转速
+                FanEnable = HTEMP_PDF.FanEnable,//风扇使能
+                Mode = HSTS_GB.Mode,//模式
+                PVToLoadAC = HSTS_GB.PVToLoadAC,//AC状态下PV馈能到负载
+                OutputStatus = HSTS_GB.OutputStatus,//机器是否有输出
+                BattLowAlarm = HSTS_GB.BattLowAlarm,//电池低电报警
+                BattDisconnected = HSTS_GB.BattDisconnected,//电池未接
+                OutputOverload = HSTS_GB.OutputOverload,//输出过载
+                OverTemp = HSTS_GB.OverTemp,//机器过温
+                EEPROM_DataErr = HSTS_GB.EEPROM_DataErr,//EEPROM数据异常
+                EEPROM_IOErr = HSTS_GB.EEPROM_IOErr,//EEPROM读写异常
+                PVLowPwrFault = HSTS_GB.PVLowPwrFault,//PV功率过低异常
+                InputOV = HSTS_GB.InputOV,//输入电压过高
+                BattOV = HSTS_GB.BattOV,//电池电压过高
+                FanSpeedFault = HSTS_GB.FanSpeedFault,//风扇转速异常
+                ParallelUnits = HSTS_GB.ParallelUnits,//并机系统里机器的总数
+                GridTieFlag = HSTS_GB.GridTieFlag,//并网标志
+                ParallelRole = HSTS_GB.ParallelRole,//并机系统中角色
+                MainRelayStat = HSTS_GB.MainRelayStat,//主输出继电器状态
+                SecOutStat = HSTS_GB.SecOutStat,//第二输出当前状态
+                BMS_ComFault = HSTS_GB.BMS_ComFault,//BMS通讯异常
+                TempSensorFault = HSTS_GB.TempSensorFault,//温度传感器异常
+                ACLED = HSTS_GB.ACLED,//市电灯状态
+                InvLED = HSTS_GB.InvLED,//逆变灯状态
+                ChgLED = HSTS_GB.ChgLED,//充电灯状态
+                AlarmLED = HSTS_GB.AlarmLED,//报警灯状态
+                InvStatus = HSTS2_HPVINV08.InvStatus,//逆变器工作状态
+                PVVoltStatus = HSTS2_HPVINV08.PVVoltStatus,//PV电压状态
+                InvBridgeStatus = HSTS2_HPVINV08.InvBridgeStatus,//逆变桥状态
+                MPPTStatus = HSTS2_HPVINV08.MPPTStatus,//MPPT状态
+                PLLStatus = HSTS2_HPVINV08.PLLStatus//锁相环状态
+            };
+
+            // 最新在最前
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+
+                if (DR_Monitor.IsSaving && DR_Monitor._savePath != null)
+                {
+                    DR_Monitor.SaveToExcel(Common_Data);
+                }
+
+            });
         }
+        #endregion
 
-
+        #region GB6042通讯(HPVINV06)
         /// <summary>
         /// GB6042通讯(HPVINV06)
         /// </summary>
@@ -2559,10 +3043,99 @@ namespace WpfApp1.ViewModels
             //机器型号
             MachineModel = StringToIntConversion(HOP_PDF.RatedPwr) + StringToIntConversion(HBAT_VQ.BattCells) * 12;
 
-        }
+            //数据
+            var Common_Data = new Common_Data
+            {
+                DataNow = DateTime.Now,
+                MainsVoltage = HGRID_GB.MainsVoltage,//市电电压
+                MainsFrequency = HGRID_GB.MainsFrequency,//市电频率
+                ACPower = HGRID_GB.ACPower,//市电功率
 
+                OutVolt = HOP_PDF.OutVolt,//输出电压
+                OutFreq = HOP_PDF.OutFreq,//输出频率
+                ApparentPwr = HOP_PDF.ApparentPwr,//视在功率
+                ActivePwr = HOP_PDF.ActivePwr,//有功功率
+                LoadPercent = HOP_PDF.LoadPercent,//负载百分比
+
+                PVVolt = HPV_PDF.PVVolt,//PV电压
+                PVPwr = HPV_PDF.PVPwr,//PV功率
+                PVCurr = HPV_PDF.PVCurr,//PV电流
+                TotalGen = HGEN.TotalGen,//总发电量
+                DailyGen = HGEN.DailyGen,//日发电量
+                MonthlyGen = HGEN.MonthlyGen,//月发电量
+                AnnualGen = HGEN.AnnualGen,//年发电量
+
+                BattVolt = HBAT_VQ.BattVolt,//电池电压
+                BatCurr = HBAT_VQ.BatCurr, //电池电流
+                BattCapacity = HBAT_VQ.BattCapacity,//电池容量
+                BusVolt = HBAT_VQ.BusVolt, //母线电压
+
+                ProtocolType = HBMS1_VQ.ProtocolType,//协议类型
+                BMS_ComOK = HBMS1_VQ.BMS_ComOK,//BMS通信正常
+                BMS_LowBattAlarm = HBMS1_VQ.BMS_LowBattAlarm,//BMS低电报警
+                BMS_LowBattFault = HBMS1_VQ.BMS_LowBattFault,//BMS低电故障
+                BMS_ChgEnable = HBMS1_VQ.BMS_ChgEnable,//BMS允许充电
+                BMS_DisEnable = HBMS1_VQ.BMS_DisEnable,//BMS允许放电
+                BMS_ChgOC = HBMS1_VQ.BMS_ChgOC,//BMS充电过流
+                BMS_DisOC = HBMS1_VQ.BMS_DisOC,//BMS放电过流
+                BMS_UnderTemp = HBMS1_VQ.BMS_UnderTemp,//BMS温度过低
+                BMS_OverTemp = HBMS1_VQ.BMS_OverTemp,//BMS温度过高
+                BMS_AvgTemp = HBMS1_VQ.BMS_AvgTemp,//BMS平均温度
+                BMS_ChgCurrLimit = HBMS1_VQ.BMS_ChgCurrLimit,//BMS充电电流限制
+                BMS_SOC = HBMS1_VQ.BMS_SOC,//BMS当前SOC
+                BMS_ChgVoltLimit = HBMS1_VQ.BMS_ChgVoltLimit,//BMS充电电压限制
+                BMS_DisVoltLimit = HBMS1_VQ.BMS_DisVoltLimit,//BMS放电电压限制
+
+                FaultCode = HSTS_GB.FaultCode,//故障代码
+                PVTemp = HTEMP_PDF.PVTemp,//PV温度
+                InvTemp = HTEMP_PDF.InvTemp,//逆变温度
+                BoostTemp = HTEMP_PDF.BoostTemp,//升压温度
+                XfmrTemp = HTEMP_PDF.XfmrTemp,//变压器温度
+                MaxTemp = HTEMP_PDF.MaxTemp,//当前最高温度
+                FanSpeed = HTEMP_PDF.FanSpeed,//风扇转速
+                FanEnable = HTEMP_PDF.FanEnable,//风扇使能
+                Mode = HSTS_GB.Mode,//模式
+                PVToLoadAC = HSTS_GB.PVToLoadAC,//AC状态下PV馈能到负载
+                OutputStatus = HSTS_GB.OutputStatus,//机器是否有输出
+                BattLowAlarm = HSTS_GB.BattLowAlarm,//电池低电报警
+                BattDisconnected = HSTS_GB.BattDisconnected,//电池未接
+                OutputOverload = HSTS_GB.OutputOverload,//输出过载
+                OverTemp = HSTS_GB.OverTemp,//机器过温
+                EEPROM_DataErr = HSTS_GB.EEPROM_DataErr,//EEPROM数据异常
+                EEPROM_IOErr = HSTS_GB.EEPROM_IOErr,//EEPROM读写异常
+                PVLowPwrFault = HSTS_GB.PVLowPwrFault,//PV功率过低异常
+                InputOV = HSTS_GB.InputOV,//输入电压过高
+                BattOV = HSTS_GB.BattOV,//电池电压过高
+                FanSpeedFault = HSTS_GB.FanSpeedFault,//风扇转速异常
+                ParallelUnits = HSTS_GB.ParallelUnits,//并机系统里机器的总数
+                GridTieFlag = HSTS_GB.GridTieFlag,//并网标志
+                ParallelRole = HSTS_GB.ParallelRole,//并机系统中角色
+                MainRelayStat = HSTS_GB.MainRelayStat,//主输出继电器状态
+                SecOutStat = HSTS_GB.SecOutStat,//第二输出当前状态
+                BMS_ComFault = HSTS_GB.BMS_ComFault,//BMS通讯异常
+                TempSensorFault = HSTS_GB.TempSensorFault,//温度传感器异常
+                ACLED = HSTS_GB.ACLED,//市电灯状态
+                InvLED = HSTS_GB.InvLED,//逆变灯状态
+                ChgLED = HSTS_GB.ChgLED,//充电灯状态
+                AlarmLED = HSTS_GB.AlarmLED//报警灯状态
+            };
+
+            // 最新在最前
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+
+                if (DR_Monitor.IsSaving && DR_Monitor._savePath != null)
+                {
+                    DR_Monitor.SaveToExcel(Common_Data);
+                }
+
+            });
+        }
+        #endregion
+
+        #region CYJ通讯(UPSCYX01)
         /// <summary>
-        /// CYJ通讯
+        /// CYJ通讯(UPSCYX01)
         /// </summary>
         /// <param name="token"></param>
         private void CommunicationWith_CYJ(CancellationToken token)
@@ -2592,7 +3165,7 @@ namespace WpfApp1.ViewModels
             _pauseEvent.Wait(token);
             //发送查询机器指令
             string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
-            MachineType = receive_MachineType.Length>=9? receive_MachineType.Substring(1, 8):"";
+            MachineType = receive_MachineType.Substring(1, 8);
             //解析指令
             SerialCommunicationService.MachineType = receive_MachineType;
 
@@ -2650,8 +3223,61 @@ namespace WpfApp1.ViewModels
             receive = SerialCommunicationService.SendCommand(HEEP1_CYJ.Command, 80);
             HEEP1_CYJ.AnalyseStringToElement(receive);
 
-        }
+            //数据
+            var Common_Data = new Common_Data
+            {
+                DataNow = DateTime.Now,
+                MainsVoltage = HGRID_GB.MainsVoltage,//市电电压
+                MainsFrequency = HGRID_GB.MainsFrequency,//市电频率
 
+                OutVolt = HOP_PDF.OutVolt,//输出电压
+                OutFreq = HOP_PDF.OutFreq,//输出频率
+                ApparentPwr = HOP_PDF.ApparentPwr,//视在功率
+                ActivePwr = HOP_PDF.ActivePwr,//有功功率
+                LoadPercent = HOP_PDF.LoadPercent,//负载百分比
+                RatedPwr = HOP_PDF.RatedPwr,//满载有功功率
+                InductorCurr = HOP_PDF.InductorCurr,//电感电流
+
+                BoostTime = HEEP1_CYJ.BoostTime,//强充时间
+                InvTime = HEEP1_CYJ.InvTime,//逆变时间
+                LoadTime = HEEP1_CYJ.LoadTime, //带载时间
+
+                BattVolt = HBAT_VQ.BattVolt,//电池电压
+                BattCapacity = HBAT_VQ.BattCapacity,//电池容量
+                BattCells = HBAT_VQ2.BattCells, //电池节数
+
+                FaultCode = HSTS_GB.FaultCode,//故障代码
+                Mode = HSTS_CYJ.Mode,//模式
+                InvTemp = HTEMP_PDF.InvTemp,//逆变温度
+                MaxTemp = HTEMP_PDF.MaxTemp,//当前最高温度
+                BattDisconnected = HSTS_CYJ.BattDisconnected,//电池未接
+                OutputOverload = HSTS_CYJ.OutputOverload,//输出过载
+                OverTemp = HSTS_CYJ.OverTemp,//机器过温
+                BattLowAlarm = HSTS_CYJ.BattLowAlarm,//电池低电报警
+                EEPROM_DataErr = HSTS_CYJ.EEPROM_DataErr,//EEPROM数据异常
+                EEPROM_IOErr = HSTS_CYJ.EEPROM_IOErr,//EEPROM读写异常
+                InputOV = HSTS_CYJ.InputOV,//输入电压过高
+                BattOV = HSTS_CYJ.BattOV,//电池电压过高
+                FanSpeedFault = HSTS_CYJ.FanSpeedFault,//风扇转速异常
+                OutputStatus = HSTS_CYJ.OutputStatus//机器是否有输出
+
+            };
+
+            // 最新在最前
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+
+                if (DR_Monitor.IsSaving && DR_Monitor._savePath != null)
+                {
+                    DR_Monitor.SaveToExcel(Common_Data);
+                }
+
+            });
+
+        }
+        #endregion
+
+        #region LB6通讯
         /// <summary>
         /// LB6通讯
         /// </summary>
@@ -2736,12 +3362,71 @@ namespace WpfApp1.ViewModels
             ShowError(receive, "HIMSG1");
 
             Thread.Sleep(200);
+
             //发送HEEP1指令
             _pauseEvent.Wait(token);
             receive = SerialCommunicationService.SendCommand(HEEP1_LB6.Command, 80);
             HEEP1_LB6.AnalyseStringToElement(receive);
 
+            //数据
+            var Common_Data = new Common_Data
+            {
+                DataNow = DateTime.Now,//日期
+
+                MainsVoltage = HGRID_GB.MainsVoltage,//市电电压
+                MainsFrequency = HGRID_GB.MainsFrequency,//市电频率
+
+                OutVolt = HOP_PDF.OutVolt,//输出电压
+                OutFreq = HOP_PDF.OutFreq,//输出频率
+                ApparentPwr = HOP_PDF.ApparentPwr,//视在功率
+                ActivePwr = HOP_PDF.ActivePwr,//有功功率
+                LoadPercent = HOP_PDF.LoadPercent,//负载百分比
+                RatedPwr = HOP_PDF.RatedPwr,//满载有功功率
+                InductorCurr = HOP_PDF.InductorCurr,//电感电流
+
+                BoostTime = HEEP1_CYJ.BoostTime,//强充时间
+                InvTime = HEEP1_CYJ.InvTime,//逆变时间
+
+                BattVolt = HBAT_VQ.BattVolt,//电池电压
+                BatCurr = HBAT_VQ.BatCurr, //电池电流
+                BattCells = HBAT_VQ2.BattCells,//电池节数
+                BattCapacity = HBAT_VQ.BattCapacity,//电池容量
+                BusVolt = HBAT_VQ.BusVolt, //母线电压
+                BattChgCurr = HBAT_VQ2.BattChgCurr,//电池充电电流
+                BatteryType = HEEP1_LB6.BatteryType,//电池类型
+
+                InvTemp = HTEMP_PDF.InvTemp,//逆变温度
+                MaxTemp = HTEMP_PDF.MaxTemp,//当前最高温度
+                FaultCode = HSTS_GB.FaultCode,//故障代码
+                Mode = HSTS_GB.Mode,//模式
+                OutputStatus = HSTS_GB.OutputStatus,//机器是否有输出
+                BattLowAlarm = HSTS_GB.BattLowAlarm,//电池低电报警
+                BattDisconnected = HSTS_GB.BattDisconnected,//电池未接
+                OutputOverload = HSTS_GB.OutputOverload,//输出过载
+                OverTemp = HSTS_GB.OverTemp,//机器过温
+                EEPROM_DataErr = HSTS_GB.EEPROM_DataErr,//EEPROM数据异常
+                EEPROM_IOErr = HSTS_GB.EEPROM_IOErr,//EEPROM读写异常
+                InputOV = HSTS_GB.InputOV,//输入电压过高
+                BattOV = HSTS_GB.BattOV,//电池电压过高
+                FanSpeedFault = HSTS_GB.FanSpeedFault,//风扇转速异常
+                AutoStartEnable = HEEP1_CYJ.AutoStartEnable,//自动开机使能
+                ChgStage = HEEP1_LB6.ChgStage//充电阶段
+
+            };
+
+            // 最新在最前
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+
+                if (DR_Monitor.IsSaving && DR_Monitor._savePath != null)
+                {
+                    DR_Monitor.SaveToExcel(Common_Data);
+                }
+
+            });
+
         }
+        #endregion
 
 
         int flag = 0;
@@ -3103,8 +3788,6 @@ namespace WpfApp1.ViewModels
            
             
         }
-
-
 
 
 

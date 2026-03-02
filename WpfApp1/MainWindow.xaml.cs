@@ -25,19 +25,17 @@ namespace WpfApp1
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        private MainWindowVM _viewModel;
         public MainWindow()
         {
-           
+
             InitializeComponent();
-           
-
-            this.DataContext = new MainWindowVM(new MessageDialogService());
-
+            _viewModel = new MainWindowVM(new MessageDialogService());
+            this.DataContext = _viewModel;
             LoadLanguage();
 
         }
-
-       
 
         /// <summary>
         /// 根据系统语言切换语言
@@ -53,14 +51,14 @@ namespace WpfApp1
             Thread.CurrentThread.CurrentUICulture = culture;
 
             // 根据语言加载 ResourceDictionary
-           
+
             switch (lang)
             {
                 case "zh-CN":
                     ChangeLanguageToChinese(this, new RoutedEventArgs());
                     break;
                 default:
-                    ChangeLanguage(this,new RoutedEventArgs());
+                    ChangeLanguage(this, new RoutedEventArgs());
                     break;
             }
         }
@@ -83,8 +81,11 @@ namespace WpfApp1
         /// <param name="e"></param>
         private void SerialSettingButton_Click(object sender, RoutedEventArgs e)
         {
-            var settingsWindow = new SerialPortSettingWindow() { Owner = this};
-
+            // 传递主窗口的ViewModel实例给设置窗口
+            var settingsWindow = new SerialPortSettingWindow(_viewModel.SerialPortSetting)
+            {
+                Owner = this
+            };
             settingsWindow.ShowDialog();
         }
 
@@ -95,7 +96,7 @@ namespace WpfApp1
         /// <param name="e"></param>
         private void OpenSettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            var settingsWindow = new SendingCommandSettingsWindow() { Owner = this};
+            var settingsWindow = new SendingCommandSettingsWindow() { Owner = this };
             settingsWindow.ShowDialog();
         }
 
@@ -106,7 +107,7 @@ namespace WpfApp1
         /// <param name="e"></param>
         private void Log_Click(object sender, RoutedEventArgs e)
         {
-            if(Log.Visibility == Visibility)
+            if (Log.Visibility == Visibility)
             {
                 Log_Close_Click(sender, e);
             }
@@ -176,8 +177,8 @@ namespace WpfApp1
             App.UpdateLanguage("Lan-en-us");
             EnglishBtn.Visibility = Visibility.Collapsed;
             ChineseBtn.Visibility = Visibility.Visible;
-             
-            
+
+
         }
 
         /// <summary>
@@ -190,7 +191,7 @@ namespace WpfApp1
             ChineseBtn.Visibility = Visibility.Collapsed;
             EnglishBtn.Visibility = Visibility.Visible;
             App.UpdateLanguage("Lan-zh-cn");
-            
+
         }
     }
 }

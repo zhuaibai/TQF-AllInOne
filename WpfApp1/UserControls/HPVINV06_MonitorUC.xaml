@@ -82,7 +82,8 @@
                 Content="{DynamicResource 概览图}"
                 IsChecked="True" />
             <RadioButton Click="ElementSetting_Click" Content="{DynamicResource 参数设置}" />
-            <!--<RadioButton Content="{DynamicResource 软件升级}" />-->
+            <Button Content="{DynamicResource 自动保存数据}" Style="{DynamicResource BtnStyle0}" Command="{Binding DR_Monitor.HPVINVSaveCommand}">
+            </Button>
         </StackPanel>
         <!--  第二行 第一列  -->
         <Grid Grid.Row="1" Margin="10,10">
