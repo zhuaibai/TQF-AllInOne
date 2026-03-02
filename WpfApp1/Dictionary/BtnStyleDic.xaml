@@ -43,6 +43,52 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style x:Key="BtnStyle0" TargetType="Button">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                 Name="border"
+                 Background="#FFDDDDDD"
+                 BorderThickness="1"
+                 CornerRadius="5">
+                        <Border.BorderBrush>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Offset="0" Color="#22ffffff" />
+                                <GradientStop Offset="0.5" Color="#77ffffff" />
+                                <GradientStop Offset="1" Color="#22ffffff" />
+                            </LinearGradientBrush>
+                        </Border.BorderBrush>
+                        <StackPanel
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
+                     Orientation="Horizontal">
+                            <TextBlock
+                         VerticalAlignment="Center"
+                         FontFamily="楷体"
+                         Foreground="{TemplateBinding Background}"
+                         Text="{TemplateBinding Tag}" />
+                            <TextBlock
+                         x:Name="txt"
+                         Margin="5,0"
+                         VerticalAlignment="Center"
+                         FontSize="12"
+                         Text="{TemplateBinding Content}" />
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#FF9479FA" />
+                            <Setter TargetName="txt" Property="Foreground" Value="#FFFFFFFF" />
+                            <Setter Property="Cursor" Value="Hand" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="BtnStyle5" TargetType="Button">
         <Setter Property="Template">
             <Setter.Value>
