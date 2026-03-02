@@ -53,27 +53,9 @@ namespace WpfApp1.Command.BMS
             MOD_INST_STATE = data;
         }
 
-        /// <summary>
-        /// 告警
-        /// </summary>
-        /// <param name="data"></param>
-        public  void MOD_WARN_STATE_Set(int[] data)
-        {
-            MOD_WARN_STATE = "";
-            if (data == null)
-            {
-                MOD_WARN_STATE = "和上位机通讯异常";
-                return;
-            }
 
-            //根据标志位获取告警信息并拼接
-            for (int i = 0; i < data.Length; i++)
-            {
-                MOD_WARN_STATE = data[i] == 1 ? MOD_WARN_STATE + getWarning(i) : MOD_WARN_STATE;
-            }
 
-        }
-
+        #region BMS01的告警 保护 错误赋值
         /// <summary>
         /// 告警
         /// </summary>
@@ -90,10 +72,193 @@ namespace WpfApp1.Command.BMS
             //根据标志位获取告警信息并拼接
             for (int i = 0; i < data.Length; i++)
             {
-                MOD_WARN_STATE = data[i] == 1 ? MOD_WARN_STATE + getWarningByBMS01(i) : MOD_WARN_STATE;
+                MOD_WARN_STATE = data[i] == 1 ? MOD_WARN_STATE + GetWarningByBMS01(i) : MOD_WARN_STATE;
             }
 
         }
+
+        /// <summary>
+        /// 保护
+        /// </summary>
+        /// <param name="data"></param>
+        public void MOD_PROT_STATE_Set_BMS01(int[] data)
+        {
+            MOD_PROT_STATE = "";
+            if (data == null)
+            {
+                MOD_PROT_STATE = "和上位机通讯异常";
+                return;
+            }
+
+            //根据标志位获取告警信息并拼接
+            for (int i = 0; i < data.Length; i++)
+            {
+                MOD_PROT_STATE = data[i] == 1 ? MOD_PROT_STATE + GetProtectByBMS01(i) : MOD_PROT_STATE;
+            }
+        }
+
+        /// <summary>
+        /// 错误
+        /// </summary>
+        /// <param name="data"></param>
+        public void MOD_ERROR_STATE_Set_BMS01(int[] data)
+        {
+            MOD_ERROR_STATE = "";
+            if (data == null)
+            {
+                MOD_ERROR_STATE = "和上位机通讯异常";
+                return;
+            }
+
+            //根据标志位获取告警信息并拼接
+            for (int i = 0; i < data.Length; i++)
+            {
+                MOD_ERROR_STATE = data[i] == 1 ? MOD_ERROR_STATE + GetERRORByBMS01(i) : MOD_ERROR_STATE;
+            }
+
+        }
+
+        /// <summary>
+        /// 获取对应标志位的告警信息
+        /// </summary>
+        /// <param name="i">索引</param>
+        private string GetWarningByBMS01(int i)
+        {
+            switch (i)
+            {
+                case 0:
+                    return App.GetText("单体过压");
+                case 1:
+                    return App.GetText("单体欠压");
+                case 2:
+                    return App.GetText("总体过压");
+                case 3:
+                    return App.GetText("总体欠压");
+                case 4:
+                    return App.GetText("电芯压差过大");
+                case 5:
+                    return App.GetText("充电过流");
+                case 6:
+                    return App.GetText("放电过流");
+                case 7:
+                    return App.GetText("充电高温1");
+                case 8:
+                    return App.GetText("充电高温2");
+                case 9:
+                    return App.GetText("充电低温");
+                case 10:
+                    return App.GetText("放电低温");
+                case 11:
+                    return App.GetText("电芯温差过大");
+                case 12:
+                    return App.GetText("MOS高温");
+                case 13:
+                    return App.GetText("环境高温");
+                case 14:
+                    return App.GetText("放电高温");
+                case 15:
+                    return App.GetText("低电量");
+                default:
+                    return "索引错误 ";
+
+            }
+        }
+
+        /// <summary>
+        /// 获取对应标志位的保护信息
+        /// </summary>
+        /// <param name="i">索引</param>
+        private string GetProtectByBMS01(int i)
+        {
+            switch (i)
+            {
+                case 0:
+                    return App.GetText("单体过压");
+                case 1:
+                    return App.GetText("单体欠压");
+                case 2:
+                    return App.GetText("总体过压");
+                case 3:
+                    return App.GetText("总体欠压");//
+                case 4:
+                    return App.GetText("满充保护");
+                case 5:
+                    return App.GetText("充电过流");
+                case 6:
+                    return App.GetText("放电过流");
+                case 7:
+                    return App.GetText("短路保护");
+                case 8:
+                    return App.GetText("充电高温1");
+                case 9:
+                    return App.GetText("充电高温2");
+                case 10:
+                    return App.GetText("充电低温");//
+                case 11:
+                    return App.GetText("放电低温");
+                case 12:
+                    return App.GetText("MOS高温");
+                case 13:
+                    return App.GetText("请立即充电");
+                case 14:
+                    return App.GetText("放电高温");
+                case 15:
+                    return App.GetText("电芯压差过大");
+                default:
+                    return "";
+
+            }
+        }
+
+        /// <summary>
+        /// 获取对应标志位的错误信息
+        /// </summary>
+        /// <param name="i">索引</param>
+        private string GetERRORByBMS01(int i)
+        {
+            switch (i)
+            {
+                case 0:
+                    return App.GetText("充电MOS故障");
+                case 1:
+                    return App.GetText("放电MOS故障");
+                case 2:
+                    return App.GetText("限流板故障");
+                case 3:
+                    return App.GetText("ADC采集故障");
+                case 4:
+                    return App.GetText("电芯失效故障");
+                case 5:
+                    return App.GetText("前端芯片通信故障");
+                case 6:
+                    return App.GetText("电池电压故障");
+                case 7:
+                    return App.GetText("预充电阻故障");
+                case 8:
+                    return App.GetText("3V3辅源故障");
+                case 9:
+                    return App.GetText("NTC故障");
+                case 10:
+                    return App.GetText("脱扣器故障");
+                case 11:
+                    return "";
+                case 12:
+                    return "";
+                case 13:
+                    return "";
+                case 14:
+                    return "";
+                case 15:
+                    return "";
+                default:
+                    return "";
+
+            }
+        }
+
+        #endregion
+
+        #region BMS03的告警 保护 错误赋值
 
         /// <summary>
         /// BMS03告警
@@ -295,6 +460,30 @@ namespace WpfApp1.Command.BMS
             }
         }
 
+        #endregion
+
+        #region BMS02的告警 保护 错误赋值
+        /// <summary>
+        /// 告警
+        /// </summary>
+        /// <param name="data"></param>
+        public void MOD_WARN_STATE_Set(int[] data)
+        {
+            MOD_WARN_STATE = "";
+            if (data == null)
+            {
+                MOD_WARN_STATE = "和上位机通讯异常";
+                return;
+            }
+
+            //根据标志位获取告警信息并拼接
+            for (int i = 0; i < data.Length; i++)
+            {
+                MOD_WARN_STATE = data[i] == 1 ? MOD_WARN_STATE + GetWarningByBMS02(i) : MOD_WARN_STATE;
+            }
+
+        }
+
         /// <summary>
         /// 保护
         /// </summary>
@@ -311,27 +500,7 @@ namespace WpfApp1.Command.BMS
             //根据标志位获取告警信息并拼接
             for (int i = 0; i < data.Length; i++)
             {
-                MOD_PROT_STATE = data[i] == 1 ? MOD_PROT_STATE + getProtect(i) : MOD_PROT_STATE;
-            }
-        }
-
-        /// <summary>
-        /// 保护
-        /// </summary>
-        /// <param name="data"></param>
-        public void MOD_PROT_STATE_Set_BMS01(int[] data)
-        {
-            MOD_PROT_STATE = "";
-            if (data == null)
-            {
-                MOD_PROT_STATE = "和上位机通讯异常";
-                return;
-            }
-
-            //根据标志位获取告警信息并拼接
-            for (int i = 0; i < data.Length; i++)
-            {
-                MOD_PROT_STATE = data[i] == 1 ? MOD_PROT_STATE + getProtectByBMS01(i) : MOD_PROT_STATE;
+                MOD_PROT_STATE = data[i] == 1 ? MOD_PROT_STATE + GetProtectByBMS02(i) : MOD_PROT_STATE;
             }
         }
 
@@ -351,28 +520,7 @@ namespace WpfApp1.Command.BMS
             //根据标志位获取告警信息并拼接
             for (int i = 0; i < data.Length; i++)
             {
-                MOD_ERROR_STATE = data[i] == 1 ? MOD_ERROR_STATE + getERROR(i) : MOD_ERROR_STATE;
-            }
-
-        }
-
-        /// <summary>
-        /// 错误
-        /// </summary>
-        /// <param name="data"></param>
-        public void MOD_ERROR_STATE_Set_BMS01(int[] data)
-        {
-            MOD_ERROR_STATE = "";
-            if (data == null)
-            {
-                MOD_ERROR_STATE = "和上位机通讯异常";
-                return;
-            }
-
-            //根据标志位获取告警信息并拼接
-            for (int i = 0; i < data.Length; i++)
-            {
-                MOD_ERROR_STATE = data[i] == 1 ? MOD_ERROR_STATE + getERRORByBMS01(i) : MOD_ERROR_STATE;
+                MOD_ERROR_STATE = data[i] == 1 ? MOD_ERROR_STATE + GetERRORByBMS02(i) : MOD_ERROR_STATE;
             }
 
         }
@@ -381,7 +529,7 @@ namespace WpfApp1.Command.BMS
         /// 获取对应标志位的告警信息
         /// </summary>
         /// <param name="i">索引</param>
-        private string getWarning(int i)
+        private string GetWarningByBMS02(int i)
         {
             switch (i)
             {
@@ -423,58 +571,11 @@ namespace WpfApp1.Command.BMS
             }
         }
 
-
-        /// <summary>
-        /// 获取对应标志位的告警信息
-        /// </summary>
-        /// <param name="i">索引</param>
-        private string getWarningByBMS01(int i)
-        {
-            switch (i)
-            {
-                case 0:
-                    return App.GetText("单体过压");
-                case 1:
-                    return App.GetText("单体欠压");
-                case 2:
-                    return App.GetText("总体过压");
-                case 3:
-                    return App.GetText("总体欠压");
-                case 4:
-                    return App.GetText("电芯压差过大");
-                case 5:
-                    return App.GetText("充电过流");
-                case 6:
-                    return App.GetText("放电过流");
-                case 7:
-                    return App.GetText("充电高温1");
-                case 8:
-                    return App.GetText("充电高温2");
-                case 9:
-                    return App.GetText("充电低温");
-                case 10:
-                    return App.GetText("放电低温");
-                case 11:
-                    return App.GetText("电芯温差过大");
-                case 12:
-                    return App.GetText("MOS高温");
-                case 13:
-                    return App.GetText("环境高温");
-                case 14:
-                    return App.GetText("放电高温");
-                case 15:
-                    return App.GetText("低电量");
-                default:
-                    return "索引错误 ";
-
-            }
-        }
-
         /// <summary>
         /// 获取对应标志位的保护信息
         /// </summary>
         /// <param name="i">索引</param>
-        private string getProtect(int i)
+        private string GetProtectByBMS02(int i)
         {
             switch (i)
             {
@@ -517,56 +618,10 @@ namespace WpfApp1.Command.BMS
         }
 
         /// <summary>
-        /// 获取对应标志位的保护信息
-        /// </summary>
-        /// <param name="i">索引</param>
-        private string getProtectByBMS01(int i)
-        {
-            switch (i)
-            {
-                case 0:
-                    return App.GetText("单体过压");
-                case 1:
-                    return App.GetText("单体欠压");
-                case 2:
-                    return App.GetText("总体过压");
-                case 3:
-                    return App.GetText("总体欠压");//
-                case 4:
-                    return App.GetText("满充保护");
-                case 5:
-                    return App.GetText("充电过流");
-                case 6:
-                    return App.GetText("放电过流");
-                case 7:
-                    return App.GetText("短路保护");
-                case 8:
-                    return App.GetText("充电高温1");
-                case 9:
-                    return App.GetText("充电高温2");
-                case 10:
-                    return App.GetText("充电低温");//
-                case 11:
-                    return App.GetText("放电低温");
-                case 12:
-                    return App.GetText("MOS高温");
-                case 13:
-                    return App.GetText("请立即充电");
-                case 14:
-                    return App.GetText("放电高温");
-                case 15:
-                    return App.GetText("电芯压差过大");
-                default:
-                    return "";
-
-            }
-        }
-
-        /// <summary>
         /// 获取对应标志位的错误信息
         /// </summary>
         /// <param name="i">索引</param>
-        private string getERROR(int i)
+        private string GetERRORByBMS02(int i)
         {
             switch (i)
             {
@@ -608,51 +663,7 @@ namespace WpfApp1.Command.BMS
             }
         }
 
-        /// <summary>
-        /// 获取对应标志位的错误信息
-        /// </summary>
-        /// <param name="i">索引</param>
-        private string getERRORByBMS01(int i)
-        {
-            switch (i)
-            {
-                case 0:
-                    return App.GetText("充电MOS故障");
-                case 1:
-                    return App.GetText("放电MOS故障");
-                case 2:
-                    return App.GetText("限流板故障");
-                case 3:
-                    return App.GetText("ADC采集故障");
-                case 4:
-                    return App.GetText("电芯失效故障");
-                case 5:
-                    return App.GetText("前端芯片通信故障");
-                case 6:
-                    return App.GetText("电池电压故障");
-                case 7:
-                    return App.GetText("预充电阻故障");
-                case 8:
-                    return App.GetText("3V3辅源故障");
-                case 9:
-                    return App.GetText("NTC故障");
-                case 10:
-                    return App.GetText("脱扣器故障");
-                case 11:
-                    return "";
-                case 12:
-                    return "";
-                case 13:
-                    return "";
-                case 14:
-                    return "";
-                case 15:
-                    return "";
-                default:
-                    return "";
-
-            }
-        }
+        #endregion
 
         /// <summary>
         /// 系统信息赋值

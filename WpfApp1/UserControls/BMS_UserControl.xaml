@@ -2692,11 +2692,11 @@
                                     Binding="{Binding PackVoltage}"
                                     FontSize="15"
                                     Header="电池包总电压(V)" />
-                                <!--<DataGridTextColumn
+                                <DataGridTextColumn
                                     Width="auto"
                                     Binding="{Binding MOSTemp}"
                                     FontSize="15"
-                                    Header="MOSFET温度(℃)" />-->
+                                    Header="MOSFET温度(℃)" />
                                 <DataGridTextColumn
                                     Width="auto"
                                     Binding="{Binding TotalChgCap}"
@@ -2704,9 +2704,24 @@
                                     Header="累计充电容量(Ah)" />
                                 <DataGridTextColumn
                                     Width="auto"
-                                    Binding="{Binding NTCTemp}"
+                                    Binding="{Binding NTCTemp1}"
                                     FontSize="15"
-                                    Header="NTC温度传感器(℃)" />
+                                    Header="NTC1温度传感器(℃)" />
+                                <DataGridTextColumn
+                                    Width="auto"
+                                    Binding="{Binding NTCTemp2}"
+                                    FontSize="15"
+                                    Header="NTC2温度传感器(℃)" />
+                                <DataGridTextColumn
+                                    Width="auto"
+                                    Binding="{Binding NTCTemp3}"
+                                    FontSize="15"
+                                    Header="NTC3温度传感器(℃)" />
+                                <DataGridTextColumn
+                                    Width="auto"
+                                    Binding="{Binding NTCTemp4}"
+                                    FontSize="15"
+                                    Header="NTC4温度传感器(℃)" />
                                 <DataGridTextColumn
                                     Width="auto"
                                     Binding="{Binding SOC}"
