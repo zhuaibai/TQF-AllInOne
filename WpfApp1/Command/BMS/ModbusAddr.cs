@@ -95,6 +95,205 @@ namespace WpfApp1.Command.BMS
 
         }
 
+        /// <summary>
+        /// BMS03告警
+        /// </summary>
+        /// <param name="data"></param>
+        public void MOD_WARN_STATE_Set_BMS03(int[] data)
+        {
+            MOD_WARN_STATE = "";
+            if (data == null)
+            {
+                MOD_WARN_STATE = "和上位机通讯异常";
+                return;
+            }
+
+            //根据标志位获取告警信息并拼接
+            for (int i = 0; i < data.Length; i++)
+            {
+                MOD_WARN_STATE = data[i] == 1 ? MOD_WARN_STATE + GetWarningByBMS03(i) : MOD_WARN_STATE;
+            }
+
+        }
+
+        /// <summary>
+        /// BMS03保护
+        /// </summary>
+        /// <param name="data"></param>
+        public void MOD_PROT_STATE_Set_BMS03(int[] data)
+        {
+            MOD_PROT_STATE = "";
+            if (data == null)
+            {
+                MOD_PROT_STATE = "和上位机通讯异常";
+                return;
+            }
+
+            //根据标志位获取告警信息并拼接
+            for (int i = 0; i < data.Length; i++)
+            {
+                MOD_PROT_STATE = data[i] == 1 ? MOD_PROT_STATE + GetProtectByBMS03(i) : MOD_PROT_STATE;
+            }
+        }
+
+        /// <summary>
+        /// BMS03错误
+        /// </summary>
+        /// <param name="data"></param>
+        public void MOD_ERROR_STATE_Set_BMS03(int[] data)
+        {
+            MOD_ERROR_STATE = "";
+            if (data == null)
+            {
+                MOD_ERROR_STATE = "和上位机通讯异常";
+                return;
+            }
+
+            //根据标志位获取告警信息并拼接
+            for (int i = 0; i < data.Length; i++)
+            {
+                MOD_ERROR_STATE = data[i] == 1 ? MOD_ERROR_STATE + GetERRORByBMS03(i) : MOD_ERROR_STATE;
+            }
+
+        }
+
+        /// <summary>
+        /// 获取BMS03标志位的告警信息
+        /// </summary>
+        /// <param name="i">索引</param>
+        private static string GetWarningByBMS03(int i)
+        {
+            switch (i)
+            {
+                case 0:
+                    return App.GetText("单体过充");
+                case 1:
+                    return App.GetText("单体过放");
+                case 2:
+                    return App.GetText("总体过充");
+                case 3:
+                    return App.GetText("总体过放");
+                case 4:
+                    return "";
+                case 5:
+                    return App.GetText("充电过流");
+                case 6:
+                    return App.GetText("放电过流");
+                case 7:
+                    return App.GetText("电芯充电高温1");
+                case 8:
+                    return App.GetText("电芯充电高温2");
+                case 9:
+                    return App.GetText("电芯充电低温");
+                case 10:
+                    return App.GetText("电芯放电低温");
+                case 11:
+                    return "";
+                case 12:
+                    return App.GetText("MOS管高温");
+                case 13:
+                    return "";
+                case 14:
+                    return App.GetText("电芯放电高温");
+                case 15:
+                    return App.GetText("电池低电量");
+                default:
+                    return "索引错误 ";
+
+            }
+        }
+
+        /// <summary>
+        /// 获取BMS03标志位的保护信息
+        /// </summary>
+        /// <param name="i">索引</param>
+        private static string GetProtectByBMS03(int i)
+        {
+            switch (i)
+            {
+                case 0:
+                    return App.GetText("单体过充");
+                case 1:
+                    return App.GetText("单体过放");
+                case 2:
+                    return App.GetText("总体过充");
+                case 3:
+                    return App.GetText("总体过放");
+                case 4:
+                    return App.GetText("满充保护");
+                case 5:
+                    return App.GetText("充电过流");
+                case 6:
+                    return App.GetText("放电过流");
+                case 7:
+                    return App.GetText("短路保护");
+                case 8:
+                    return App.GetText("电芯充电高温1");
+                case 9:
+                    return App.GetText("电芯充电高温2");
+                case 10:
+                    return App.GetText("充电低温");
+                case 11:
+                    return App.GetText("放电低温");
+                case 12:
+                    return App.GetText("MOS高温");
+                case 13:
+                    return App.GetText("历史欠压");
+                case 14:
+                    return App.GetText("放电高温");
+                case 15:
+                    return "";
+                default:
+                    return "索引错误 ";
+
+            }
+        }
+
+        /// <summary>
+        /// 获取BMS03标志位的错误信息
+        /// </summary>
+        /// <param name="i">索引</param>
+        private static string GetERRORByBMS03(int i)
+        {
+            switch (i)
+            {
+                case 0:
+                    return App.GetText("充电MOS故障");
+                case 1:
+                    return App.GetText("放电MOS故障");
+                case 2:
+                    return App.GetText("限流控制故障");
+                case 3:
+                    return App.GetText("ADC采集故障");
+                case 4:
+                    return App.GetText("电芯失效故障");
+                case 5:
+                    return App.GetText("前端芯片故障");
+                case 6:
+                    return App.GetText("电池电压故障");
+                case 7:
+                    return App.GetText("3V3辅源故障");
+                case 8:
+                    return App.GetText("NTC故障");
+                case 9:
+                    return App.GetText("脱扣器故障");
+                case 10:
+                    return App.GetText("实时时钟故障");
+                case 11:
+                    return App.GetText("Flash故障");
+                case 12:
+                    return App.GetText("电芯温差过大");
+                case 13:
+                    return "";
+                case 14:
+                    return "";
+                case 15:
+                    return "";
+                default:
+                    return "索引错误 ";
+
+            }
+        }
 
         /// <summary>
         /// 保护

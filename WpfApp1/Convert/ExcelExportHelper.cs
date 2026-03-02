@@ -80,7 +80,10 @@ namespace WpfApp1.Convert
                         ws.Cell(row, col++).Value = item.PackVoltage;
                         ws.Cell(row, col++).Value = item.MOSTemp;
                         ws.Cell(row, col++).Value = item.TotalChgCap;
-                        ws.Cell(row, col++).Value = item.NTCTemp;
+                        ws.Cell(row, col++).Value = item.NTCTemp1;
+                        ws.Cell(row, col++).Value = item.NTCTemp2;
+                        ws.Cell(row, col++).Value = item.NTCTemp3;
+                        ws.Cell(row, col++).Value = item.NTCTemp4;
                         ws.Cell(row, col++).Value = item.SOC;
                         ws.Cell(row, col++).Value = item.SOH;
                         ws.Cell(row, col++).Value = item.RemainCap;
