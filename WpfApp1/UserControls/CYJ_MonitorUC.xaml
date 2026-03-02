@@ -1212,29 +1212,29 @@
                                 Style="{StaticResource ActionButton}" />
 
                             <!--  强充时间  -->
-                            <!--
+
                             <TextBlock
                                 Grid.Row="8"
                                 Style="{StaticResource ContentText}"
-                                Text="{DynamicResource 强充时间}" />
+                                Text="{DynamicResource 充电电流}" />
                             <TextBlock
                                 Grid.Row="8"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_CYJ.BoostTime}" />
-                            <TextBox
+                                Text="{Binding HEEP1_CYJ.ChargeCur}" />
+                            <ComboBox
                                 Grid.Row="8"
                                 Grid.Column="2"
-                                Style="{StaticResource InputBox}"
-                                Text="{Binding HEEP1_CYJ.BMSreturns_to_AC_mode_SOC_Inputs, UpdateSourceTrigger=PropertyChanged}"
-                                ToolTip="030" />
+                                ItemsSource="{Binding HEEP1_CYJ.ChargeCurOptions}"
+                                SelectedItem="{Binding HEEP1_CYJ.ChargeCur_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{StaticResource SelectBox}" />
                             <Button
                                 Grid.Row="8"
                                 Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_CYJ.Command_SetBMSreturns_to_AC_mode_SOC, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding DataContext.HEEP1_CYJ.Command_SetChargeCur, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
-                            -->
+
                             <!--  逆变时间  -->
                             <!--
                             <TextBlock

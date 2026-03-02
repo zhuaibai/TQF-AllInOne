@@ -29,6 +29,11 @@ namespace WpfApp1.Command.Command_CYJ
             UpdateState = _updateState;
 
             #region 初始化命令
+            //充电电流
+            Command_SetChargeCur = new RelayCommand(
+                execute: () => ChargeCurOperation(),
+                canExecute: () => Validate(nameof(ChargeCur_Inputs)) && !ChargeCur_IsWorking
+            );
 
             //设置低电锁机电压
             Command_SetLowPowerLock = new RelayCommand(
@@ -1808,12 +1813,120 @@ namespace WpfApp1.Command.Command_CYJ
 
         #endregion
 
+        #region 充电电流
+
+        private string _ChargeCur;
+
+        public string ChargeCur
+        {
+            get { return _ChargeCur; }
+            set
+            {
+                _ChargeCur = value;
+                this.RaiseProperChanged(nameof(ChargeCur));
+            }
+        }
+
+
+        private bool ChargeCur_IsWorking;
+
+
+        //设置值
+        private string _ChargeCur_Inputs;
+
+        public string ChargeCur_Inputs
+        {
+            get { return _ChargeCur_Inputs; }
+            set
+            {
+                _ChargeCur_Inputs = value;
+                this.RaiseProperChanged(nameof(ChargeCur_Inputs));
+                Command_SetChargeCur.RaiseCanExecuteChanged();
+            }
+        }
+
+        //下拉选项
+        private List<string> _ChargeCurOptions = new List<string> {"02", "03", "04", "05", "06", "07", "08", "09" ,"10"};
+
+        public List<string> ChargeCurOptions
+        {
+            get { return _ChargeCurOptions; }
+            set
+            {
+                _ChargeCurOptions = value;
+                this.RaiseProperChanged(nameof(ChargeCurOptions));
+            }
+        }
+
+        public RelayCommand Command_SetChargeCur { get; }
+
+        /// <summary>
+        /// 点击设置
+        /// </summary>
+        private async void ChargeCurOperation()
+        {
+            try
+            {
+                ChargeCur_IsWorking = true;
+                // 禁用按钮
+                Command_SetChargeCur.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    ChargeCur = "正在写入...";
+                    //执行设置指令
+                    Thread.Sleep(2000);//没有这个延时会报错
+                    string receive = SerialCommunicationService.SendSettingCommand("MUCHGC0", ChargeCur_Inputs);
+                    if (receive.StartsWith("(ACK"))
+                    {
+                        ChargeCur = "写入成功";
+                    }
+                    else
+                        ChargeCur = "写入失败";
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                ChargeCur_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetChargeCur.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+        #endregion
+
         #region 通用方法
         // 输入验证&选择验证
         private bool Validate(string value)
         {
             switch (value)
             {
+                case "ChargeCur_Inputs":
+                    return !String.IsNullOrWhiteSpace(ChargeCur_Inputs);
                 case "LowPowerLock_Inputs":
                     return !string.IsNullOrWhiteSpace(LowPowerLock_Inputs);                      //低电锁机电压
                 case "BattLowAlarmVolt_Inputs":

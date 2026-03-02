@@ -194,7 +194,7 @@ namespace WpfApp1.Convert
             for (int i = 0; i < regCount; i++)
             {
                 int dataIndex = 3 + i * 2;
-                // 数据为大端格式（高字节在前），但用户希望小端在前返回
+                // 数据为小端在前返回
                 short value = (short)((response[dataIndex + 1] << 8) | response[dataIndex]);
                 registers[i] = value;
             }

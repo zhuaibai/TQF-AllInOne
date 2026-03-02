@@ -2341,7 +2341,7 @@
                                 Grid.Row="8"
                                 Grid.Column="3"
                                 Height="30"
-                                Command="{Binding DataContext.BMS_Setting.Command_SetSystemTime, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Command="{Binding BMS_Setting.Command_SetSystemTime}"
                                 Content="{DynamicResource 设置}"
                                 IsEnabled="{Binding Administration}"
                                 Style="{StaticResource ActionButton}" />

@@ -868,7 +868,7 @@ namespace WpfApp1.ViewModels
                         short[] data = ModbusRTU.ParseRead20Response(SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 4, (ushort)i), 133));
                         if (data.Length == 64)
                         {
-                            var model = new HistoryLodModel(data, cellNum);
+                            var model = new HistoryLodModel   (data, cellNum);
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 HistoryLods.Add(model);
