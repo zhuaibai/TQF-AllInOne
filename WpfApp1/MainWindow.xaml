@@ -189,7 +189,7 @@
                 <TextBlock
                     HorizontalAlignment="Center"
                     FontSize="10"
-                    Text="抗干扰模式" />
+                    Text="{DynamicResource 抗干扰模式}" />
             </StackPanel>
             <ComboBox
                 MaxHeight="30"

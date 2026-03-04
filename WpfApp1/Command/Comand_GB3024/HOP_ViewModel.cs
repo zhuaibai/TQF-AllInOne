@@ -168,7 +168,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 //输出电压
                 OutputVoltage = Values[0].Substring(1, 5);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
             }

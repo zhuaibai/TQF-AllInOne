@@ -2016,7 +2016,7 @@ namespace WpfApp1.Command.Command_CYJ
                 Mode = Values[12];
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //异常
                 ReceiveException("HEEP1_Exe");

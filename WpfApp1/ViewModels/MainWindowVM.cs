@@ -1187,7 +1187,7 @@ namespace WpfApp1.ViewModels
             //初始化串口通讯工具
             SerialCommunicationService.InitiateCom(serialPortSettings);
         }
-
+        
         #region 串口图标
         //串口打开图标
         private Visibility _ComIconOpen = Visibility.Visible;
@@ -1322,7 +1322,7 @@ namespace WpfApp1.ViewModels
                     //更新combobox状态
                     UpdateComboBoxEnabledState();   
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
 
                 }
@@ -2068,7 +2068,6 @@ namespace WpfApp1.ViewModels
             });
         }
         #endregion
-
 
         #region GB3024通讯
         /// <summary>
@@ -3458,10 +3457,10 @@ namespace WpfApp1.ViewModels
         }
         #endregion
 
-
+        #region BMS02通讯
         int flag = 0;
         /// <summary>
-        /// BMS通讯
+        ///  BMS02通讯
         /// </summary>
         /// <param name="token"></param>
         private void CommunicationWithBMS(CancellationToken token)
@@ -3784,46 +3783,11 @@ namespace WpfApp1.ViewModels
             }
 
         }
+        #endregion
 
+        #region BMS01通讯
         /// <summary>
-        /// 刷新用户设置参数
-        /// </summary>
-        public void RefleshSettingParam()
-        {
-            // 等待暂停或取消信号
-           
-            //发送03功能码(查是91个设置项的电压)
-            Thread.Sleep(500);
-            byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame((byte)SerialCommunicationService.address, 130, 112), 229);
-            ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
-            //初始化设置值
-            ModbusRTU.FirstSetReceive(BMS_Setting.SendingCommands);
-            
-        }
-
-        /// <summary>
-        /// 对用户参数进行对应语言的可视化
-        /// </summary>
-        public void RefleshSettingParamToLanguage(string Lan)
-        {
-           
-                if (SelectedMachineItem == "BMS01")
-                {
-                    //补丁，BMS01时单位稍作修改
-                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings2());
-                    
-                }
-                else
-                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings());
-           
-            
-        }
-
-
-
-
-        /// <summary>
-        /// BMS通讯
+        /// BMS01通讯
         /// </summary>
         /// <param name="token"></param>
         private void CommunicationWithBMS01(CancellationToken token)
@@ -3854,7 +3818,7 @@ namespace WpfApp1.ViewModels
                 if (data != null && data.Length >= 2)
                 {
                     BMS_Setting.SettingStatue = ModbusRTU.GetBits(data[0]);
-                    
+
                 }
 
                 //首界面设置状态显示
@@ -3990,7 +3954,7 @@ namespace WpfApp1.ViewModels
                 BMS_Setting.setSystemTime(data);
 
             }
-            else if(SelectedMode == BatteryMode.Mode4)
+            else if (SelectedMode == BatteryMode.Mode4)
             {
                 // 等待暂停或取消信号
                 _pauseEvent.Wait(token);
@@ -4016,7 +3980,7 @@ namespace WpfApp1.ViewModels
                 if (data != null && data.Length >= 2)
                 {
                     BMS_Setting.SettingStatue = ModbusRTU.GetBits(data[0]);
-                    
+
                 }
 
                 //首界面设置状态显示
@@ -4100,14 +4064,14 @@ namespace WpfApp1.ViewModels
                 var polling = new PollingData
                 {
                     Date = DateTime.Now,                                       //日期
-                    TotalVolt = BMS_VM.MOD_AFECOL_PACKVOL/100.0,                     //总电压
+                    TotalVolt = BMS_VM.MOD_AFECOL_PACKVOL / 100.0,                     //总电压
                     Current = BMS_VM.MOD_AFECOL_CUR,                           //电流
                     SOC = (BMS_VM.MOD_SOC / 100.0).ToString("F2"),               //SOC
                     SOH = (BMS_VM.MOD_SOH / 100.0).ToString("F2"),               //SOH
                     FullCap = (BMS_VM.MOD_FULL_CAP / 100.0).ToString("F2"),    //满充容量
                     FullRemainCap = (BMS_VM.MOD_RES_CAP / 100.0).ToString("F2"), //剩余容量
                     CycleCount = BMS_VM.MOD_CYCLECNT,                          //循环次数
-                    Cell1 = BMS_VM.MOD_CELL1_VOL/1000.0,                              //电芯1
+                    Cell1 = BMS_VM.MOD_CELL1_VOL / 1000.0,                              //电芯1
                     Cell2 = BMS_VM.MOD_CELL2_VOL / 1000.0,
                     Cell3 = BMS_VM.MOD_CELL3_VOL / 1000.0,
                     Cell4 = BMS_VM.MOD_CELL4_VOL / 1000.0,
@@ -4126,10 +4090,10 @@ namespace WpfApp1.ViewModels
                     AvgVolt = BMS_VM.MOD_CELL_VOLDIFF,                         //最大电芯压差
                     MaxVolt = BMS_VM.MOD_MAXCELL_VOL,                          //最高电压
                     MinVolt = BMS_VM.MOD_MINCELL_VOL,                          //最低电压
-                    Temp1 = BMS_VM.MOD_GROUD1_TEMP/10.0,                            //电芯温度1
-                    Temp2 = BMS_VM.MOD_GROUD2_TEMP/10.0,                            //电芯温度1
-                    Temp3 = BMS_VM.MOD_GROUD3_TEMP/10.0,                            //电芯温度1
-                    Temp4 = BMS_VM.MOD_GROUD4_TEMP/10.0,                            //电芯温度1
+                    Temp1 = BMS_VM.MOD_GROUD1_TEMP / 10.0,                            //电芯温度1
+                    Temp2 = BMS_VM.MOD_GROUD2_TEMP / 10.0,                            //电芯温度1
+                    Temp3 = BMS_VM.MOD_GROUD3_TEMP / 10.0,                            //电芯温度1
+                    Temp4 = BMS_VM.MOD_GROUD4_TEMP / 10.0,                            //电芯温度1
                     Chg_MOS = BMS_VM.MOD_INST_STATE[0].ToString(),             //充电MOS
                     Dis_MOS = BMS_VM.MOD_INST_STATE[1].ToString(),             //放电MOS
                     Chg_Statues = BMS_VM.MOD_INST_STATE[4].ToString(),         //充电
@@ -4153,7 +4117,7 @@ namespace WpfApp1.ViewModels
                 };
                 for (int j = 0; j < BMS_Setting.CellNum; j++)
                 {
-                    polling.BalanceStatus =polling.BalanceStatus+ BMS_Setting.JunHen[j].ToString()
+                    polling.BalanceStatus = polling.BalanceStatus + BMS_Setting.JunHen[j].ToString()
                     + ";";
                 }
 
@@ -4194,10 +4158,11 @@ namespace WpfApp1.ViewModels
 
             }
         }
+        #endregion
 
         #region BMS03通讯
         /// <summary>
-        /// BMS01通讯
+        /// BMS03通讯
         /// </summary>
         /// <param name="token"></param>
         private void CommunicationWithBMS03(CancellationToken token)
@@ -4546,6 +4511,40 @@ namespace WpfApp1.ViewModels
             }
         }
         #endregion
+
+        /// <summary>
+        /// 刷新用户设置参数
+        /// </summary>
+        public void RefleshSettingParam()
+        {
+            // 等待暂停或取消信号
+           
+            //发送03功能码(查是91个设置项的电压)
+            Thread.Sleep(500);
+            byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame((byte)SerialCommunicationService.address, 130, 112), 229);
+            ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
+            //初始化设置值
+            ModbusRTU.FirstSetReceive(BMS_Setting.SendingCommands);
+            
+        }
+
+        /// <summary>
+        /// 对用户参数进行对应语言的可视化
+        /// </summary>
+        public void RefleshSettingParamToLanguage(string Lan)
+        {
+           
+                if (SelectedMachineItem == "BMS01")
+                {
+                    //补丁，BMS01时单位稍作修改
+                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings2());
+                    
+                }
+                else
+                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings());
+           
+            
+        }
 
         /// <summary>
         /// 停止后台通信

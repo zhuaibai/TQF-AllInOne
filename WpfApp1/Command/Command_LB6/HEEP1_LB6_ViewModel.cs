@@ -1922,7 +1922,7 @@ namespace WpfApp1.Command.Command_LB6
                 //AutoReturnHome = Values[11];
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //异常
                 ReceiveException("HEEP1异常");

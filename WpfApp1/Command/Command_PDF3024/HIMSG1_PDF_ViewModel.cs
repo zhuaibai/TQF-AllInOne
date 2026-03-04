@@ -378,7 +378,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 SWIntegrity = Values[2].Substring(0, 1);
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ReceiveException("HIMSG1异常");
                 AddLog($"{command}返回数据：{value}解析异常");

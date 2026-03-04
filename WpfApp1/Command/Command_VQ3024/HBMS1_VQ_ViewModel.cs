@@ -421,7 +421,7 @@ namespace WpfApp1.Command.Command_VQ3024
                 //BMS电流
                 BMS_Curr = BMS_ChgEnable;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ReceiveException("HBMS1异常");
                 AddLog($"{command}返回数据：{value}解析异常");

@@ -542,7 +542,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 FanSpeed = Values[5];
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ReceiveException("HTEMP异常");
                 AddLog($"{command}返回数据：{value}解析异常");

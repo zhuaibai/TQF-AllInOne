@@ -104,7 +104,7 @@ namespace WpfApp1.Services
                 {
                     SerialPort.Close();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     SerialPort.Close();
                     return false;
@@ -131,7 +131,7 @@ namespace WpfApp1.Services
                     SerialPort.Open();
                     return true;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return false;
                 }
@@ -144,7 +144,7 @@ namespace WpfApp1.Services
                     SerialPort.Open();
                     return true;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return false;
                 }
@@ -337,6 +337,9 @@ namespace WpfApp1.Services
                         //throw new TimeoutException("No data received within timeout period");
                         return string.Empty;
                     }
+                 
+                    
+               
                     // 部分数据已收到，继续处理
                 }
 
@@ -397,7 +400,7 @@ namespace WpfApp1.Services
                 string DataBuffer = Encoding.ASCII.GetString(buffer);
                 return DataBuffer;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // 超时未
                 //MessageBox.Show("超时未收到ACK");
@@ -535,7 +538,7 @@ namespace WpfApp1.Services
                 //string DataBuffer = Encoding.ASCII.GetString(buffer);
                 return buffer;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // 超时未
                 //MessageBox.Show("超时未收到ACK");
@@ -613,7 +616,7 @@ namespace WpfApp1.Services
                 string DataBuffer = Encoding.ASCII.GetString(buffer);
                 return DataBuffer;
             }
-            catch (TimeoutException ex)
+            catch (TimeoutException)
             {
                 // 超时未
                 //MessageBox.Show("超时未收到ACK");
@@ -621,7 +624,7 @@ namespace WpfApp1.Services
                 AddReceiveFrame(totalBytesRead);
                 return string.Empty;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return string.Empty;
             }

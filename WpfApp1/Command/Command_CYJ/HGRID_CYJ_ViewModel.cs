@@ -592,7 +592,7 @@ namespace WpfApp1.Command.Command_CYJ
                 //MOS_TubeCurrent = Values[8];
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ReceiveException("HGRID异常");
                 AddLog($"{command}返回数据：{value}解析异常");

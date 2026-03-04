@@ -589,7 +589,7 @@ namespace WpfApp1.Command.GB_General
 
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ReceiveException("HGRID异常");
             }

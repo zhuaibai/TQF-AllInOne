@@ -768,7 +768,7 @@ namespace WpfApp1.Command.Command_VQ3024
                 //MOS_TubeCurrent = Values[8];
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ReceiveException("HOP异常");
                 AddLog($"{command}返回数据：{value}解析异常");

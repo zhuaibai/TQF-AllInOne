@@ -1602,7 +1602,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 ////低电锁机电压
                 //LowPowerLock = Values[17];
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ReceiveException("HEEP2异常");
                 AddLog($"{command}返回数据：{value}解析异常");

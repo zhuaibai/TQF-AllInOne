@@ -374,7 +374,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 PVPwr = Values[2];
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ReceiveException("HPV异常");
                 AddLog($"{command}返回数据：{value}解析异常");
