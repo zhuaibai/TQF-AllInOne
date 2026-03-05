@@ -335,9 +335,9 @@ namespace WpfApp1.ViewModels
                 execute: () => ResetSysParamsOperation(),
                 canExecute: () => !ResetSysParams_IsWorking // 增加处理状态检查
             );
-            //读取历史记录
-            HistoryReadCommand = new RelayCommand(
-                execute: () => HistoryReadOperation(),
+            //读取历史记录BMS02
+            HistoryReadCommandBMS02 = new RelayCommand(
+                execute: () => HistoryReadOperationBMS02(),
                 canExecute: () => !HistoryRead_IsWorking // 增加处理状态检查
             );
             //读取历史记录BMS01
@@ -345,6 +345,11 @@ namespace WpfApp1.ViewModels
                 execute: () => HistoryReadOperationBMS01(),
                 canExecute: () => !HistoryRead_IsWorking // 增加处理状态检查
             );
+            //读取历史记录BMS03
+            HistoryReadCommandBMS03 = new RelayCommand(
+               execute: () => HistoryReadOperationBMS03(),
+               canExecute: () => !HistoryRead_IsWorking // 增加处理状态检查
+           );
             //读取充电电流校准系数
             Command_SetChgCalibFactorRead = new RelayCommand(
                 execute: () => ChgCalibFactorReadOperation(),
@@ -828,24 +833,25 @@ namespace WpfApp1.ViewModels
 
         private bool HistoryRead_IsWorking;
 
-        public RelayCommand HistoryReadCommand { get; }
+        public RelayCommand HistoryReadCommandBMS02 { get; }
 
         public RelayCommand HistoryReadCommandBMS01 { get; }
 
+        public RelayCommand HistoryReadCommandBMS03 { get; }
         private bool stopReadFlag;
         private bool stopReadFlag_isWorking;
 
         /// <summary>
-        /// 点击设置
+        /// BMS02点击设置
         /// </summary>
-        private async void HistoryReadOperation()
+        private async void HistoryReadOperationBMS02()
         {
             try
             {
                 HistoryRead_IsWorking = true;
                 stopReadFlag = false;
                 // 禁用按钮
-                HistoryReadCommand.RaiseCanExecuteChanged();
+                HistoryReadCommandBMS02.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
@@ -900,7 +906,7 @@ namespace WpfApp1.ViewModels
                 HistoryRead_IsWorking = false;
                 //Status = "就绪";
                 // 重新启用按钮
-                HistoryReadCommand.RaiseCanExecuteChanged();
+                HistoryReadCommandBMS02.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
                 stopReadFlag = true;
@@ -908,7 +914,9 @@ namespace WpfApp1.ViewModels
             }
         }
 
-
+        /// <summary>
+        /// BMS01点击设置
+        /// </summary>
         private async void HistoryReadOperationBMS01()
         {
             try
@@ -916,7 +924,7 @@ namespace WpfApp1.ViewModels
                 HistoryRead_IsWorking = true;
                 stopReadFlag = false;
                 // 禁用按钮
-                HistoryReadCommand.RaiseCanExecuteChanged();
+                HistoryReadCommandBMS01.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
@@ -971,13 +979,87 @@ namespace WpfApp1.ViewModels
                 HistoryRead_IsWorking = false;
                 //Status = "就绪";
                 // 重新启用按钮
-                HistoryReadCommand.RaiseCanExecuteChanged();
+                HistoryReadCommandBMS01.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
                 stopReadFlag = true;
                 UpdateState("历史记录读取完成");
             }
         }
+
+        /// <summary>
+        /// BMS03点击设置
+        /// </summary>
+        private async void HistoryReadOperationBMS03()
+        {
+            try
+            {
+                HistoryRead_IsWorking = true;
+                stopReadFlag = false;
+                // 禁用按钮
+                HistoryReadCommandBMS03.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在读取历史记录");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+                HistoryLods.Clear();
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    for (int i = ReadCounts; ; i++)
+                    {
+                        //读取指令
+                        Thread.Sleep(100);//没有这个延时会报错
+                        short[] data = ModbusRTU.ParseRead20Response(SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 4, (ushort)i), 133));
+                        if (data.Length == 64)
+                        {
+                            var model = new HistoryLodModel(data, cellNum, 1, 0);
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                HistoryLods.Add(model);
+                            });
+                        }
+                        else
+                        {
+                            break;
+                        }
+                        if (stopReadFlag)
+                        {
+                            break;
+                        }
+                        //HistoryLods.Add(new HistoryLodModel(data));
+                    }
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                HistoryRead_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                HistoryReadCommandBMS03.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                stopReadFlag = true;
+                UpdateState("历史记录读取完成");
+            }
+        }
+
 
         /// <summary>
         /// 停止读取历史记录

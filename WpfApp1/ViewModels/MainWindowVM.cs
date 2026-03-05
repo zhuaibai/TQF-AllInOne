@@ -44,6 +44,7 @@ namespace WpfApp1.ViewModels
             #region 后台线程
             StartCommand = new RelayCommand(StartBackgroundThread);
             StopCommand = new RelayCommand(StopBackgroundThread);
+            ExecuteSpecialCommand = new RelayCommand(() => { });
 
 
             //初始化串口信息
@@ -144,7 +145,7 @@ namespace WpfApp1.ViewModels
         #endregion
 
         #region 串口下拉框设置
-        private SerialPortSettingViewModel _serialPortSetting;
+        private SerialPortSettingViewModel _serialPortSetting = null!;
         public SerialPortSettingViewModel SerialPortSetting
         {
             get
@@ -222,7 +223,7 @@ namespace WpfApp1.ViewModels
         }
 
         //130-220数据项的读取、写入与显示
-        private SendingCommandSettingsViewModel BMS_Command_Setting;
+        private SendingCommandSettingsViewModel BMS_Command_Setting = null!;
 
         public SendingCommandSettingsViewModel BMS_Setting
         {
@@ -247,7 +248,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        private UnionMonitorVM uinonVN;
+        private UnionMonitorVM uinonVN = null!;
 
         public UnionMonitorVM UnionVM
         {
@@ -360,14 +361,14 @@ namespace WpfApp1.ViewModels
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        private int StringToIntConversion(string str)
+        private int StringToIntConversion(string? str)
         {
-            if (str == null)
+            if (string.IsNullOrEmpty(str))
             {
                 return 0;
             }
             //这是专门应对市电功率的情况
-            string tag = str.Substring(0, 1);
+            string tag = str.Length > 0 ? str.Substring(0, 1) : string.Empty;
             if (tag == "-")
             {
                 str = str.Substring(1);
@@ -413,11 +414,11 @@ namespace WpfApp1.ViewModels
         /// <param name="front"></param>
         /// <param name="after"></param>
         /// <returns></returns>
-        private int CountPercent(string front, string after)
+        private int CountPercent(string? front, string? after)
         {
             int newFront = StringToIntConversion(front);
             int newAfter = StringToIntConversion(after);
-            if (newAfter <= 0 || newAfter <= 0)
+            if (newAfter <= 0)
             {
                 return 0;
             }
@@ -497,9 +498,9 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        public BMS_UserControl BMS02 { get; set; }
-        public BMS01_UserControl BMS01 { get; set; }
-        public BMS03_UserControl BMS03 { get; set; }
+        public BMS_UserControl BMS02 { get; set; } = null!;
+        public BMS01_UserControl BMS01 { get; set; } = null!;
+        public BMS03_UserControl BMS03 { get; set; } = null!;
         public ObservableCollection<string> MachineItems { get; } = new(){
         "HPVINV02",
         "HPVINV04",
@@ -752,7 +753,7 @@ namespace WpfApp1.ViewModels
         /// <summary>
         /// 实时时间
         /// </summary>
-        private ClockViewModel _Clock;
+        private ClockViewModel _Clock = null!;
 
         public ClockViewModel Clock
         {
@@ -767,7 +768,7 @@ namespace WpfApp1.ViewModels
 
         #region GB指令ViewModel
 
-        private HOPViewModel hopVm;
+        private HOPViewModel hopVm = null!;
         public HOPViewModel HOP
         {
             get { return hopVm; }
@@ -778,7 +779,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        private HEEP1_ViewModel hEEP1_ViewModel;
+        private HEEP1_ViewModel hEEP1_ViewModel = null!;
 
         public HEEP1_ViewModel HEEP1
         {
@@ -790,7 +791,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        private HEEP1_HPVINV02_ViewModel _HEEP1_HPVIN02;
+        private HEEP1_HPVINV02_ViewModel _HEEP1_HPVIN02 = null!;
 
         public HEEP1_HPVINV02_ViewModel HEEP1_HPVINV02
         {
@@ -804,7 +805,7 @@ namespace WpfApp1.ViewModels
 
 
 
-        private HEEP2_ViewModel hEEP2_ViewModel;
+        private HEEP2_ViewModel hEEP2_ViewModel = null!;
 
         public HEEP2_ViewModel HEEP2
         {
@@ -816,7 +817,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        private HGEN_ViewModel _HGEN;
+        private HGEN_ViewModel _HGEN = null!;
 
         public HGEN_ViewModel HGEN
         {
@@ -825,7 +826,7 @@ namespace WpfApp1.ViewModels
         }
 
 
-        private Special_Command special_Command;
+        private Special_Command special_Command = null!;
 
         public Special_Command SpecialCommand
         {
@@ -837,7 +838,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        private HGRID_GB_ViewModel _HGRID_GB;
+        private HGRID_GB_ViewModel _HGRID_GB = null!;
 
         public HGRID_GB_ViewModel HGRID_GB
         {
@@ -849,7 +850,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        private HSTS_GB_ViewModel _HSTS_GB;
+        private HSTS_GB_ViewModel _HSTS_GB = null!;
 
         public HSTS_GB_ViewModel HSTS_GB
         {
@@ -861,7 +862,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        private HPVB_GB_ViewModel _HPVB_GB;
+        private HPVB_GB_ViewModel _HPVB_GB = null!;
 
         public HPVB_GB_ViewModel HPVB_GB
         {
@@ -873,7 +874,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        private HSTS2_HPVINV08_ViewModel _HSTS2_HPVINV08;
+        private HSTS2_HPVINV08_ViewModel _HSTS2_HPVINV08 = null!;
 
         public HSTS2_HPVINV08_ViewModel HSTS2_HPVINV08
         {
@@ -891,7 +892,7 @@ namespace WpfApp1.ViewModels
         #region VQ指令ViewModel
 
         //HOP
-        private HOP_VQ_ViewModel _HOP_VQ;
+        private HOP_VQ_ViewModel _HOP_VQ = null!;
 
         public HOP_VQ_ViewModel HOP_VQ
         {
@@ -904,7 +905,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HBMS1
-        private HBMS1_VQ_ViewModel _HBMS1_VQ;
+        private HBMS1_VQ_ViewModel _HBMS1_VQ = null!;
 
         public HBMS1_VQ_ViewModel HBMS1_VQ
         {
@@ -917,7 +918,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HBAT，适用GB
-        private HBAT_GB_ViewModel _HBAT_VQ;
+        private HBAT_GB_ViewModel _HBAT_VQ = null!;
 
         public HBAT_GB_ViewModel HBAT_VQ
         {
@@ -930,7 +931,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HBAT,适用VQ
-        private HBAT_VQ_ViewModel _HBAT_VQ2;
+        private HBAT_VQ_ViewModel _HBAT_VQ2 = null!;
 
         public HBAT_VQ_ViewModel HBAT_VQ2
         {
@@ -943,7 +944,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HEEP1
-        private HEEP1_VQ_ViewModel _HEEP1_VQ;
+        private HEEP1_VQ_ViewModel _HEEP1_VQ = null!;
 
         public HEEP1_VQ_ViewModel HEEP1_VQ
         {
@@ -956,7 +957,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HGRID
-        private HGRID_VQ_ViewModel _HGRID_VQ;
+        private HGRID_VQ_ViewModel _HGRID_VQ = null!;
 
         public HGRID_VQ_ViewModel HGRID_VQ
         {
@@ -977,7 +978,7 @@ namespace WpfApp1.ViewModels
 
 
         //HIMSG2
-        private HIMSG2_PDF_ViewModel _HIGSG2_PDF;
+        private HIMSG2_PDF_ViewModel _HIGSG2_PDF = null!;
 
         public HIMSG2_PDF_ViewModel HIGSG2_PDF
         {
@@ -987,7 +988,7 @@ namespace WpfApp1.ViewModels
 
 
         //HGRID
-        private HGRID_PDF_ViewModel _HGRID_PDF;
+        private HGRID_PDF_ViewModel _HGRID_PDF = null!;
         public HGRID_PDF_ViewModel HGRID_PDF
         {
             get
@@ -1001,7 +1002,7 @@ namespace WpfApp1.ViewModels
             }
         }
         //HOP
-        private HOP_PDF_ViewModel _HOP_PDF;
+        private HOP_PDF_ViewModel _HOP_PDF = null!;
 
         public HOP_PDF_ViewModel HOP_PDF
         {
@@ -1014,7 +1015,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HBAT
-        private HBAT_PDF_ViewModel _HBAT_PDF;
+        private HBAT_PDF_ViewModel _HBAT_PDF = null!;
 
         public HBAT_PDF_ViewModel HBAT_PDF
         {
@@ -1027,7 +1028,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HIMSG1
-        private HIMSG1_PDF_ViewModel _HIMSG1;
+        private HIMSG1_PDF_ViewModel _HIMSG1 = null!;
 
         public HIMSG1_PDF_ViewModel HIMSG1
         {
@@ -1040,7 +1041,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HPV
-        private HPV_PDF_ViewModel _HPV_PDF;
+        private HPV_PDF_ViewModel _HPV_PDF = null!;
 
         public HPV_PDF_ViewModel HPV_PDF
         {
@@ -1053,7 +1054,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HTEMP
-        private HTEMP_PDF_ViewModel _HTEMP_PDF;
+        private HTEMP_PDF_ViewModel _HTEMP_PDF = null!;
 
         public HTEMP_PDF_ViewModel HTEMP_PDF
         {
@@ -1066,7 +1067,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HCTMSG1
-        private HCTMSG1_PDF_ViewModel _HCTMSG1_PDF;
+        private HCTMSG1_PDF_ViewModel _HCTMSG1_PDF = null!;
 
         public HCTMSG1_PDF_ViewModel HCTMSG1_PDF
         {
@@ -1079,7 +1080,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HEEP3
-        private HEEP3_PDF_ViewModel _HEEP3_PDF;
+        private HEEP3_PDF_ViewModel _HEEP3_PDF = null!;
 
         public HEEP3_PDF_ViewModel HEEP3_PDF
         {
@@ -1092,7 +1093,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HEEP1
-        private HEEP1_PDF_ViewModel _HEEP1_PDF;
+        private HEEP1_PDF_ViewModel _HEEP1_PDF = null!;
 
         public HEEP1_PDF_ViewModel HEEP1_PDF
         {
@@ -1109,7 +1110,7 @@ namespace WpfApp1.ViewModels
         #region CYJ指令ViewModel
 
         //HGRID
-        private HGRID_CYJ_ViewModel _HGRID_CYJ;
+        private HGRID_CYJ_ViewModel _HGRID_CYJ = null!;
 
         public HGRID_CYJ_ViewModel HGRID_CYJ
         {
@@ -1122,7 +1123,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HEEP1
-        private HEEP1_CYJ_ViewModel _HEEP1_CYJ;
+        private HEEP1_CYJ_ViewModel _HEEP1_CYJ = null!;
 
         public HEEP1_CYJ_ViewModel HEEP1_CYJ
         {
@@ -1135,7 +1136,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HSTS
-        private HSTS_CYJ_ViewModel _HSTS_CYJ;
+        private HSTS_CYJ_ViewModel _HSTS_CYJ = null!;
 
         public HSTS_CYJ_ViewModel HSTS_CYJ
         {
@@ -1157,7 +1158,7 @@ namespace WpfApp1.ViewModels
         /// <summary>
         /// HEEP1
         /// </summary>
-        private HEEP1_LB6_ViewModel _HEEP1_LB6;
+        private HEEP1_LB6_ViewModel _HEEP1_LB6 = null!;
 
         public HEEP1_LB6_ViewModel HEEP1_LB6
         {
@@ -1175,7 +1176,7 @@ namespace WpfApp1.ViewModels
         #region 串口工具
 
         //串口实体类
-        private SerialPortSettings serialPortSettings;
+        private SerialPortSettings serialPortSettings = null!;
 
         /// <summary>
         /// 初始化串口工具
@@ -1274,7 +1275,9 @@ namespace WpfApp1.ViewModels
                     var serializer = new XmlSerializer(typeof(SerialPortSettings));
                     using (var reader = new StreamReader("serialSettings.xml"))
                     {
-                        return (SerialPortSettings)serializer.Deserialize(reader);
+                        var obj = serializer.Deserialize(reader) as SerialPortSettings;
+                        if (obj != null)
+                            return obj;
                     }
                 }
             }
@@ -1378,7 +1381,7 @@ namespace WpfApp1.ViewModels
         /// <summary>
         /// 内容窗口
         /// </summary>
-        private UserControl contentUC;
+        private UserControl contentUC = null!;
         public UserControl ContentUC
         {
             get
@@ -1395,7 +1398,7 @@ namespace WpfApp1.ViewModels
         /// <summary>
         /// 机器类型
         /// </summary>
-        private string _MachineType;
+        private string _MachineType = string.Empty;
 
         public string MachineType
         {
@@ -1569,7 +1572,7 @@ namespace WpfApp1.ViewModels
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1); // 异步竞争
 
         //帧计数
-        private SerialCountVM _SerialCountVM;
+        private SerialCountVM _SerialCountVM = null!;
 
         public SerialCountVM SerialCountVM
         {

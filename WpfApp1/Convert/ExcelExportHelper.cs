@@ -50,7 +50,10 @@ namespace WpfApp1.Convert
                     ws.Cell(1, col++).Value = "总电压(V)";
                     ws.Cell(1, col++).Value = "MOS温度(℃)";
                     ws.Cell(1, col++).Value = "累计充电容量(mAh)";
-                    ws.Cell(1, col++).Value = "NTC温度(℃)";
+                    ws.Cell(1, col++).Value = "NTC1温度(℃)";
+                    ws.Cell(1, col++).Value = "NTC2温度(℃)";
+                    ws.Cell(1, col++).Value = "NTC3温度(℃)";
+                    ws.Cell(1, col++).Value = "NTC4温度(℃)";
                     ws.Cell(1, col++).Value = "SOC(%)";
                     ws.Cell(1, col++).Value = "SOH(%)";
                     ws.Cell(1, col++).Value = "剩余容量(mAh)";
