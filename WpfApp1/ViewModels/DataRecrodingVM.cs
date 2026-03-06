@@ -959,7 +959,7 @@ namespace WpfApp1.ViewModels
             if (_currentDeviceConfig == null)
             {
                 MessageBox.Show("设备配置错误");
-                return;
+                return ;
             }
 
             // 重置状态
@@ -1014,7 +1014,7 @@ namespace WpfApp1.ViewModels
                 {
                     _isSaving = value;
                     OnPropertyChanged(nameof(IsSaving));
-
+                    
                     if (!_isSaving)
                     {
                         StopSaving();
@@ -1048,7 +1048,7 @@ namespace WpfApp1.ViewModels
                 return false;
             }
         }
-
+        
         /// <summary>
         /// 处理文件被占用的情况
         /// </summary>
