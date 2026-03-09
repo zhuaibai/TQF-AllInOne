@@ -170,15 +170,15 @@ namespace WpfApp1.ViewModels
                 OnPropertyChanged(nameof(IsEnableComboBox));
             }
         }
-
+        //下拉框可用状态更新
         private void UpdateComboBoxEnabledState()
         {
             IsEnableComboBox = !SerialCommunicationService.IsOpen();
         }
         #endregion
 
-        #region 小标题选项
-
+        #region 电池小标题选项
+        //电池模式枚举
         public enum BatteryMode
         {
             Mode1,
@@ -189,7 +189,6 @@ namespace WpfApp1.ViewModels
             Mode6,
             Mode7
         }
-
         private BatteryMode _selectedMode = BatteryMode.Mode1;
 
         public BatteryMode SelectedMode
@@ -247,7 +246,7 @@ namespace WpfApp1.ViewModels
         }
 
         private UnionMonitorVM uinonVN;
-
+        //并联监控VM
         public UnionMonitorVM UnionVM
         {
             get { return uinonVN; }
