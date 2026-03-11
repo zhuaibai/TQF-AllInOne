@@ -1,5 +1,7 @@
-﻿using System.Collections.ObjectModel;
+﻿using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.IO.Ports;
 using System.Reflection.Metadata;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,7 +9,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml.Serialization;
-using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using WpfApp1.Command;
 using WpfApp1.Command.BMS;
 using WpfApp1.Command.Comand_GB3024;
@@ -24,13 +25,18 @@ using WpfApp1.Models;
 using WpfApp1.Services;
 using WpfApp1.UserControls;
 using InputType = WpfApp1.CustomMessageBox.InputType;
-
+using System.Management;
 namespace WpfApp1.ViewModels
 {
     public class MainWindowVM : BaseViewModel
     {
+        private ManagementEventWatcher _insertWatcher;
+        private ManagementEventWatcher _removeWatcher;
+
         public MainWindowVM(IMessageDialogService messageService)
         {
+            
+
             #region 日志界面
             // 初始化命令
             ClearLogCommand = new DelegateCommand(ClearLog);
@@ -45,6 +51,20 @@ namespace WpfApp1.ViewModels
             StartCommand = new RelayCommand(StartBackgroundThread);
             StopCommand = new RelayCommand(StopBackgroundThread);
 
+            ComPorts = new ObservableCollection<string>();
+            UpdateComPorts();  // 初始加载
+
+            // 监听设备插入事件 
+            var insertQuery = new WqlEventQuery("SELECT * FROM Win32_DeviceChangeEvent WHERE EventType = 2");
+            _insertWatcher = new ManagementEventWatcher(insertQuery);
+            _insertWatcher.EventArrived += OnDeviceChanged;
+            _insertWatcher.Start();
+
+            // 监听设备移除事件
+            var removeQuery = new WqlEventQuery("SELECT * FROM Win32_DeviceChangeEvent WHERE EventType = 3");
+            _removeWatcher = new ManagementEventWatcher(removeQuery);
+            _removeWatcher.EventArrived += OnDeviceChanged;
+            _removeWatcher.Start();
 
             //初始化串口信息
             IniCom();
@@ -125,6 +145,36 @@ namespace WpfApp1.ViewModels
             // 初始化ComboBox的可用状态
             UpdateComboBoxEnabledState();
             App.ChangeLanguageWithSetting = RefleshSettingParamToLanguage;
+        }
+
+        private ObservableCollection<string> _comPorts;
+        public ObservableCollection<string> ComPorts
+        {
+            get => _comPorts;
+            set
+            {
+                _comPorts = value;
+                OnPropertyChanged(nameof(ComPorts));
+            }
+        }
+
+        private void OnDeviceChanged(object sender, EventArrivedEventArgs e)
+        {
+            // 调度到 UI 线程更新集合
+            Application.Current.Dispatcher.Invoke(() => UpdateComPorts());
+        }
+
+        /// <summary>
+        /// 核心函数：更新当前可用串口列表
+        /// </summary>
+        public void UpdateComPorts()
+        {
+            string[] ports = SerialPort.GetPortNames();  // 获取当前系统串口名数组
+            ComPorts.Clear();                            // 清空旧列表
+            foreach (string port in ports)
+            {
+                ComPorts.Add(port);                       // 添加新串口
+            }
         }
 
         #region 数据记录VM
@@ -1169,6 +1219,7 @@ namespace WpfApp1.ViewModels
         {
             //加载串口配置文件
             serialPortSettings = LoadCom();
+         
             //初始化串口通讯工具
             SerialCommunicationService.InitiateCom(serialPortSettings);
         }
@@ -1236,7 +1287,7 @@ namespace WpfApp1.ViewModels
 
                 // 重新初始化串口
                 SerialCommunicationService.InitiateCom(settings);
-
+                
                 AddLog($"串口参数已更新: {settings.PortName}, {settings.BaudRate}bps");
             }
             catch (Exception ex)
@@ -1792,6 +1843,7 @@ namespace WpfApp1.ViewModels
                 UpdateState(App.GetText("异常!"));
                 //关闭串口
                 SerialCommunicationService.CloseCom();
+                UpdateComboBoxEnabledState();
             }
             finally
             {
@@ -4170,6 +4222,7 @@ namespace WpfApp1.ViewModels
         private void StopBackgroundThread()
         {
             _cts.Cancel();
+            
             AddLog("后台通信停止请求已发送");
         }
         #endregion

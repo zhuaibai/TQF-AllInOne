@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -8,9 +9,10 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using WpfApp1.Command;
+using WpfApp1.CustomMessageBox.Service;
 using WpfApp1.Models;
+using WpfApp1.ViewModels;
 
 namespace WpfApp1.Services
 {
@@ -98,15 +100,18 @@ namespace WpfApp1.Services
         /// <returns></returns>
         public static bool CloseCom()
         {
+            
             if (SerialPort.IsOpen)
             {
                 try
                 {
                     SerialPort.Close();
+                   
                 }
                 catch (Exception ex)
                 {
                     SerialPort.Close();
+                    
                     return false;
                 }
                 return true;
