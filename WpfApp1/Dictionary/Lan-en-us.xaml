@@ -9,10 +9,7 @@
     <s:String x:Key="异常!">Exception!</s:String>
     <s:String x:Key="启动时间">Time:</s:String>
     <s:String x:Key="自动保存数据">AutoSave</s:String>
-<<<<<<< HEAD
-=======
     <s:String x:Key="选择串口：">SerialPort:</s:String>
->>>>>>> new
     <s:String x:Key="功能选项">FunctionOptions</s:String>
     <s:String x:Key="串口设置">SerialConfig</s:String>
     <s:String x:Key="打开串口">OpenPort</s:String>

@@ -1,7 +1,8 @@
 ﻿using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
-using System.IO.Ports;
 using System.Reflection.Metadata;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,17 +25,20 @@ using WpfApp1.CustomMessageBox.Service;
 using WpfApp1.Models;
 using WpfApp1.Services;
 using WpfApp1.UserControls;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using InputType = WpfApp1.CustomMessageBox.InputType;
+
 namespace WpfApp1.ViewModels
 {
     public class MainWindowVM : BaseViewModel
     {
 
-
+        /// <summary>
+        /// 重构函数
+        /// </summary>
+        /// <param name="messageService"></param>
         public MainWindowVM(IMessageDialogService messageService)
         {
-            
-
             #region 日志界面
             // 初始化命令
             ClearLogCommand = new DelegateCommand(ClearLog);
@@ -46,14 +50,17 @@ namespace WpfApp1.ViewModels
             #endregion
 
             #region 后台线程
+            StartCommand = new RelayCommand(StartBackgroundThread);
+            StopCommand = new RelayCommand(StopBackgroundThread);
 
+            // 创建串口实例
+            _serialPortSetting = new SerialPortSettingViewModel();
             //初始化串口信息
             IniCom();
             OpenCom = new RelayCommand(openCom);
-            // 创建串口实例
-            _serialPortSetting = new SerialPortSettingViewModel();
+
             //发送帧，接收帧
-            SerialCountVM = new SerialCountVM();
+            _SerialCountVM = new SerialCountVM();
             //绑定发送接收帧计数委托
             SerialCommunicationService.AddReceiveFrame = SerialCountVM.AddReceiveFrame;
             SerialCommunicationService.AddSendFrame = SerialCountVM.AddSendFrame;
@@ -62,45 +69,45 @@ namespace WpfApp1.ViewModels
             BMS_Command_Setting = new SendingCommandSettingsViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
 
             //初始化  GB   ViewModel
-            HOP = new HOPViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HEEP1 = new HEEP1_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HEEP1_HPVINV02 = new HEEP1_HPVINV02_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HEEP2 = new HEEP2_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HGEN = new HGEN_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HGRID_GB = new HGRID_GB_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HSTS_GB = new HSTS_GB_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            SpecialCommand = new Special_Command(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HPVB_GB = new HPVB_GB_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HSTS2_HPVINV08 = new HSTS2_HPVINV08_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            hopVm = new HOPViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            hEEP1_ViewModel = new HEEP1_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HEEP1_HPVIN02 = new HEEP1_HPVINV02_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            hEEP2_ViewModel = new HEEP2_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HGEN = new HGEN_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HGRID_GB = new HGRID_GB_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HSTS_GB = new HSTS_GB_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            special_Command = new Special_Command(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HPVB_GB = new HPVB_GB_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HSTS2_HPVINV08 = new HSTS2_HPVINV08_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
 
             //初始化  VQ   ViewModel
-            HOP_VQ = new HOP_VQ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HBMS1_VQ = new HBMS1_VQ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HBAT_VQ = new HBAT_GB_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HEEP1_VQ = new HEEP1_VQ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HGRID_VQ = new HGRID_VQ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HBAT_VQ2 = new HBAT_VQ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HOP_VQ = new HOP_VQ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HBMS1_VQ = new HBMS1_VQ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HBAT_VQ = new HBAT_GB_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HEEP1_VQ = new HEEP1_VQ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HGRID_VQ = new HGRID_VQ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HBAT_VQ2 = new HBAT_VQ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
 
             //初始化  VDF ViewModel
-            HBAT_PDF = new HBAT_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HCTMSG1_PDF = new HCTMSG1_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HGRID_PDF = new HGRID_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HEEP1_PDF = new HEEP1_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HEEP3_PDF = new HEEP3_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HIMSG1 = new HIMSG1_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HOP_PDF = new HOP_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HPV_PDF = new HPV_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HTEMP_PDF = new HTEMP_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HIGSG2_PDF = new HIMSG2_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HEEP1_LB6 = new HEEP1_LB6_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            //初始化 CYJ ViewModel
-            HGRID_CYJ = new HGRID_CYJ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HEEP1_CYJ = new HEEP1_CYJ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            HSTS_CYJ = new HSTS_CYJ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            //初始化实时时间ViewModel
-            Clock = new ClockViewModel();
+            _HBAT_PDF = new HBAT_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HCTMSG1_PDF = new HCTMSG1_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HGRID_PDF = new HGRID_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HEEP1_PDF = new HEEP1_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HEEP3_PDF = new HEEP3_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HIMSG1 = new HIMSG1_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HOP_PDF = new HOP_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HPV_PDF = new HPV_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HTEMP_PDF = new HTEMP_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HIGSG2_PDF = new HIMSG2_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
 
-            //初始化BMS上位机界面
+            //初始化 CYJ ViewModel
+            _HGRID_CYJ = new HGRID_CYJ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HEEP1_CYJ = new HEEP1_CYJ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HSTS_CYJ = new HSTS_CYJ_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            //初始化实时时间ViewModel
+            _Clock = new ClockViewModel();
+            //初始化 LB6 ViewModel
+            _HEEP1_LB6 = new HEEP1_LB6_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
 
             #endregion
 
@@ -118,35 +125,23 @@ namespace WpfApp1.ViewModels
             //    BMS_VM.SOC = (BMS_VM.SOC + 10) % 110;
             //};
             //timer.Start();
-            //实时监控列表
+
+            //实时监控列表实例化
             RT_Monitor.PollingList = new ObservableCollection<PollingData>();
             //实例化数据记录列表
             DR_Monitor.CommonDataList = new ObservableCollection<Common_Data>();
-            //并联监控
-            UnionVM = new UnionMonitorVM();
+            //并联监控实例化
+            uinonVN = new UnionMonitorVM();
+
             // 初始化ComboBox的可用状态
             UpdateComboBoxEnabledState();
+
             App.ChangeLanguageWithSetting = RefleshSettingParamToLanguage;
         }
 
 
-        #region 数据记录VM
+        private SerialPortSettingViewModel _serialPortSetting;
 
-        private DataRecrodingVM _DR_Monitor = new DataRecrodingVM();
-
-        public DataRecrodingVM DR_Monitor
-        {
-            get { return _DR_Monitor; }
-            set
-            {
-                _DR_Monitor = value;
-                this.RaiseProperChanged(nameof(DR_Monitor));
-            }
-        }
-        #endregion
-
-        #region 串口下拉框设置
-        private SerialPortSettingViewModel _serialPortSetting = null!;
         public SerialPortSettingViewModel SerialPortSetting
         {
             get
@@ -178,94 +173,8 @@ namespace WpfApp1.ViewModels
         {
             IsEnableComboBox = !SerialCommunicationService.IsOpen();
         }
-        #endregion
 
         #region 小标题选项
-
-        private ObservableCollection<string> _comPorts;
-        public ObservableCollection<string> ComPorts
-        {
-            get => _comPorts;
-            set
-            {
-                _comPorts = value;
-                OnPropertyChanged(nameof(ComPorts));
-            }
-        }
-
-
-        private void OnDeviceChanged(object sender, EventArrivedEventArgs e)
-        {
-            // 调度到 UI 线程更新集合
-            Application.Current.Dispatcher.Invoke(() => UpdateComPorts());
-        }
-
-        /// <summary>
-        /// 核心函数：更新当前可用串口列表
-        /// </summary>
-        public void UpdateComPorts()
-        {
-            string[] ports = SerialPort.GetPortNames();  // 获取当前系统串口名数组
-            ComPorts.Clear();                            // 清空旧列表
-            foreach (string port in ports)
-            {
-                ComPorts.Add(port);                       // 添加新串口
-            }
-        }
-
-
-        #region 数据记录VM
-
-        private DataRecrodingVM _DR_Monitor = new DataRecrodingVM();
-
-        public DataRecrodingVM DR_Monitor
-        {
-            get { return _DR_Monitor; }
-            set
-            {
-                _DR_Monitor = value;
-                this.RaiseProperChanged(nameof(DR_Monitor));
-            }
-        }
-        #endregion
-
-        #region 串口下拉框设置
-        private SerialPortSettingViewModel _serialPortSetting;
-        public SerialPortSettingViewModel SerialPortSetting
-        {
-            get
-            {
-                return _serialPortSetting;
-            }
-            set
-            {
-                _serialPortSetting = value;
-                OnPropertyChanged(nameof(SerialPortSetting));
-            }
-        }
-
-        private bool _isEnableComboBox = true;
-        public bool IsEnableComboBox
-        {
-            get
-            {
-                return _isEnableComboBox;
-            }
-            set
-            {
-                _isEnableComboBox = value;
-                OnPropertyChanged(nameof(IsEnableComboBox));
-            }
-        }
-        //下拉框可用状态更新
-        private void UpdateComboBoxEnabledState()
-        {
-            IsEnableComboBox = !SerialCommunicationService.IsOpen();
-        }
-        #endregion
-
-        #region 电池小标题选项
-        //电池模式枚举
         public enum BatteryMode
         {
             Mode1,
@@ -276,6 +185,7 @@ namespace WpfApp1.ViewModels
             Mode6,
             Mode7
         }
+
         private BatteryMode _selectedMode = BatteryMode.Mode1;
 
         public BatteryMode SelectedMode
@@ -287,8 +197,6 @@ namespace WpfApp1.ViewModels
                 OnPropertyChanged(nameof(SelectedMode));
             }
         }
-
-
         #endregion
 
         #region BMS
@@ -307,7 +215,7 @@ namespace WpfApp1.ViewModels
         }
 
         //130-220数据项的读取、写入与显示
-        private SendingCommandSettingsViewModel BMS_Command_Setting = null!;
+        private SendingCommandSettingsViewModel BMS_Command_Setting;
 
         public SendingCommandSettingsViewModel BMS_Setting
         {
@@ -332,13 +240,23 @@ namespace WpfApp1.ViewModels
             }
         }
 
-<<<<<<< HEAD
-        private UnionMonitorVM uinonVN = null!;
+        #region 数据记录VM
 
-=======
+        private DataRecrodingVM _DR_Monitor = new DataRecrodingVM();
+
+        public DataRecrodingVM DR_Monitor
+        {
+            get { return _DR_Monitor; }
+            set
+            {
+                _DR_Monitor = value;
+                this.RaiseProperChanged(nameof(DR_Monitor));
+            }
+        }
+        #endregion
+
         private UnionMonitorVM uinonVN;
-        //并联监控VM
->>>>>>> new
+
         public UnionMonitorVM UnionVM
         {
             get { return uinonVN; }
@@ -348,12 +266,16 @@ namespace WpfApp1.ViewModels
                 this.RaiseProperChanged(nameof(UnionVM));
             }
         }
+
         //管理员权限
         private bool administration = false;
 
         public bool Administration
         {
-            get { return administration; }
+            get
+            {
+                return administration;
+            }
             set
             {
                 administration = value;
@@ -367,7 +289,6 @@ namespace WpfApp1.ViewModels
         #endregion
 
         #region 图标百分比
-
 
         //逆变总功率百分比
         private int _PercentValue;
@@ -432,7 +353,6 @@ namespace WpfApp1.ViewModels
         /// 市电功率
         /// </summary>
         private int _ACPower;
-
         public int ACPowerVM
         {
             get { return _ACPower; }
@@ -443,21 +363,19 @@ namespace WpfApp1.ViewModels
             }
         }
 
-
-
         /// <summary>
         /// 把数字字符串转换成整数
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        private int StringToIntConversion(string? str)
+        private int StringToIntConversion(string str)
         {
-            if (string.IsNullOrEmpty(str))
+            if (str == null)
             {
                 return 0;
             }
             //这是专门应对市电功率的情况
-            string tag = str.Length > 0 ? str.Substring(0, 1) : string.Empty;
+            string tag = str.Substring(0, 1);
             if (tag == "-")
             {
                 str = str.Substring(1);
@@ -485,29 +403,11 @@ namespace WpfApp1.ViewModels
         /// <param name="front"></param>
         /// <param name="after"></param>
         /// <returns></returns>
-        private int CountPercent(int front, int after)
-        {
-            if (after == 0)
-            {
-                return 0;
-            }
-            else
-            {
-                return (front * 100) / after;
-            }
-        }
-
-        /// <summary>
-        /// 两数相除，返回百分比
-        /// </summary>
-        /// <param name="front"></param>
-        /// <param name="after"></param>
-        /// <returns></returns>
-        private int CountPercent(string? front, string? after)
+        private int CountPercent(string front, string after)
         {
             int newFront = StringToIntConversion(front);
             int newAfter = StringToIntConversion(after);
-            if (newAfter <= 0)
+            if (newAfter <= 0 || newAfter <= 0)
             {
                 return 0;
             }
@@ -570,8 +470,6 @@ namespace WpfApp1.ViewModels
             }
         }
 
-
-
         #endregion
 
         #region 下拉框选择机器类型
@@ -587,9 +485,9 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        public BMS_UserControl BMS02 { get; set; } = null!;
-        public BMS01_UserControl BMS01 { get; set; } = null!;
-        public BMS03_UserControl BMS03 { get; set; } = null!;
+        public BMS_UserControl BMS02 { get; set; }
+        public BMS01_UserControl BMS01 { get; set; }
+        public BMS03_UserControl BMS03 { get; set; }
         public ObservableCollection<string> MachineItems { get; } = new(){
         "HPVINV02",
         "HPVINV04",
@@ -678,7 +576,6 @@ namespace WpfApp1.ViewModels
                     SelectedMachineItem = "BMS03";
                     break;
             }
-
         }
 
         /// <summary>
@@ -817,6 +714,10 @@ namespace WpfApp1.ViewModels
                 else if ((receive_MachineType.Substring(0, 9) == "(BMS00003"))
                 {
                     SwitchViewToVQorGB("BMS03");
+                    //默认设置抗干扰模式
+                    //IsChecked = true;
+                    //OnceOpenCRC = true;
+                    //SerialCommunicationService.OpenReceiveCRC(true);
                     //返回机器类型
                     machine = receive_MachineType;
                     return true;
@@ -827,8 +728,6 @@ namespace WpfApp1.ViewModels
                     machine = receive_MachineType;
                     return false;
                 }
-
-
             }
             else
             {
@@ -842,7 +741,7 @@ namespace WpfApp1.ViewModels
         /// <summary>
         /// 实时时间
         /// </summary>
-        private ClockViewModel _Clock = null!;
+        private ClockViewModel _Clock;
 
         public ClockViewModel Clock
         {
@@ -857,7 +756,7 @@ namespace WpfApp1.ViewModels
 
         #region GB指令ViewModel
 
-        private HOPViewModel hopVm = null!;
+        private HOPViewModel hopVm;
         public HOPViewModel HOP
         {
             get { return hopVm; }
@@ -868,7 +767,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        private HEEP1_ViewModel hEEP1_ViewModel = null!;
+        private HEEP1_ViewModel hEEP1_ViewModel;
 
         public HEEP1_ViewModel HEEP1
         {
@@ -880,8 +779,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        private HEEP1_HPVINV02_ViewModel _HEEP1_HPVIN02 = null!;
-
+        private HEEP1_HPVINV02_ViewModel _HEEP1_HPVIN02;
         public HEEP1_HPVINV02_ViewModel HEEP1_HPVINV02
         {
             get { return _HEEP1_HPVIN02; }
@@ -892,9 +790,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
-
-
-        private HEEP2_ViewModel hEEP2_ViewModel = null!;
+        private HEEP2_ViewModel hEEP2_ViewModel;
 
         public HEEP2_ViewModel HEEP2
         {
@@ -906,7 +802,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        private HGEN_ViewModel _HGEN = null!;
+        private HGEN_ViewModel _HGEN;
 
         public HGEN_ViewModel HGEN
         {
@@ -915,7 +811,7 @@ namespace WpfApp1.ViewModels
         }
 
 
-        private Special_Command special_Command = null!;
+        private Special_Command special_Command;
 
         public Special_Command SpecialCommand
         {
@@ -927,7 +823,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        private HGRID_GB_ViewModel _HGRID_GB = null!;
+        private HGRID_GB_ViewModel _HGRID_GB;
 
         public HGRID_GB_ViewModel HGRID_GB
         {
@@ -939,7 +835,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        private HSTS_GB_ViewModel _HSTS_GB = null!;
+        private HSTS_GB_ViewModel _HSTS_GB;
 
         public HSTS_GB_ViewModel HSTS_GB
         {
@@ -951,7 +847,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        private HPVB_GB_ViewModel _HPVB_GB = null!;
+        private HPVB_GB_ViewModel _HPVB_GB;
 
         public HPVB_GB_ViewModel HPVB_GB
         {
@@ -963,7 +859,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        private HSTS2_HPVINV08_ViewModel _HSTS2_HPVINV08 = null!;
+        private HSTS2_HPVINV08_ViewModel _HSTS2_HPVINV08;
 
         public HSTS2_HPVINV08_ViewModel HSTS2_HPVINV08
         {
@@ -974,14 +870,11 @@ namespace WpfApp1.ViewModels
                 this.RaiseProperChanged(nameof(HSTS2_HPVINV08));
             }
         }
-
-
         #endregion
 
         #region VQ指令ViewModel
-
         //HOP
-        private HOP_VQ_ViewModel _HOP_VQ = null!;
+        private HOP_VQ_ViewModel _HOP_VQ;
 
         public HOP_VQ_ViewModel HOP_VQ
         {
@@ -994,7 +887,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HBMS1
-        private HBMS1_VQ_ViewModel _HBMS1_VQ = null!;
+        private HBMS1_VQ_ViewModel _HBMS1_VQ;
 
         public HBMS1_VQ_ViewModel HBMS1_VQ
         {
@@ -1007,7 +900,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HBAT，适用GB
-        private HBAT_GB_ViewModel _HBAT_VQ = null!;
+        private HBAT_GB_ViewModel _HBAT_VQ;
 
         public HBAT_GB_ViewModel HBAT_VQ
         {
@@ -1020,7 +913,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HBAT,适用VQ
-        private HBAT_VQ_ViewModel _HBAT_VQ2 = null!;
+        private HBAT_VQ_ViewModel _HBAT_VQ2;
 
         public HBAT_VQ_ViewModel HBAT_VQ2
         {
@@ -1033,7 +926,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HEEP1
-        private HEEP1_VQ_ViewModel _HEEP1_VQ = null!;
+        private HEEP1_VQ_ViewModel _HEEP1_VQ;
 
         public HEEP1_VQ_ViewModel HEEP1_VQ
         {
@@ -1046,8 +939,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HGRID
-        private HGRID_VQ_ViewModel _HGRID_VQ = null!;
-
+        private HGRID_VQ_ViewModel _HGRID_VQ;
         public HGRID_VQ_ViewModel HGRID_VQ
         {
             get { return _HGRID_VQ; }
@@ -1057,17 +949,12 @@ namespace WpfApp1.ViewModels
                 this.RaiseProperChanged(nameof(HGRID_VQ));
             }
         }
-
-
-
-
         #endregion
 
         #region VDF指令ViewModel
 
-
         //HIMSG2
-        private HIMSG2_PDF_ViewModel _HIGSG2_PDF = null!;
+        private HIMSG2_PDF_ViewModel _HIGSG2_PDF;
 
         public HIMSG2_PDF_ViewModel HIGSG2_PDF
         {
@@ -1075,9 +962,8 @@ namespace WpfApp1.ViewModels
             set { _HIGSG2_PDF = value; }
         }
 
-
         //HGRID
-        private HGRID_PDF_ViewModel _HGRID_PDF = null!;
+        private HGRID_PDF_ViewModel _HGRID_PDF;
         public HGRID_PDF_ViewModel HGRID_PDF
         {
             get
@@ -1091,7 +977,7 @@ namespace WpfApp1.ViewModels
             }
         }
         //HOP
-        private HOP_PDF_ViewModel _HOP_PDF = null!;
+        private HOP_PDF_ViewModel _HOP_PDF;
 
         public HOP_PDF_ViewModel HOP_PDF
         {
@@ -1104,7 +990,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HBAT
-        private HBAT_PDF_ViewModel _HBAT_PDF = null!;
+        private HBAT_PDF_ViewModel _HBAT_PDF;
 
         public HBAT_PDF_ViewModel HBAT_PDF
         {
@@ -1117,7 +1003,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HIMSG1
-        private HIMSG1_PDF_ViewModel _HIMSG1 = null!;
+        private HIMSG1_PDF_ViewModel _HIMSG1;
 
         public HIMSG1_PDF_ViewModel HIMSG1
         {
@@ -1130,7 +1016,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HPV
-        private HPV_PDF_ViewModel _HPV_PDF = null!;
+        private HPV_PDF_ViewModel _HPV_PDF;
 
         public HPV_PDF_ViewModel HPV_PDF
         {
@@ -1143,8 +1029,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HTEMP
-        private HTEMP_PDF_ViewModel _HTEMP_PDF = null!;
-
+        private HTEMP_PDF_ViewModel _HTEMP_PDF;
         public HTEMP_PDF_ViewModel HTEMP_PDF
         {
             get { return _HTEMP_PDF; }
@@ -1156,7 +1041,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HCTMSG1
-        private HCTMSG1_PDF_ViewModel _HCTMSG1_PDF = null!;
+        private HCTMSG1_PDF_ViewModel _HCTMSG1_PDF;
 
         public HCTMSG1_PDF_ViewModel HCTMSG1_PDF
         {
@@ -1169,7 +1054,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HEEP3
-        private HEEP3_PDF_ViewModel _HEEP3_PDF = null!;
+        private HEEP3_PDF_ViewModel _HEEP3_PDF;
 
         public HEEP3_PDF_ViewModel HEEP3_PDF
         {
@@ -1182,7 +1067,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HEEP1
-        private HEEP1_PDF_ViewModel _HEEP1_PDF = null!;
+        private HEEP1_PDF_ViewModel _HEEP1_PDF;
 
         public HEEP1_PDF_ViewModel HEEP1_PDF
         {
@@ -1199,7 +1084,7 @@ namespace WpfApp1.ViewModels
         #region CYJ指令ViewModel
 
         //HGRID
-        private HGRID_CYJ_ViewModel _HGRID_CYJ = null!;
+        private HGRID_CYJ_ViewModel _HGRID_CYJ;
 
         public HGRID_CYJ_ViewModel HGRID_CYJ
         {
@@ -1212,7 +1097,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HEEP1
-        private HEEP1_CYJ_ViewModel _HEEP1_CYJ = null!;
+        private HEEP1_CYJ_ViewModel _HEEP1_CYJ;
 
         public HEEP1_CYJ_ViewModel HEEP1_CYJ
         {
@@ -1225,7 +1110,7 @@ namespace WpfApp1.ViewModels
         }
 
         //HSTS
-        private HSTS_CYJ_ViewModel _HSTS_CYJ = null!;
+        private HSTS_CYJ_ViewModel _HSTS_CYJ;
 
         public HSTS_CYJ_ViewModel HSTS_CYJ
         {
@@ -1237,17 +1122,13 @@ namespace WpfApp1.ViewModels
             }
         }
 
-
-
-
         #endregion
 
         #region LB6指令ViewModel
-
         /// <summary>
         /// HEEP1
         /// </summary>
-        private HEEP1_LB6_ViewModel _HEEP1_LB6 = null!;
+        private HEEP1_LB6_ViewModel _HEEP1_LB6;
 
         public HEEP1_LB6_ViewModel HEEP1_LB6
         {
@@ -1259,26 +1140,47 @@ namespace WpfApp1.ViewModels
             }
         }
 
-
         #endregion
 
         #region 串口工具
 
         //串口实体类
-        private SerialPortSettings serialPortSettings = null!;
+        //   private SerialPortSettings serialPortSettings;
 
         /// <summary>
         /// 初始化串口工具
         /// </summary>
         private void IniCom()
         {
-            //加载串口配置文件
-            serialPortSettings = LoadCom();
-         
-            //初始化串口通讯工具
-            SerialCommunicationService.InitiateCom(serialPortSettings);
+            // 直接从 SerialPortSetting 获取设置
+            var settings = SerialPortSetting.GetCurrentSettings();
+
+            // 初始化串口通讯工具
+            SerialCommunicationService.InitiateCom(settings);
         }
-        
+
+        /// <summary>
+        /// 重新配置串口参数 - 应用最新的设置
+        /// 当用户通过下拉框选择了新串口后，调用此方法更新配置
+        /// </summary>
+        private void ReconfigureSerialPort()
+        {
+            try
+            {
+                // 获取到最新值
+                var settings = SerialPortSetting.GetCurrentSettings();
+
+                // 重新初始化串口
+                SerialCommunicationService.InitiateCom(settings);
+
+                AddLog($"串口参数已更新: {settings.PortName}, {settings.BaudRate}bps");
+            }
+            catch (Exception ex)
+            {
+                AddLog($"更新串口参数失败: {ex.Message}");
+            }
+        }
+
         #region 串口图标
         //串口打开图标
         private Visibility _ComIconOpen = Visibility.Visible;
@@ -1330,67 +1232,12 @@ namespace WpfApp1.ViewModels
         #endregion
 
         /// <summary>
-        /// 重新配置串口参数 - 应用最新的设置
-        /// 当用户通过下拉框选择了新串口后，调用此方法更新配置
-        /// </summary>
-        private void ReconfigureSerialPort()
-        {
-            try
-            {
-                // 获取到最新值
-                var settings = SerialPortSetting.GetCurrentSettings();
-
-                // 重新初始化串口
-                SerialCommunicationService.InitiateCom(settings);
-<<<<<<< HEAD
-
-=======
-                
->>>>>>> new
-                AddLog($"串口参数已更新: {settings.PortName}, {settings.BaudRate}bps");
-            }
-            catch (Exception ex)
-            {
-                AddLog($"更新串口参数失败: {ex.Message}");
-            }
-        }
-
-
-        /// <summary>
-        /// 从文件加载串口通讯信息
-        /// </summary>
-        /// <returns></returns>
-        private SerialPortSettings LoadCom()
-        {
-            try
-            {
-                if (File.Exists("serialSettings.xml"))
-                {
-                    var serializer = new XmlSerializer(typeof(SerialPortSettings));
-                    using (var reader = new StreamReader("serialSettings.xml"))
-                    {
-                        var obj = serializer.Deserialize(reader) as SerialPortSettings;
-                        if (obj != null)
-                            return obj;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"加载设置时出错: {ex.Message}");
-            }
-            return new SerialPortSettings();
-        }
-
-
-        /// <summary>
         /// 打开串口(已打开则关闭串口)
         /// </summary>
         public async void openCom()
         {
-            if (SerialCommunicationService.IsOpen())
+            if (SerialCommunicationService.IsOpen())//判断串口是否已打开
             {
-
                 try
                 {
                     AddLog("准备关闭通信");
@@ -1405,19 +1252,18 @@ namespace WpfApp1.ViewModels
                             Task.Delay(30).Wait();
                         }
                     });
-                    //等待后台通讯停止
+                    //等待后台通讯停止（1s）
                     await Task.WhenAny(WaitFinish, Task.Delay(1000));
                     //关闭串口
                     SerialCommunicationService.CloseCom();
                     AddLog("串口已关闭");
 
                     ChangeComIcon(false);
-
                     UpdateState(App.GetText("串口已关闭"));
                     comStateColor(false);
                     AddLog($"关闭串口{SerialCommunicationService.getComName()}成功");
                     //更新combobox状态
-                    UpdateComboBoxEnabledState();   
+                    UpdateComboBoxEnabledState();
                 }
                 catch (Exception)
                 {
@@ -1432,16 +1278,20 @@ namespace WpfApp1.ViewModels
             }
             else
             {
-                
+                // 先重新配置串口参数（确保使用最新的设置）
                 ReconfigureSerialPort();
+
+                // 尝试打开串口
                 if (!SerialCommunicationService.OpenCom())
                 {
                     MessageBox.Show("串口打开失败！");
                     return;
-                };
+                }
+                ;
                 ChangeComIcon(true);
                 comStateColor(true);
                 AddLog($"打开串口{SerialCommunicationService.getComName()}成功");
+
                 string machine;
                 //自动识别机器
                 if (!AutoSelectedMachineType(out machine))
@@ -1467,15 +1317,13 @@ namespace WpfApp1.ViewModels
 
         }
 
-
-
         #endregion
 
         #region 信息显示窗口
         /// <summary>
         /// 内容窗口
         /// </summary>
-        private UserControl contentUC = null!;
+        private UserControl contentUC;
         public UserControl ContentUC
         {
             get
@@ -1492,9 +1340,9 @@ namespace WpfApp1.ViewModels
         /// <summary>
         /// 机器类型
         /// </summary>
-        private string _MachineType = string.Empty;
+        private string? _MachineType;
 
-        public string MachineType
+        public string? MachineType
         {
             get { return _MachineType; }
             set
@@ -1519,7 +1367,6 @@ namespace WpfApp1.ViewModels
                 this.RaiseProperChanged(nameof(MachineModel));
             }
         }
-
 
         #endregion
 
@@ -1666,8 +1513,7 @@ namespace WpfApp1.ViewModels
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1); // 异步竞争
 
         //帧计数
-        private SerialCountVM _SerialCountVM = null!;
-
+        private SerialCountVM _SerialCountVM;
         public SerialCountVM SerialCountVM
         {
             get { return _SerialCountVM; }
@@ -1762,7 +1608,7 @@ namespace WpfApp1.ViewModels
         // 命令定义
         public ICommand StartCommand { get; }
         public ICommand StopCommand { get; }
-        public ICommand ExecuteSpecialCommand { get; }
+        //public ICommand ExecuteSpecialCommand { get; }
         public ICommand OpenCom { get; }
 
         /// <summary>
@@ -1790,7 +1636,6 @@ namespace WpfApp1.ViewModels
 
         }
 
-
         /// <summary>
         /// 后台工作线程主循环
         /// </summary>
@@ -1804,12 +1649,11 @@ namespace WpfApp1.ViewModels
                 {
                     //补丁，BMS01时单位稍作修改
                     ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings2());
-                   
                 }
                 else
                     ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings());
                 //COM通讯
-                while (!token.IsCancellationRequested)
+                while (!token.IsCancellationRequested)//检查是否请求取消
                 {
                     if (SelectedMachineItem == "HPVINV02")
                     {
@@ -1818,12 +1662,11 @@ namespace WpfApp1.ViewModels
                     }
                     else if (SelectedMachineItem == "LPVINV02")
                     {
-                        //VQ3024通讯
+                        //LPVINV02通讯
                         CommunicationWithVQ3024(token);
                     }
                     else if (SelectedMachineItem == "HPVINV07")
                     {
-
                         //PTF通讯
                         CommunicationWithPTF3024(token);
                     }
@@ -1831,23 +1674,20 @@ namespace WpfApp1.ViewModels
                     {
                         //HPVINV04通讯
                         CommunicationWithHPVINV04(token);
-
                     }
                     else if (SelectedMachineItem == "HPVINV06")
                     {
                         //GB6042通讯
                         CommunicationWithGB_HPVINV06(token);
-
                     }
                     else if (SelectedMachineItem == "HPVINV08")
                     {
                         //HPVINV08通讯
                         CommunicationWithGB_HPVINV08(token);
-
                     }
                     else if (SelectedMachineItem == "UPSCYX01")
                     {
-                        //CYJ通讯
+                        //CYJ通讯（UPSCYX01）
                         CommunicationWith_CYJ(token);
                     }
                     else if (SelectedMachineItem == "LB6")
@@ -1867,8 +1707,8 @@ namespace WpfApp1.ViewModels
                             }
                             continue;
                         }
-                        //BMS通讯
-                        CommunicationWithBMS(token);
+                        //BMS02通讯
+                        CommunicationWithBMS02(token);
                     }
                     else if (SelectedMachineItem == "BMS01")
                     {
@@ -1883,7 +1723,7 @@ namespace WpfApp1.ViewModels
                             }
                             continue;
                         }
-                        //BMS通讯
+                        //BMS01通讯
                         CommunicationWithBMS01(token);
                     }
                     else if (SelectedMachineItem == "BMS03")
@@ -1949,8 +1789,6 @@ namespace WpfApp1.ViewModels
             {
                 AddLog($"{name}CRC异常:{value}");
             }
-
-
         }
 
         #region VDF3024通讯
@@ -2167,10 +2005,6 @@ namespace WpfApp1.ViewModels
         }
         #endregion
 
-<<<<<<< HEAD
-=======
-
->>>>>>> new
         #region GB3024通讯
         /// <summary>
         /// GB3024通讯
@@ -3562,66 +3396,63 @@ namespace WpfApp1.ViewModels
         #region BMS02通讯
         int flag = 0;
         /// <summary>
-        ///  BMS02通讯
+        /// BMS02通讯
         /// </summary>
         /// <param name="token"></param>
-        private void CommunicationWithBMS(CancellationToken token)
+        private void CommunicationWithBMS02(CancellationToken token)
         {
 
-            byte[] receive;
-            short[] data;
+            byte[] receive; // 接收到的原始字节数据
+            short[] data; // 解析后的寄存器数据（16位整数数组）
+
+            // 模式1：读取BMS基本信息和状态
             if (SelectedMode == BatteryMode.Mode1)
             {
                 Thread.Sleep(200);
-                // 等待暂停或取消信号
+                // 等待暂停或取消信号（支持暂停/恢复机制）
                 _pauseEvent.Wait(token);
-                //发送查询机器指令
+                // 发送查询机器类型指令
                 string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
                 if (receive_MachineType != null && receive_MachineType.Length == 10)
-                    MachineType = receive_MachineType.Substring(1, 8);
-                //解析指令
-                SerialCommunicationService.MachineType = receive_MachineType;
+                {
+                    MachineType = receive_MachineType.Substring(1, 8);// 提取机器类型（跳过起始字节）
+                                                                      //解析指令
+                    SerialCommunicationService.MachineType = receive_MachineType;// 存储机器类型
+                }
+
 
                 //首界面设置状态显示
                 // 等待暂停或取消信号
                 _pauseEvent.Wait(token);
+
                 //读写入的参数设置值(充电MOS、放电MOS、关机、休眠)
                 Thread.Sleep(200);
+                // 构建读取指令：从站地址=1, 读取寄存器120-121（强制开关和强制均衡）
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 120, 2), 9);
                 data = ModbusRTU.ParseRead03Response(receive);
                 if (data != null && data.Length >= 2)
                 {
-                    BMS_Setting.SettingStatue = ModbusRTU.GetBits(data[0]);
-                    
+                    // 将16位寄存器值转换为位数组（每个位代表一个状态标志）
+                    BMS_Setting.SettingStatue = ModbusRTU.GetBits(data[0]);// 设置状态
+                    BMS_Setting.JunHen = ModbusRTU.GetBits(data[1]); // 均衡状态
                 }
 
-                //首界面设置状态显示
-                // 等待暂停或取消信号
-                _pauseEvent.Wait(token);
-                //均衡模式
-                Thread.Sleep(200);
-                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame((byte)SerialCommunicationService.address, 84, 1), 7);
-                data = ModbusRTU.ParseRead03Response(receive);
-                if (data != null && data.Length == 1)
-                {
-                    BMS_Setting.JunHen = ModbusRTU.GetBits(data[0]);
-                }
-
-                // 等待暂停或取消信号
+                // 读取电芯数量和温度传感器数量
                 _pauseEvent.Wait(token);
                 Thread.Sleep(200);
+                // 读取寄存器250-251（电芯数量和NTC数量）
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 250, 2), 9);
                 //解析返回的报文
                 data = ModbusRTU.ParseRead03Response(receive);
                 if (data != null && data.Length == 2)
                 {
-                    BMS_Setting.CellNum = data[0];
-                    BMS_Setting.NtcNum = data[1];
+                    BMS_Setting.CellNum = data[0];// 电芯数量
+                    BMS_Setting.NtcNum = data[1];// 温度传感器数量
                 }
 
                 // 等待暂停或取消信号
                 _pauseEvent.Wait(token);
-                //发送03功能码(查是16个电芯的电压)
+                //读取寄存器2-17 查是16个电芯的电压
                 Thread.Sleep(200);
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 2, 16), 37);
                 //解析返回的报文
@@ -3629,12 +3460,14 @@ namespace WpfApp1.ViewModels
 
                 // 等待暂停或取消信号
                 _pauseEvent.Wait(token);
-                //查五个状态码(83)
+                //读取状态码(83)
                 Thread.Sleep(200);
+                // 读取寄存器80-84
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 80, 5), 15);
                 data = ModbusRTU.ParseRead03Response(receive);
                 if (data != null)
                 {
+                    // 第4个寄存器（索引3）为设备状态，转换为位数组
                     BMS_VM.MOD_INST_STATE_Set(ModbusRTU.GetBits(data[3]));
 
                     //查告警(80)、保护(81)、硬件错误(82)信息
@@ -3647,67 +3480,79 @@ namespace WpfApp1.ViewModels
                 _pauseEvent.Wait(token);
                 //查电压  //查当前电流 //查温度
                 Thread.Sleep(200);
+                // 读取寄存器18-35
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 18, 18), 41);
                 data = ModbusRTU.ParseRead03Response(receive);
-                BMS_VM.OverViewSet(data);
+                BMS_VM.OverViewSet(data); // 更新概览数据到ViewModel
 
                 // 等待暂停或取消信号
                 _pauseEvent.Wait(token);
                 //查系统信息
                 Thread.Sleep(200);
+                // 读取寄存器283-296
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 283, 14), 33);
                 data = ModbusRTU.ParseRead03Response(receive);
-                BMS_VM.SystemInfoSet(data);
+                BMS_VM.SystemInfoSet(data); // 更新系统信息到ViewModel
 
                 // 等待暂停或取消信号
                 _pauseEvent.Wait(token);
                 //AFE_Protect
                 Thread.Sleep(200);
+                // 读取寄存器86（AFE保护状态）
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 86, 1), 7);
                 if (receive != null && receive.Length > 1)
                 {
                     data = ModbusRTU.ParseRead03Response(receive);
                     if (data != null)
                     {
-                        BMS_VM.AFE_Protect = ModbusRTU.GetBits(data[0]);
+                        BMS_VM.AFE_Protect = ModbusRTU.GetBits(data[0]);// AFE保护状态位
                     }
                 }
 
             }
+            // 模式2：读取设置项并进行初始化设置
             else if (SelectedMode == BatteryMode.Mode2)
             {
                 // 等待暂停或取消信号
                 _pauseEvent.Wait(token);
                 //发送03功能码(查是91个设置项的电压)
                 Thread.Sleep(500);
+                // 读取112个设置项（寄存器130-241）
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 130, 112), 229);
                 ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
+
+                // 首次运行时进行初始化设置
                 if (flag == 0)
                 {
                     //发送03功能码(查是91个设置项的电压)
                     Thread.Sleep(200);
+                    // 再次读取设置项以确保数据准确
                     receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 130, 112), 229);
                     ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
                     //初始化设置值
                     ModbusRTU.FirstSetReceive(BMS_Setting.SendingCommands);
-                    flag = 1;
+                    flag = 1;// 标记已初始化
                 }
             }
+            // 模式6：读取前端芯片监控数据
             else if (SelectedMode == BatteryMode.Mode6)
             {
                 // 等待暂停或取消信号
                 _pauseEvent.Wait(token);
                 //查前端芯片
                 Thread.Sleep(500);
+                // 读取前端芯片数据（寄存器320-355，36个寄存器）
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 320, 36), 77);
                 BMS_Setting.SetFrontMonitor(ModbusRTU.ParseRead03Response(receive));
             }
+            // 模式3：读取系统设置和概览信息
             else if (SelectedMode == BatteryMode.Mode3)
             {
                 // 等待暂停或取消信号
                 _pauseEvent.Wait(token);
                 //读写入的参数设置值
                 Thread.Sleep(300);
+                // 读取系统设置（寄存器252-255，4个寄存器）
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 252, 4), 13);
                 BMS_Setting.setSystem(ModbusRTU.ParseRead03Response(receive));
 
@@ -3719,11 +3564,12 @@ namespace WpfApp1.ViewModels
                 data = ModbusRTU.ParseRead03Response(receive);
                 BMS_VM.OverViewSet(data);
             }
-            else if(SelectedMode == BatteryMode.Mode4)
+            // 模式4：仅读取电芯和温度传感器数量
+            else if (SelectedMode == BatteryMode.Mode4)
             {
                 // 等待暂停或取消信号
                 _pauseEvent.Wait(token);
-                
+
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 250, 2), 9);
                 //解析返回的报文
                 data = ModbusRTU.ParseRead03Response(receive);
@@ -3734,6 +3580,7 @@ namespace WpfApp1.ViewModels
                 }
                 Thread.Sleep(500);
             }
+            // 模式5：实时监控模式（读取数据并保存到列表和Excel）
             else if (SelectedMode == BatteryMode.Mode5)     //实时监控
             {
                 //首界面设置状态显示
@@ -3746,19 +3593,7 @@ namespace WpfApp1.ViewModels
                 if (data != null && data.Length >= 2)
                 {
                     BMS_Setting.SettingStatue = ModbusRTU.GetBits(data[0]);
-                   
-                }
-
-                //首界面设置状态显示
-                // 等待暂停或取消信号
-                _pauseEvent.Wait(token);
-                //均衡模式
-                Thread.Sleep(200);
-                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame((byte)SerialCommunicationService.address, 84, 1), 7);
-                data = ModbusRTU.ParseRead03Response(receive);
-                if (data != null && data.Length == 1)
-                {
-                    BMS_Setting.JunHen = ModbusRTU.GetBits(data[0]);
+                    BMS_Setting.JunHen = ModbusRTU.GetBits(data[1]);
                 }
 
                 // 等待暂停或取消信号
@@ -3889,48 +3724,7 @@ namespace WpfApp1.ViewModels
 
         #region BMS01通讯
         /// <summary>
-<<<<<<< HEAD
         /// BMS01通讯
-=======
-        /// 刷新用户设置参数
-        /// </summary>
-        public void RefleshSettingParam()
-        {
-            // 等待暂停或取消信号
-           
-            //发送03功能码(查是91个设置项的电压)
-            Thread.Sleep(500);
-            byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame((byte)SerialCommunicationService.address, 130, 112), 229);
-            ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
-            //初始化设置值
-            ModbusRTU.FirstSetReceive(BMS_Setting.SendingCommands);
-            
-        }
-
-        /// <summary>
-        /// 对用户参数进行对应语言的可视化
-        /// </summary>
-        public void RefleshSettingParamToLanguage(string Lan)
-        {
-           
-                if (SelectedMachineItem == "BMS01")
-                {
-                    //补丁，BMS01时单位稍作修改
-                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings2());
-                    
-                }
-                else
-                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings());
-           
-            
-        }
-
-
-
-
-        /// <summary>
-        /// BMS通讯
->>>>>>> new
         /// </summary>
         /// <param name="token"></param>
         private void CommunicationWithBMS01(CancellationToken token)
@@ -3961,21 +3755,8 @@ namespace WpfApp1.ViewModels
                 if (data != null && data.Length >= 2)
                 {
                     BMS_Setting.SettingStatue = ModbusRTU.GetBits(data[0]);
-
+                    BMS_Setting.JunHen = ModbusRTU.GetBits(data[1]);
                 }
-
-                //首界面设置状态显示
-                // 等待暂停或取消信号
-                _pauseEvent.Wait(token);
-                //均衡模式
-                Thread.Sleep(200);
-                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame((byte)SerialCommunicationService.address, 84, 1), 7);
-                data = ModbusRTU.ParseRead03Response(receive);
-                if (data != null && data.Length == 1)
-                {
-                    BMS_Setting.JunHen = ModbusRTU.GetBits(data[0]);
-                }
-
 
                 // 等待暂停或取消信号
                 _pauseEvent.Wait(token);
@@ -4123,19 +3904,7 @@ namespace WpfApp1.ViewModels
                 if (data != null && data.Length >= 2)
                 {
                     BMS_Setting.SettingStatue = ModbusRTU.GetBits(data[0]);
-
-                }
-
-                //首界面设置状态显示
-                // 等待暂停或取消信号
-                _pauseEvent.Wait(token);
-                //均衡模式
-                Thread.Sleep(200);
-                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame((byte)SerialCommunicationService.address, 184, 1), 7);
-                data = ModbusRTU.ParseRead03Response(receive);
-                if (data != null && data.Length == 1)
-                {
-                    BMS_Setting.JunHen = ModbusRTU.GetBits(data[0]);
+                    BMS_Setting.JunHen = ModbusRTU.GetBits(data[1]);
                 }
 
                 // 等待暂停或取消信号
@@ -4305,7 +4074,7 @@ namespace WpfApp1.ViewModels
 
         #region BMS03通讯
         /// <summary>
-        /// BMS03通讯
+        /// BMS01通讯
         /// </summary>
         /// <param name="token"></param>
         private void CommunicationWithBMS03(CancellationToken token)
@@ -4661,14 +4430,14 @@ namespace WpfApp1.ViewModels
         public void RefleshSettingParam()
         {
             // 等待暂停或取消信号
-           
+
             //发送03功能码(查是91个设置项的电压)
             Thread.Sleep(500);
             byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame((byte)SerialCommunicationService.address, 130, 112), 229);
             ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
             //初始化设置值
             ModbusRTU.FirstSetReceive(BMS_Setting.SendingCommands);
-            
+
         }
 
         /// <summary>
@@ -4676,17 +4445,16 @@ namespace WpfApp1.ViewModels
         /// </summary>
         public void RefleshSettingParamToLanguage(string Lan)
         {
-           
-                if (SelectedMachineItem == "BMS01")
-                {
-                    //补丁，BMS01时单位稍作修改
-                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings2());
-                    
-                }
-                else
-                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings());
-           
-            
+
+            if (SelectedMachineItem == "BMS01")
+            {
+                //补丁，BMS01时单位稍作修改
+                ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings2());
+
+            }
+            else
+                ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings());
+
         }
 
         /// <summary>
@@ -4695,7 +4463,6 @@ namespace WpfApp1.ViewModels
         private void StopBackgroundThread()
         {
             _cts.Cancel();
-            
             AddLog("后台通信停止请求已发送");
         }
         #endregion
@@ -4726,7 +4493,8 @@ namespace WpfApp1.ViewModels
             {
                 ShowAdmin = Visibility.Visible;
                 Administration = true;
-            }else if(Password == "123456")
+            }
+            else if (Password == "123456")
             {
                 Administration = true;
             }
@@ -4769,7 +4537,6 @@ namespace WpfApp1.ViewModels
             return result;
 
         }
-
 
 
         /// <summary>
@@ -4820,21 +4587,23 @@ namespace WpfApp1.ViewModels
         /// <returns></returns>
         private string MShowTestMessage(string message, string title, string error)
         {
-            string result = string.Empty;
+            string result = string.Empty; // 初始化返回结果
+            // 检查当前线程是否在UI线程上,CheckAccess() 判断当前线程是否为UI线程
             if (Application.Current.Dispatcher.CheckAccess())
             {
-                // 当前是UI线程直接调用
+                // 当前是UI线程，直接调用对话框服务显示输入框
                 result = _messageService.ShowInputDialog(
-                message,
-                title,
-                InputType.Password,
-                "管理员密码",
-                validator: input => (input == "Tqf147258"|| input == "123456"),
-                validationMessage: error,
+                message,// 提示信息
+                title,// 标题
+                InputType.Password, // 输入类型为密码
+                "管理员密码",// 输入框的默认占位文本   
+                validator: input => (input == "Tqf147258" || input == "123456"),// 验证委托
+                validationMessage: error,// 验证失败时显示的错误信息
                 fontSize: 50);
             }
             else
             {
+                // 当前不是UI线程，需要使用Dispatcher将调用封送到UI线程上执行
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
                     result = _messageService.ShowInputDialog(
@@ -4847,6 +4616,7 @@ namespace WpfApp1.ViewModels
                 fontSize: 50);
                 }));
             }
+            // 返回用户输入的密码
             return result;
         }
 
