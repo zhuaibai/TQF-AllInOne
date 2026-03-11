@@ -206,8 +206,8 @@
             </ComboBox>
             <TextBlock Text="{DynamicResource 选择串口：}" Margin=" 0,20" FontSize="15" FontFamily="楷体"></TextBlock>
             <ComboBox  MaxHeight="30"
-                ItemsSource="{Binding ComPorts}"
-                SelectedItem="{Binding SelectedPort, Mode=TwoWay}"
+                ItemsSource="{Binding SerialPortSetting.AvailablePorts}"
+                SelectedItem="{Binding SerialPortSetting.SelectedPort, Mode=TwoWay}"
                 Style="{StaticResource cmbstyle}"
                        IsEnabled="{Binding IsEnableComboBox}"></ComboBox>
         </StackPanel>
