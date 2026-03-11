@@ -25,13 +25,11 @@ using WpfApp1.Models;
 using WpfApp1.Services;
 using WpfApp1.UserControls;
 using InputType = WpfApp1.CustomMessageBox.InputType;
-using System.Management;
 namespace WpfApp1.ViewModels
 {
     public class MainWindowVM : BaseViewModel
     {
-        private ManagementEventWatcher _insertWatcher;
-        private ManagementEventWatcher _removeWatcher;
+
 
         public MainWindowVM(IMessageDialogService messageService)
         {
@@ -48,24 +46,6 @@ namespace WpfApp1.ViewModels
             #endregion
 
             #region 后台线程
-            StartCommand = new RelayCommand(StartBackgroundThread);
-            StopCommand = new RelayCommand(StopBackgroundThread);
-            ExecuteSpecialCommand = new RelayCommand(() => { });
-
-            ComPorts = new ObservableCollection<string>();
-            UpdateComPorts();  // 初始加载
-
-            // 监听设备插入事件 
-            var insertQuery = new WqlEventQuery("SELECT * FROM Win32_DeviceChangeEvent WHERE EventType = 2");
-            _insertWatcher = new ManagementEventWatcher(insertQuery);
-            _insertWatcher.EventArrived += OnDeviceChanged;
-            _insertWatcher.Start();
-
-            // 监听设备移除事件
-            var removeQuery = new WqlEventQuery("SELECT * FROM Win32_DeviceChangeEvent WHERE EventType = 3");
-            _removeWatcher = new ManagementEventWatcher(removeQuery);
-            _removeWatcher.EventArrived += OnDeviceChanged;
-            _removeWatcher.Start();
 
             //初始化串口信息
             IniCom();
@@ -149,7 +129,7 @@ namespace WpfApp1.ViewModels
             App.ChangeLanguageWithSetting = RefleshSettingParamToLanguage;
         }
 
-<<<<<<< HEAD
+
         #region 数据记录VM
 
         private DataRecrodingVM _DR_Monitor = new DataRecrodingVM();
@@ -201,7 +181,7 @@ namespace WpfApp1.ViewModels
         #endregion
 
         #region 小标题选项
-=======
+
         private ObservableCollection<string> _comPorts;
         public ObservableCollection<string> ComPorts
         {
@@ -212,7 +192,7 @@ namespace WpfApp1.ViewModels
                 OnPropertyChanged(nameof(ComPorts));
             }
         }
->>>>>>> new
+
 
         private void OnDeviceChanged(object sender, EventArrivedEventArgs e)
         {
@@ -232,6 +212,7 @@ namespace WpfApp1.ViewModels
                 ComPorts.Add(port);                       // 添加新串口
             }
         }
+
 
         #region 数据记录VM
 
