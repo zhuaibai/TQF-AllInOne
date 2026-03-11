@@ -1,5 +1,7 @@
-﻿using System.Collections.ObjectModel;
+﻿using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.IO.Ports;
 using System.Reflection.Metadata;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,7 +9,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml.Serialization;
-using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using WpfApp1.Command;
 using WpfApp1.Command.BMS;
 using WpfApp1.Command.Comand_GB3024;
@@ -24,13 +25,18 @@ using WpfApp1.Models;
 using WpfApp1.Services;
 using WpfApp1.UserControls;
 using InputType = WpfApp1.CustomMessageBox.InputType;
-
+using System.Management;
 namespace WpfApp1.ViewModels
 {
     public class MainWindowVM : BaseViewModel
     {
+        private ManagementEventWatcher _insertWatcher;
+        private ManagementEventWatcher _removeWatcher;
+
         public MainWindowVM(IMessageDialogService messageService)
         {
+            
+
             #region 日志界面
             // 初始化命令
             ClearLogCommand = new DelegateCommand(ClearLog);
@@ -46,6 +52,20 @@ namespace WpfApp1.ViewModels
             StopCommand = new RelayCommand(StopBackgroundThread);
             ExecuteSpecialCommand = new RelayCommand(() => { });
 
+            ComPorts = new ObservableCollection<string>();
+            UpdateComPorts();  // 初始加载
+
+            // 监听设备插入事件 
+            var insertQuery = new WqlEventQuery("SELECT * FROM Win32_DeviceChangeEvent WHERE EventType = 2");
+            _insertWatcher = new ManagementEventWatcher(insertQuery);
+            _insertWatcher.EventArrived += OnDeviceChanged;
+            _insertWatcher.Start();
+
+            // 监听设备移除事件
+            var removeQuery = new WqlEventQuery("SELECT * FROM Win32_DeviceChangeEvent WHERE EventType = 3");
+            _removeWatcher = new ManagementEventWatcher(removeQuery);
+            _removeWatcher.EventArrived += OnDeviceChanged;
+            _removeWatcher.Start();
 
             //初始化串口信息
             IniCom();
@@ -129,6 +149,7 @@ namespace WpfApp1.ViewModels
             App.ChangeLanguageWithSetting = RefleshSettingParamToLanguage;
         }
 
+<<<<<<< HEAD
         #region 数据记录VM
 
         private DataRecrodingVM _DR_Monitor = new DataRecrodingVM();
@@ -180,7 +201,90 @@ namespace WpfApp1.ViewModels
         #endregion
 
         #region 小标题选项
+=======
+        private ObservableCollection<string> _comPorts;
+        public ObservableCollection<string> ComPorts
+        {
+            get => _comPorts;
+            set
+            {
+                _comPorts = value;
+                OnPropertyChanged(nameof(ComPorts));
+            }
+        }
+>>>>>>> new
 
+        private void OnDeviceChanged(object sender, EventArrivedEventArgs e)
+        {
+            // 调度到 UI 线程更新集合
+            Application.Current.Dispatcher.Invoke(() => UpdateComPorts());
+        }
+
+        /// <summary>
+        /// 核心函数：更新当前可用串口列表
+        /// </summary>
+        public void UpdateComPorts()
+        {
+            string[] ports = SerialPort.GetPortNames();  // 获取当前系统串口名数组
+            ComPorts.Clear();                            // 清空旧列表
+            foreach (string port in ports)
+            {
+                ComPorts.Add(port);                       // 添加新串口
+            }
+        }
+
+        #region 数据记录VM
+
+        private DataRecrodingVM _DR_Monitor = new DataRecrodingVM();
+
+        public DataRecrodingVM DR_Monitor
+        {
+            get { return _DR_Monitor; }
+            set
+            {
+                _DR_Monitor = value;
+                this.RaiseProperChanged(nameof(DR_Monitor));
+            }
+        }
+        #endregion
+
+        #region 串口下拉框设置
+        private SerialPortSettingViewModel _serialPortSetting;
+        public SerialPortSettingViewModel SerialPortSetting
+        {
+            get
+            {
+                return _serialPortSetting;
+            }
+            set
+            {
+                _serialPortSetting = value;
+                OnPropertyChanged(nameof(SerialPortSetting));
+            }
+        }
+
+        private bool _isEnableComboBox = true;
+        public bool IsEnableComboBox
+        {
+            get
+            {
+                return _isEnableComboBox;
+            }
+            set
+            {
+                _isEnableComboBox = value;
+                OnPropertyChanged(nameof(IsEnableComboBox));
+            }
+        }
+        //下拉框可用状态更新
+        private void UpdateComboBoxEnabledState()
+        {
+            IsEnableComboBox = !SerialCommunicationService.IsOpen();
+        }
+        #endregion
+
+        #region 电池小标题选项
+        //电池模式枚举
         public enum BatteryMode
         {
             Mode1,
@@ -191,7 +295,6 @@ namespace WpfApp1.ViewModels
             Mode6,
             Mode7
         }
-
         private BatteryMode _selectedMode = BatteryMode.Mode1;
 
         public BatteryMode SelectedMode
@@ -248,8 +351,13 @@ namespace WpfApp1.ViewModels
             }
         }
 
+<<<<<<< HEAD
         private UnionMonitorVM uinonVN = null!;
 
+=======
+        private UnionMonitorVM uinonVN;
+        //并联监控VM
+>>>>>>> new
         public UnionMonitorVM UnionVM
         {
             get { return uinonVN; }
@@ -1185,6 +1293,7 @@ namespace WpfApp1.ViewModels
         {
             //加载串口配置文件
             serialPortSettings = LoadCom();
+         
             //初始化串口通讯工具
             SerialCommunicationService.InitiateCom(serialPortSettings);
         }
@@ -1252,7 +1361,11 @@ namespace WpfApp1.ViewModels
 
                 // 重新初始化串口
                 SerialCommunicationService.InitiateCom(settings);
+<<<<<<< HEAD
 
+=======
+                
+>>>>>>> new
                 AddLog($"串口参数已更新: {settings.PortName}, {settings.BaudRate}bps");
             }
             catch (Exception ex)
@@ -1826,6 +1939,7 @@ namespace WpfApp1.ViewModels
                 UpdateState(App.GetText("异常!"));
                 //关闭串口
                 SerialCommunicationService.CloseCom();
+                UpdateComboBoxEnabledState();
             }
             finally
             {
@@ -2072,6 +2186,10 @@ namespace WpfApp1.ViewModels
         }
         #endregion
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> new
         #region GB3024通讯
         /// <summary>
         /// GB3024通讯
@@ -3790,7 +3908,48 @@ namespace WpfApp1.ViewModels
 
         #region BMS01通讯
         /// <summary>
+<<<<<<< HEAD
         /// BMS01通讯
+=======
+        /// 刷新用户设置参数
+        /// </summary>
+        public void RefleshSettingParam()
+        {
+            // 等待暂停或取消信号
+           
+            //发送03功能码(查是91个设置项的电压)
+            Thread.Sleep(500);
+            byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame((byte)SerialCommunicationService.address, 130, 112), 229);
+            ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
+            //初始化设置值
+            ModbusRTU.FirstSetReceive(BMS_Setting.SendingCommands);
+            
+        }
+
+        /// <summary>
+        /// 对用户参数进行对应语言的可视化
+        /// </summary>
+        public void RefleshSettingParamToLanguage(string Lan)
+        {
+           
+                if (SelectedMachineItem == "BMS01")
+                {
+                    //补丁，BMS01时单位稍作修改
+                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings2());
+                    
+                }
+                else
+                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings());
+           
+            
+        }
+
+
+
+
+        /// <summary>
+        /// BMS通讯
+>>>>>>> new
         /// </summary>
         /// <param name="token"></param>
         private void CommunicationWithBMS01(CancellationToken token)
@@ -4555,6 +4714,7 @@ namespace WpfApp1.ViewModels
         private void StopBackgroundThread()
         {
             _cts.Cancel();
+            
             AddLog("后台通信停止请求已发送");
         }
         #endregion

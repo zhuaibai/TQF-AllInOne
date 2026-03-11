@@ -1,12 +1,20 @@
 ﻿using Microsoft.Win32;
 using OfficeOpenXml;
 using System;
+<<<<<<< HEAD
 using System.Diagnostics.CodeAnalysis;
+=======
+>>>>>>> new
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+<<<<<<< HEAD
 // removed unused usings
+=======
+using System.Text;
+using System.Threading.Tasks;
+>>>>>>> new
 using System.Windows;
 using System.Windows.Input;
 using WpfApp1.Command;
@@ -20,7 +28,11 @@ namespace WpfApp1.ViewModels
         /// <summary>
         /// 设置数据列表
         /// </summary>
+<<<<<<< HEAD
         private ObservableCollection<Common_Data> _CommonDataList = new ObservableCollection<Common_Data>();
+=======
+        private ObservableCollection<Common_Data> _CommonDataList;
+>>>>>>> new
         public ObservableCollection<Common_Data> CommonDataList
         {
             get { return _CommonDataList; }
@@ -38,6 +50,7 @@ namespace WpfApp1.ViewModels
         #endregion
 
         #region 配置类定义
+<<<<<<< HEAD
         // can be null when not saving
         public string? _savePath;
         private bool _isSaving = false;
@@ -49,25 +62,52 @@ namespace WpfApp1.ViewModels
         {
             public string DeviceName { get; set; } = string.Empty;
             public List<ColumnGroup> ColumnGroups { get; set; } = new List<ColumnGroup>();
+=======
+        public string _savePath;
+        private bool _isSaving = false;
+        private bool _isFileLock = false;
+        private int _retryCount = 0;
+        private const int MAX_RETRY_COUNT = 2;
+        // 设备Excel配置类
+        public class DeviceExcelConfig
+        {
+            public string DeviceName { get; set; }
+            public List<ColumnGroup> ColumnGroups { get; set; }
+>>>>>>> new
         }
 
         // 列分组类
         public class ColumnGroup
         {
+<<<<<<< HEAD
             public string GroupName { get; set; } = string.Empty;
             public System.Drawing.Color GroupColor { get; set; }
             public List<ColumnInfo> Columns { get; set; } = new List<ColumnInfo>();
+=======
+            public string GroupName { get; set; }
+            public System.Drawing.Color GroupColor { get; set; }
+            public List<ColumnInfo> Columns { get; set; }
+>>>>>>> new
         }
 
         // 列信息类
         public class ColumnInfo
         {
+<<<<<<< HEAD
             public string HeaderName { get; set; } = string.Empty;     // 表头名称
             public string DataProperty { get; set; } = string.Empty;   // 数据属性名
             public int ColumnWidth { get; set; } = 15;       // 列宽
             public string? Format { get; set; }         // 数据格式
 
             public ColumnInfo(string headerName, string dataProperty, int columnWidth = 15, string? format = null)
+=======
+            public string HeaderName { get; set; }     // 表头名称
+            public string DataProperty { get; set; }   // 数据属性名
+            public int ColumnWidth { get; set; }       // 列宽
+            public string Format { get; set; }         // 数据格式
+
+            public ColumnInfo(string headerName, string dataProperty, int columnWidth = 15, string format = null)
+>>>>>>> new
             {
                 HeaderName = headerName;
                 DataProperty = dataProperty;
@@ -78,8 +118,19 @@ namespace WpfApp1.ViewModels
         #endregion
 
         #region HPVINV02/06的保存命令和配置
+<<<<<<< HEAD
         private ICommand? _HPVINVSaveCommand;
         public ICommand HPVINVSaveCommand => _HPVINVSaveCommand ??= new RelayCommand(() => StartSavingWithConfig(GetHPVINVConfig()));
+=======
+        private ICommand _HPVINVSaveCommand;
+        public ICommand HPVINVSaveCommand
+        {
+            get
+            {
+                return _HPVINVSaveCommand ?? (_HPVINVSaveCommand = new RelayCommand(() => StartSavingWithConfig(GetHPVINVConfig())));
+            }
+        }
+>>>>>>> new
 
         /// <summary>
         /// 配置数据和头部
@@ -224,8 +275,19 @@ namespace WpfApp1.ViewModels
         #endregion
 
         #region HPVINV04的保存命令和配置
+<<<<<<< HEAD
         private ICommand? _HPVINV04SaveCommand;
         public ICommand HPVINV04SaveCommand => _HPVINV04SaveCommand ??= new RelayCommand(() => StartSavingWithConfig(GetHPVINV04Config()));
+=======
+        private ICommand _HPVINV04SaveCommand;
+        public ICommand HPVINV04SaveCommand
+        {
+            get
+            {
+                return _HPVINV04SaveCommand ?? (_HPVINV04SaveCommand = new RelayCommand(() => StartSavingWithConfig(GetHPVINV04Config())));
+            }
+        }
+>>>>>>> new
 
         private static DeviceExcelConfig GetHPVINV04Config()
         {
@@ -370,8 +432,19 @@ namespace WpfApp1.ViewModels
         #endregion
 
         #region HPVINV07的保存命令和配置
+<<<<<<< HEAD
         private ICommand? _HPVINV07SaveCommand;
         public ICommand HPVINV07SaveCommand => _HPVINV07SaveCommand ??= new RelayCommand(() => StartSavingWithConfig(GetHPVINV07Config()));
+=======
+        private ICommand _HPVINV07SaveCommand;
+        public ICommand HPVINV07SaveCommand
+        {
+            get
+            {
+                return _HPVINV07SaveCommand ?? (_HPVINV07SaveCommand = new RelayCommand(() => StartSavingWithConfig(GetHPVINV07Config())));
+            }
+        }
+>>>>>>> new
 
         private static DeviceExcelConfig GetHPVINV07Config()
         {
@@ -470,8 +543,19 @@ namespace WpfApp1.ViewModels
         #endregion
 
         #region HPVINV08的保存命令和配置
+<<<<<<< HEAD
         private ICommand? _HPVINV08SaveCommand;
         public ICommand HPVINV08SaveCommand => _HPVINV08SaveCommand ??= new RelayCommand(() => StartSavingWithConfig(GetHPVINV08Config()));
+=======
+        private ICommand _HPVINV08SaveCommand;
+        public ICommand HPVINV08SaveCommand
+        {
+            get
+            {
+                return _HPVINV08SaveCommand ?? (_HPVINV08SaveCommand = new RelayCommand(() => StartSavingWithConfig(GetHPVINV08Config())));
+            }
+        }
+>>>>>>> new
 
         /// <summary>
         /// 
@@ -625,8 +709,19 @@ namespace WpfApp1.ViewModels
         #endregion
 
         #region UPSCYX01的保存命令和配置
+<<<<<<< HEAD
         private ICommand? _UPSCYX01SaveCommand;
         public ICommand UPSCYX01SaveCommand => _UPSCYX01SaveCommand ??= new RelayCommand(() => StartSavingWithConfig(GetUPSCYX01Config()));
+=======
+        private ICommand _UPSCYX01SaveCommand;
+        public ICommand UPSCYX01SaveCommand
+        {
+            get
+            {
+                return _UPSCYX01SaveCommand ?? (_UPSCYX01SaveCommand = new RelayCommand(() => StartSavingWithConfig(GetUPSCYX01Config())));
+            }
+        }
+>>>>>>> new
 
         /// <summary>
         /// 
@@ -727,8 +822,19 @@ namespace WpfApp1.ViewModels
         #endregion
 
         #region LB6的保存命令和配置
+<<<<<<< HEAD
         private ICommand? _LB6SaveCommand;
         public ICommand LB6SaveCommand => _LB6SaveCommand ??= new RelayCommand(() => StartSavingWithConfig(GetLB6Config()));
+=======
+        private ICommand _LB6SaveCommand;
+        public ICommand LB6SaveCommand
+        {
+            get
+            {
+                return _LB6SaveCommand ?? (_LB6SaveCommand = new RelayCommand(() => StartSavingWithConfig(GetLB6Config())));
+            }
+        }
+>>>>>>> new
 
         /// <summary>
         /// 
@@ -832,8 +938,19 @@ namespace WpfApp1.ViewModels
         #endregion
 
         #region LPVINV02的保存命令和配置
+<<<<<<< HEAD
         private ICommand? _LPVINV02SaveCommand;
         public ICommand LPVINV02SaveCommand => _LPVINV02SaveCommand ??= new RelayCommand(() => StartSavingWithConfig(GetLPVINV02Config()));
+=======
+        private ICommand _LPVINV02SaveCommand;
+        public ICommand LPVINV02SaveCommand
+        {
+            get
+            {
+                return _LPVINV02SaveCommand ?? (_LPVINV02SaveCommand = new RelayCommand(() => StartSavingWithConfig(GetLPVINV02Config())));
+            }
+        }
+>>>>>>> new
 
         /// <summary>
         /// 
@@ -946,12 +1063,19 @@ namespace WpfApp1.ViewModels
 
         #region 通用保存方法
         // 当前设备配置
+<<<<<<< HEAD
         private DeviceExcelConfig? _currentDeviceConfig;
+=======
+        private DeviceExcelConfig _currentDeviceConfig;
+>>>>>>> new
 
         /// <summary>
         /// 开始保存
         /// </summary>
+<<<<<<< HEAD
         [MemberNotNull(nameof(_currentDeviceConfig))]
+=======
+>>>>>>> new
         private void StartSavingWithConfig(DeviceExcelConfig config)
         {
             _currentDeviceConfig = config;
@@ -959,7 +1083,11 @@ namespace WpfApp1.ViewModels
             if (_currentDeviceConfig == null)
             {
                 MessageBox.Show("设备配置错误");
+<<<<<<< HEAD
                 return ;
+=======
+                return;
+>>>>>>> new
             }
 
             // 重置状态
@@ -1014,7 +1142,11 @@ namespace WpfApp1.ViewModels
                 {
                     _isSaving = value;
                     OnPropertyChanged(nameof(IsSaving));
+<<<<<<< HEAD
                     
+=======
+
+>>>>>>> new
                     if (!_isSaving)
                     {
                         StopSaving();
@@ -1048,7 +1180,11 @@ namespace WpfApp1.ViewModels
                 return false;
             }
         }
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> new
         /// <summary>
         /// 处理文件被占用的情况
         /// </summary>
@@ -1099,8 +1235,12 @@ namespace WpfApp1.ViewModels
             int currentColumn = 1;
 
             // 创建分组表头
+<<<<<<< HEAD
             var cfg = _currentDeviceConfig!;
             foreach (var group in cfg.ColumnGroups)
+=======
+            foreach (var group in _currentDeviceConfig.ColumnGroups)
+>>>>>>> new
             {
                 int groupStartColumn = currentColumn;
                 int groupEndColumn = currentColumn + group.Columns.Count - 1;
@@ -1143,7 +1283,11 @@ namespace WpfApp1.ViewModels
             sheet.View.FreezePanes(3, 1);
 
             // 保存文件（这里可能会抛出异常，由调用者处理）
+<<<<<<< HEAD
             package.SaveAs(new FileInfo(_savePath!));
+=======
+            package.SaveAs(new FileInfo(_savePath));
+>>>>>>> new
         }
 
         /// <summary>
