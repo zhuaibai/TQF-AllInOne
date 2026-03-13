@@ -713,6 +713,7 @@ namespace WpfApp1.Command.BMS
             MOD_RES_CAP = data[15];       //剩余容量
             MOD_FULL_CAP = data[16];      //充满容量
             MOD_CYCLECNT = data[17];      //循环次数
+           
         }
 
         private int _SOC;
@@ -1137,6 +1138,8 @@ namespace WpfApp1.Command.BMS
             }
         }
 
+
+
         private int _MOD_BASIC_MSG_RESERVED1;   //36
         public int MOD_BASIC_MSG_RESERVED1
         {
@@ -1401,6 +1404,16 @@ namespace WpfApp1.Command.BMS
             }
         }
 
+        private string _MOD_BULETOOTH;          //60 蓝牙地址
+        public string MOD_BULETOOTH
+        {
+            get { return _MOD_BULETOOTH; }
+            set
+            {
+                _MOD_BULETOOTH = value;
+                this.RaiseProperChanged(nameof(MOD_BULETOOTH));
+            }
+        }
 
         /************************************ 告警量参数读取区(Read Only) **************************************/
 

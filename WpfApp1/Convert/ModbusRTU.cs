@@ -141,7 +141,7 @@ namespace WpfApp1.Convert
             List<byte> frame = new List<byte>();
 
             frame.Add(slaveAddr);                // 从站地址
-            frame.Add(0x20);                     // 功能码 03
+            frame.Add(0x20);                     // 功能码 20
             frame.Add((byte)(startAddr >> 8));   // 起始地址高字节
             frame.Add((byte)(startAddr & 0xFF)); // 起始地址低字节
             frame.Add((byte)(regCount >> 8));    // 寄存器数量高字节

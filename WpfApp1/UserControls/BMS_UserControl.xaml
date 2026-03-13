@@ -2323,6 +2323,29 @@
                                 IsEnabled="{Binding Administration}"
                                 Style="{StaticResource ActionButton}" />
 
+                            <!--  蓝牙地址  -->
+                            <TextBlock
+                                Grid.Row="8"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 蓝牙地址}" />
+                            <TextBlock
+                                Grid.Row="8"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding BMS_Setting.BuleTooth}" />
+                            <TextBox
+                                Grid.Row="8"
+                                Grid.Column="2"
+                                Style="{StaticResource InputBox}"
+                                Text="{Binding BMS_Setting.BuleTooth_Inputs, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button
+                                Grid.Row="8"
+                                Grid.Column="3"
+                                Command="{Binding BMS_Setting.Command_SetBuleTooth}"
+                                Content="{DynamicResource 设置}"
+                                IsEnabled="{Binding Administration}"
+                                Style="{StaticResource ActionButton}" />
+
                             <!--  获取超出范围数据索引  -->
                             <!--
                             <TextBlock
