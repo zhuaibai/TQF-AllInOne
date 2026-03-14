@@ -1853,7 +1853,7 @@ namespace WpfApp1.ViewModels
                     registerValues[0] = (bluetoothBytes[1] << 8) | bluetoothBytes[0];
                     registerValues[1] = (bluetoothBytes[3] << 8) | bluetoothBytes[2];
                     registerValues[2] = (bluetoothBytes[5] << 8) | bluetoothBytes[4];
-
+                    
                     byte[] receive = SerialCommunicationService.SendCommandToBMS(
                         ModbusRTU.BuildWriteMultiRegisterFrame(1, 297, registerValues), 8);
                     if (receive.Length != 8)
