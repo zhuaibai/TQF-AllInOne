@@ -3509,6 +3509,37 @@ namespace WpfApp1.ViewModels
                     }
                 }
 
+                // 等待暂停或取消信号
+                _pauseEvent.Wait(token);
+                //读写入的参数设置值
+                Thread.Sleep(300);
+                // 读取系统设置（寄存器297，3个寄存器）
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 297, 3), 11);
+                short[] registers = ModbusRTU.ParseRead03Response(receive);
+                if (registers != null && registers.Length >= 3)
+                {
+                    // 从 registers 还原为 6 字节（小端序组合）
+                    byte[] bluetoothBytes = new byte[6];
+                    bluetoothBytes[0] = (byte)(registers[0] & 0xFF);       // 寄存器297的低字节
+                    bluetoothBytes[1] = (byte)(registers[0] >> 8);         // 寄存器297的高字节
+                    bluetoothBytes[2] = (byte)(registers[1] & 0xFF);
+                    bluetoothBytes[3] = (byte)(registers[1] >> 8);
+                    bluetoothBytes[4] = (byte)(registers[2] & 0xFF);
+                    bluetoothBytes[5] = (byte)(registers[2] >> 8);
+
+                    // 格式化为 "XX:XX:XX:XX:XX:XX"
+                    string bluetoothStr = string.Format("{0:X2}:{1:X2}:{2:X2}:{3:X2}:{4:X2}:{5:X2}",
+                        bluetoothBytes[0], bluetoothBytes[1], bluetoothBytes[2],
+                        bluetoothBytes[3], bluetoothBytes[4], bluetoothBytes[5]);
+
+                    BMS_Setting.setBuletooth(bluetoothStr);
+                }
+                else
+                {
+                    // 处理读取失败，例如显示错误信息
+                    AddLog("读取蓝牙地址失败");
+                }
+
             }
             // 模式2：读取设置项并进行初始化设置
             else if (SelectedMode == BatteryMode.Mode2)

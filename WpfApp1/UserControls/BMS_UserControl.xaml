@@ -432,6 +432,17 @@
                             Grid.Column="1"
                             Style="{StaticResource ContentText}"
                             Text="{Binding BMS_VM.MOD_SP_CELLSN}" />
+                        <!--  电芯型号  -->
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="2"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource 蓝牙地址}" />
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="3"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding BMS_Setting.BuleTooth}" />
                     </Grid>
                 </GroupBox>
             </ScrollViewer>
@@ -2160,7 +2171,6 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="3*" />
                         <ColumnDefinition Width="3*" />
-
                     </Grid.ColumnDefinitions>
                     <!--  第一列  -->
                     <Border

@@ -21,6 +21,7 @@ using WpfApp1.Command.BMS;
 using WpfApp1.Convert;
 using WpfApp1.Models;
 using WpfApp1.Services;
+using System.Text.RegularExpressions;
 
 namespace WpfApp1.ViewModels
 {
@@ -1821,21 +1822,33 @@ namespace WpfApp1.ViewModels
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
-                
+
+                // 先解析蓝牙地址
+                if (!TryParseBluetoothAddress(BuleTooth_Inputs, out byte[] bluetoothBytes))
+                {
+                    // 解析失败，弹出提示框
+                    MessageBox.Show(
+                        "蓝牙地址格式不正确，应为12位十六进制数（可包含冒号或短横分隔）\n例如：00:1A:7D:DA:71:13",
+                        "输入错误",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
 
                 // 暂停后台线程
                 _pauseEvent.Reset();
                 AddLog("已暂停后台通信");
 
+                UpdateState("正在执行设置命令");
+
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(() =>
                 {
-                    //执行设置指令
-                    Thread.Sleep(2000);//没有这个延时会报错
+                    // 执行设置指令（硬件可能需要短暂延时）
+                    Thread.Sleep(2000); // 保留原延时
 
-                    byte[] bluetoothBytes = ParseBluetoothAddress(BuleTooth_Inputs); // 返回6字节
+                    // 将6字节蓝牙地址拆分为3个寄存器值（低字节在前）
                     int[] registerValues = new int[3];
                     registerValues[0] = (bluetoothBytes[1] << 8) | bluetoothBytes[0];
                     registerValues[1] = (bluetoothBytes[3] << 8) | bluetoothBytes[2];
@@ -1845,16 +1858,16 @@ namespace WpfApp1.ViewModels
                         ModbusRTU.BuildWriteMultiRegisterFrame(1, 297, registerValues), 8);
                     if (receive.Length != 8)
                     {
-
                         receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 14, 3), 8);
                         if (receive.Length == 8)
                         {
                             OutIndex = receive[5];
-                            MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                            // 注意：MessageBox 不能在后台线程直接调用，需要调度到 UI 线程
+                            Application.Current.Dispatcher.Invoke(() =>
+                                MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error));
                         }
                     }
-                })
-                , timeoutCts.Token);
+                }, timeoutCts.Token);
             }
             catch (OperationCanceledException)
             {
@@ -1865,8 +1878,8 @@ namespace WpfApp1.ViewModels
                 // 恢复后台线程
                 _pauseEvent.Set();
                 AddLog("恢复后台通信");
+
                 BuleTooth_IsWorking = false;
-                
                 // 重新启用按钮
                 Command_SetBuleTooth.RaiseCanExecuteChanged();
                 // 确保释放锁
@@ -1875,20 +1888,31 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        public byte[] ParseBluetoothAddress(string hexAddress)
+        public bool TryParseBluetoothAddress(string input, out byte[] bytes)
         {
-            // 按冒号分割，并移除空项
-            string[] parts = hexAddress.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length != 6)
-                throw new ArgumentException("蓝牙地址必须包含6个十六进制字节（以冒号分隔）");
+            bytes = null;
+            if (string.IsNullOrWhiteSpace(input))
+                return false;
 
-            byte[] bytes = new byte[6];
-            for (int i = 0; i < 6; i++)
+            string cleaned = Regex.Replace(input, @"[^0-9A-Fa-f]", "");
+            if (cleaned.Length != 12)
+                return false;
+
+            try
             {
-                // 将十六进制字符串转换为字节
-                bytes[i] = byte.Parse(parts[i].Trim(), System.Globalization.NumberStyles.HexNumber);
+                bytes = new byte[6];
+                for (int i = 0; i < 6; i++)
+                {
+                    string byteStr = cleaned.Substring(i * 2, 2);
+                    
+                    bytes[i] = byte.Parse(byteStr, System.Globalization.NumberStyles.HexNumber, null);
+                }
+                return true;
             }
-            return bytes;
+            catch
+            {
+                return false;
+            }
         }
         #endregion
 
