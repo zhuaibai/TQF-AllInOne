@@ -1849,19 +1849,22 @@ namespace WpfApp1.ViewModels
                     Thread.Sleep(2000); // 保留原延时
 
                     // 将6字节蓝牙地址拆分为3个寄存器值（低字节在前）
-                    int[] registerValues = new int[3];
-                    registerValues[0] = (bluetoothBytes[1] << 8) | bluetoothBytes[0];
-                    registerValues[1] = (bluetoothBytes[3] << 8) | bluetoothBytes[2];
-                    registerValues[2] = (bluetoothBytes[5] << 8) | bluetoothBytes[4];
-                    
+                    int[] registerValues = new int[6];
+                    registerValues[0] = bluetoothBytes[0];
+                    registerValues[1] = bluetoothBytes[1];
+                    registerValues[2] = bluetoothBytes[2];
+                    registerValues[3] = bluetoothBytes[3];
+                    registerValues[4] = bluetoothBytes[4];
+                    registerValues[5] = bluetoothBytes[5];
+
                     byte[] receive = SerialCommunicationService.SendCommandToBMS(
-                        ModbusRTU.BuildWriteMultiRegisterFrame(1, 297, registerValues), 8);
+                        ModbusRTU.BuildWriteMultiRegisterFrame(1, 297, registerValues), 21);
                     if (receive.Length != 8)
                     {
-                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 14, 3), 8);
-                        if (receive.Length == 8)
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 297, 6), 21);
+                        if (receive.Length == 21)
                         {
-                            OutIndex = receive[5];
+                            OutIndex = receive[6];
                             // 注意：MessageBox 不能在后台线程直接调用，需要调度到 UI 线程
                             Application.Current.Dispatcher.Invoke(() =>
                                 MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error));
