@@ -1848,7 +1848,7 @@ namespace WpfApp1.ViewModels
                     // 执行设置指令（硬件可能需要短暂延时）
                     Thread.Sleep(2000); // 保留原延时
 
-                    // 将6字节蓝牙地址拆分为3个寄存器值（低字节在前）
+                    // 将6字节蓝牙地址拆分为6个寄存器值
                     int[] registerValues = new int[6];
                     registerValues[0] = bluetoothBytes[0];
                     registerValues[1] = bluetoothBytes[1];
@@ -1858,11 +1858,11 @@ namespace WpfApp1.ViewModels
                     registerValues[5] = bluetoothBytes[5];
 
                     byte[] receive = SerialCommunicationService.SendCommandToBMS(
-                        ModbusRTU.BuildWriteMultiRegisterFrame(1, 297, registerValues), 21);
+                        ModbusRTU.BuildWriteMultiRegisterFrame(1, 297, registerValues), 8);
                     if (receive.Length != 8)
                     {
-                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 297, 6), 21);
-                        if (receive.Length == 21)
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 297, 6), 8);
+                        if (receive.Length == 8)
                         {
                             OutIndex = receive[6];
                             // 注意：MessageBox 不能在后台线程直接调用，需要调度到 UI 线程
