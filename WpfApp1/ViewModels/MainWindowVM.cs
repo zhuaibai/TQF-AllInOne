@@ -3516,29 +3516,7 @@ namespace WpfApp1.ViewModels
                 // 读取系统设置（寄存器297，3个寄存器）
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 297, 6), 17);
                 data = ModbusRTU.ParseRead03Response(receive);
-                if (data != null && data.Length >= 6)
-                {
-                    
-                    byte[] bluetoothBytes = new byte[6];
-                    bluetoothBytes[0] = (byte)(data[5] >> 8);       // 寄存器297的低字节
-                    bluetoothBytes[1] = (byte)(data[4] >> 8);         
-                    bluetoothBytes[2] = (byte)(data[3] >> 8);
-                    bluetoothBytes[3] = (byte)(data[2] >> 8);
-                    bluetoothBytes[4] = (byte)(data[1] >> 8);
-                    bluetoothBytes[5] = (byte)(data[0] >> 8);
-
-                    // 格式化为 "XX:XX:XX:XX:XX:XX"
-                    string bluetoothStr = string.Format("{0:X2}:{1:X2}:{2:X2}:{3:X2}:{4:X2}:{5:X2}",
-                        bluetoothBytes[0], bluetoothBytes[1], bluetoothBytes[2],
-                        bluetoothBytes[3], bluetoothBytes[4], bluetoothBytes[5]);
-
-                    BMS_Setting.setBuletooth(bluetoothStr);
-                }
-                else
-                {
-                    // 处理读取失败，例如显示错误信息
-                    AddLog("读取蓝牙地址失败");
-                }
+                BMS_Setting.SetBuleTooth(data);
 
             }
             // 模式2：读取设置项并进行初始化设置
@@ -3602,29 +3580,7 @@ namespace WpfApp1.ViewModels
                 // 读取系统设置（寄存器297，3个寄存器）
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 297, 6), 17);
                 data = ModbusRTU.ParseRead03Response(receive);
-                if (data != null && data.Length >= 17)
-                {
-
-                    byte[] bluetoothBytes = new byte[6];
-                    bluetoothBytes[0] = (byte)(data[5] >> 8);       // 寄存器297的低字节
-                    bluetoothBytes[1] = (byte)(data[4] >> 8);
-                    bluetoothBytes[2] = (byte)(data[3] >> 8);
-                    bluetoothBytes[3] = (byte)(data[2] >> 8);
-                    bluetoothBytes[4] = (byte)(data[1] >> 8);
-                    bluetoothBytes[5] = (byte)(data[0] >> 8);
-
-                    // 格式化为 "XX:XX:XX:XX:XX:XX"
-                    string bluetoothStr = string.Format("{0:X2}:{1:X2}:{2:X2}:{3:X2}:{4:X2}:{5:X2}",
-                        bluetoothBytes[0], bluetoothBytes[1], bluetoothBytes[2],
-                        bluetoothBytes[3], bluetoothBytes[4], bluetoothBytes[5]);
-
-                    BMS_Setting.setBuletooth(bluetoothStr);
-                }
-                else
-                {
-                    // 处理读取失败，例如显示错误信息
-                    AddLog("读取蓝牙地址失败");
-                }
+                BMS_Setting.SetBuleTooth(data);
             }
             // 模式4：仅读取电芯和温度传感器数量
             else if (SelectedMode == BatteryMode.Mode4)

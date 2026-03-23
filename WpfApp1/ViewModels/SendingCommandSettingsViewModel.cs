@@ -552,14 +552,7 @@ namespace WpfApp1.ViewModels
             CycleCount = data[3];
             
         }
-        public void setBuletooth(string data)
-        {
-            if (data == null || data.Length < 4)
-            {
-                return;
-            }
-            BuleTooth = data;
-        }
+        
 
         //电芯数量
         private int cellNum = 16;
@@ -1791,8 +1784,43 @@ namespace WpfApp1.ViewModels
                 this.RaiseProperChanged(nameof(BuleTooth));
             }
         }
+        public void setBuletooth(string data)
+        {
+            if (data == null || data.Length < 4)
+            {
+                return;
+            }
+            BuleTooth = data;
+        }
+        public void SetBuleTooth(short[] data)
+        {
+            if (data != null && data.Length >= 6)
+            {
 
-        private bool BuleTooth_IsWorking;
+                byte[] bluetoothBytes = new byte[6];
+                bluetoothBytes[0] = (byte)(data[5] >> 8);       // 寄存器297的低字节
+                bluetoothBytes[1] = (byte)(data[4] >> 8);
+                bluetoothBytes[2] = (byte)(data[3] >> 8);
+                bluetoothBytes[3] = (byte)(data[2] >> 8);
+                bluetoothBytes[4] = (byte)(data[1] >> 8);
+                bluetoothBytes[5] = (byte)(data[0] >> 8);
+
+                // 格式化为 "XX:XX:XX:XX:XX:XX"
+                string bluetoothStr = string.Format("{0:X2}:{1:X2}:{2:X2}:{3:X2}:{4:X2}:{5:X2}",
+                    bluetoothBytes[0], bluetoothBytes[1], bluetoothBytes[2],
+                    bluetoothBytes[3], bluetoothBytes[4], bluetoothBytes[5]);
+
+                setBuletooth(bluetoothStr);
+            }
+            else
+            {
+                // 处理读取失败，例如显示错误信息
+                AddLog("读取蓝牙地址失败");
+            }
+        }
+         
+
+private bool BuleTooth_IsWorking;
         //蓝牙设置值
         private string _BuleTooth_Inputs;
 
