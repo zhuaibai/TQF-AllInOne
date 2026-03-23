@@ -3514,18 +3514,18 @@ namespace WpfApp1.ViewModels
                 //读写入的参数设置值
                 Thread.Sleep(300);
                 // 读取系统设置（寄存器297，3个寄存器）
-                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 297, 3), 11);
-                short[] registers = ModbusRTU.ParseRead03Response(receive);
-                if (registers != null && registers.Length >= 3)
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 297, 6), 17);
+                data = ModbusRTU.ParseRead03Response(receive);
+                if (data != null && data.Length >= 6)
                 {
-                    // 从 registers 还原为 6 字节（小端序组合）
+                    
                     byte[] bluetoothBytes = new byte[6];
-                    bluetoothBytes[0] = (byte)(registers[0] & 0xFF);       // 寄存器297的低字节
-                    bluetoothBytes[1] = (byte)(registers[0] >> 8);         // 寄存器297的高字节
-                    bluetoothBytes[2] = (byte)(registers[1] & 0xFF);
-                    bluetoothBytes[3] = (byte)(registers[1] >> 8);
-                    bluetoothBytes[4] = (byte)(registers[2] & 0xFF);
-                    bluetoothBytes[5] = (byte)(registers[2] >> 8);
+                    bluetoothBytes[0] = (byte)(data[5] >> 8);       // 寄存器297的低字节
+                    bluetoothBytes[1] = (byte)(data[4] >> 8);         
+                    bluetoothBytes[2] = (byte)(data[3] >> 8);
+                    bluetoothBytes[3] = (byte)(data[2] >> 8);
+                    bluetoothBytes[4] = (byte)(data[1] >> 8);
+                    bluetoothBytes[5] = (byte)(data[0] >> 8);
 
                     // 格式化为 "XX:XX:XX:XX:XX:XX"
                     string bluetoothStr = string.Format("{0:X2}:{1:X2}:{2:X2}:{3:X2}:{4:X2}:{5:X2}",
@@ -3600,18 +3600,18 @@ namespace WpfApp1.ViewModels
                 //读写入的参数设置值
                 Thread.Sleep(300);
                 // 读取系统设置（寄存器297，3个寄存器）
-                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 297, 3), 11);
-                short[] registers = ModbusRTU.ParseRead03Response(receive);
-                if (registers != null && registers.Length >= 3)
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 297, 6), 17);
+                data = ModbusRTU.ParseRead03Response(receive);
+                if (data != null && data.Length >= 17)
                 {
-                    // 从 registers 还原为 6 字节（小端序组合）
+
                     byte[] bluetoothBytes = new byte[6];
-                    bluetoothBytes[0] = (byte)(registers[0] & 0xFF);       // 寄存器297的低字节
-                    bluetoothBytes[1] = (byte)(registers[0] >> 8);         // 寄存器297的高字节
-                    bluetoothBytes[2] = (byte)(registers[1] & 0xFF);
-                    bluetoothBytes[3] = (byte)(registers[1] >> 8);
-                    bluetoothBytes[4] = (byte)(registers[2] & 0xFF);
-                    bluetoothBytes[5] = (byte)(registers[2] >> 8);
+                    bluetoothBytes[0] = (byte)(data[5] >> 8);       // 寄存器297的低字节
+                    bluetoothBytes[1] = (byte)(data[4] >> 8);
+                    bluetoothBytes[2] = (byte)(data[3] >> 8);
+                    bluetoothBytes[3] = (byte)(data[2] >> 8);
+                    bluetoothBytes[4] = (byte)(data[1] >> 8);
+                    bluetoothBytes[5] = (byte)(data[0] >> 8);
 
                     // 格式化为 "XX:XX:XX:XX:XX:XX"
                     string bluetoothStr = string.Format("{0:X2}:{1:X2}:{2:X2}:{3:X2}:{4:X2}:{5:X2}",

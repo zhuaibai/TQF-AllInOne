@@ -441,6 +441,7 @@
                         <TextBlock
                             Grid.Row="3"
                             Grid.Column="3"
+                            FontSize="11"
                             Style="{StaticResource ContentText}"
                             Text="{Binding BMS_Setting.BuleTooth}" />
                     </Grid>

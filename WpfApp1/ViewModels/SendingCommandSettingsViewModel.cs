@@ -1809,6 +1809,32 @@ namespace WpfApp1.ViewModels
 
         public RelayCommand Command_SetBuleTooth { get; }
 
+        public int[] GetBullTooth()
+        {
+            // 先解析蓝牙地址
+            if (!TryParseBluetoothAddress(BuleTooth_Inputs, out byte[] bluetoothBytes))
+            {
+                // 解析失败，弹出提示框
+                MessageBox.Show(
+                    "蓝牙地址格式不正确，应为12位十六进制数（可包含冒号或短横分隔）\n例如：00:1A:7D:DA:71:13",
+                    "输入错误",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return null;
+            }
+            ushort[] bluetoothShort = new ushort[6];
+            bluetoothShort[0] = bluetoothBytes[5];
+            bluetoothShort[1] = bluetoothBytes[4];
+            bluetoothShort[2] = bluetoothBytes[3];
+            bluetoothShort[3] = bluetoothBytes[2];
+            bluetoothShort[4] = bluetoothBytes[1];
+            bluetoothShort[5] = bluetoothBytes[0];
+
+            int[] BuleToothres = new int[] { bluetoothShort[0] << 8, bluetoothShort[1] << 8, bluetoothShort[2] << 8, bluetoothShort[3] << 8, bluetoothShort[4] << 8, bluetoothShort[5] << 8 };
+            // 将6字节蓝牙地址拆分为6个寄存器值
+            return BuleToothres;
+        }
+
         /// <summary>
         /// 点击设置
         /// </summary>
@@ -1823,18 +1849,6 @@ namespace WpfApp1.ViewModels
                 // 异步等待锁
                 await _semaphore.WaitAsync();
 
-                // 先解析蓝牙地址
-                if (!TryParseBluetoothAddress(BuleTooth_Inputs, out byte[] bluetoothBytes))
-                {
-                    // 解析失败，弹出提示框
-                    MessageBox.Show(
-                        "蓝牙地址格式不正确，应为12位十六进制数（可包含冒号或短横分隔）\n例如：00:1A:7D:DA:71:13",
-                        "输入错误",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
-                    return;
-                }
-
                 // 暂停后台线程
                 _pauseEvent.Reset();
                 AddLog("已暂停后台通信");
@@ -1848,14 +1862,9 @@ namespace WpfApp1.ViewModels
                     // 执行设置指令（硬件可能需要短暂延时）
                     Thread.Sleep(2000); // 保留原延时
 
-                    // 将6字节蓝牙地址拆分为3个寄存器值（低字节在前）
-                    int[] registerValues = new int[3];
-                    registerValues[0] = (bluetoothBytes[1] << 8) | bluetoothBytes[0];
-                    registerValues[1] = (bluetoothBytes[3] << 8) | bluetoothBytes[2];
-                    registerValues[2] = (bluetoothBytes[5] << 8) | bluetoothBytes[4];
-
+                   
                     byte[] receive = SerialCommunicationService.SendCommandToBMS(
-                        ModbusRTU.BuildWriteMultiRegisterFrame(1, 297, registerValues), 8);
+                        ModbusRTU.BuildWriteMultiRegisterFrame(1, 297, GetBullTooth()), 8);
                     if (receive.Length != 8)
                     {
                         receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 14, 3), 8);
