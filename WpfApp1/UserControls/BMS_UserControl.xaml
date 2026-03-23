@@ -2343,7 +2343,8 @@
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding BMS_Setting.BuleTooth}" />
-                            <TextBox
+                            <!--设置值-->
+                                <TextBox
                                 Grid.Row="8"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"

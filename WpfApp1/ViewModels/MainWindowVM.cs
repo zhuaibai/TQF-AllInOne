@@ -3490,7 +3490,7 @@ namespace WpfApp1.ViewModels
                 //查系统信息
                 Thread.Sleep(200);
                 // 读取寄存器283-296
-                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 283, 14), 33);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 283, 13), 31);
                 data = ModbusRTU.ParseRead03Response(receive);
                 BMS_VM.SystemInfoSet(data); // 更新系统信息到ViewModel
 
@@ -3515,30 +3515,8 @@ namespace WpfApp1.ViewModels
                 Thread.Sleep(300);
                 // 读取系统设置（寄存器297，6个寄存器）
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 297, 6), 17);
-                short[] registers = ModbusRTU.ParseRead03Response(receive);
-                if (registers != null && registers.Length >= 3)
-                {
-                    // 从 registers 还原为 6 字节（小端序组合）
-                    byte[] bluetoothBytes = new byte[6];
-                    bluetoothBytes[0] = (byte)registers[0];       // 寄存器297
-                    bluetoothBytes[1] = (byte)registers[1];       
-                    bluetoothBytes[2] = (byte)registers[2];      
-                    bluetoothBytes[3] = (byte)registers[3];       
-                    bluetoothBytes[4] = (byte)registers[4];       
-                    bluetoothBytes[5] = (byte)registers[5];       //寄存器302
-
-                    // 格式化为 "XX:XX:XX:XX:XX:XX"
-                    string bluetoothStr = string.Format("{0:X2}:{1:X2}:{2:X2}:{3:X2}:{4:X2}:{5:X2}",
-                        bluetoothBytes[0], bluetoothBytes[1], bluetoothBytes[2],
-                        bluetoothBytes[3], bluetoothBytes[4], bluetoothBytes[5]);
-
-                    BMS_Setting.setBuletooth(bluetoothStr);
-                }
-                else
-                {
-                    // 处理读取失败，例如显示错误信息
-                    AddLog("读取蓝牙地址失败");
-                }
+                data = ModbusRTU.ParseRead03Response(receive);
+               
 
             }
             // 模式2：读取设置项并进行初始化设置
@@ -3601,30 +3579,7 @@ namespace WpfApp1.ViewModels
                 Thread.Sleep(300);
                 // 读取系统设置（寄存器297，3个寄存器）
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 297, 6), 17);
-                short[] registers = ModbusRTU.ParseRead03Response(receive);
-                if (registers != null && registers.Length >= 3)
-                {
-                    // 从 registers 还原为 6 字节（小端序组合）
-                    byte[] bluetoothBytes = new byte[6];
-                    bluetoothBytes[0] = (byte)registers[0];       // 寄存器297
-                    bluetoothBytes[1] = (byte)registers[1];
-                    bluetoothBytes[2] = (byte)registers[2];
-                    bluetoothBytes[3] = (byte)registers[3];
-                    bluetoothBytes[4] = (byte)registers[4];
-                    bluetoothBytes[5] = (byte)registers[5];
-
-                    // 格式化为 "XX:XX:XX:XX:XX:XX"
-                    string bluetoothStr = string.Format("{0:X2}:{1:X2}:{2:X2}:{3:X2}:{4:X2}:{5:X2}",
-                        bluetoothBytes[0], bluetoothBytes[1], bluetoothBytes[2],
-                        bluetoothBytes[3], bluetoothBytes[4], bluetoothBytes[5]);
-
-                    BMS_Setting.setBuletooth(bluetoothStr);
-                }
-                else
-                {
-                    // 处理读取失败，例如显示错误信息
-                    AddLog("读取蓝牙地址失败");
-                }
+              
             }
             // 模式4：仅读取电芯和温度传感器数量
             else if (SelectedMode == BatteryMode.Mode4)
@@ -3707,7 +3662,7 @@ namespace WpfApp1.ViewModels
                 _pauseEvent.Wait(token);
                 //查系统信息
                 Thread.Sleep(200);
-                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 283, 14), 33);
+                receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 283, 13), 31);
                 data = ModbusRTU.ParseRead03Response(receive);
                 BMS_VM.SystemInfoSet(data);
 
