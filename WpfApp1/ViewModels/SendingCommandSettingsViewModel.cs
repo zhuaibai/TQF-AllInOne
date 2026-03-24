@@ -1926,7 +1926,7 @@ namespace WpfApp1.ViewModels
 
                     string byteStr = cleaned.Substring(i * 2, 2);
 
-                    bytes[i] = byte.Parse(byteStr, NumberStyles.HexNumber, null);
+                    bytes[i] = byte.Parse(byteStr, NumberStyles.HexNumber);
                    
                 }
                 if (bytes.All(b => b == 0))
