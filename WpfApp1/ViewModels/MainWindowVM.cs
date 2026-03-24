@@ -3600,7 +3600,7 @@ namespace WpfApp1.ViewModels
             }
 
             // 模式5：实时监控模式（读取数据并保存到列表和Excel）
-            else if (SelectedMode == BatteryMode.Mode5)     //实时监控
+            else if (SelectedMode == BatteryMode .Mode5)     //实时监控
             {
                 //首界面设置状态显示
                 // 等待暂停或取消信号
