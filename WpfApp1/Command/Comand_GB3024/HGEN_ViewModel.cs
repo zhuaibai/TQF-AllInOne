@@ -253,7 +253,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 //总发电量
                 TotalGen = Tools.RemoveLeadingZeros(Values[5]);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ReceiveException("HGEN异常");
                 AddLog($"{command}返回数据：{value}解析异常");

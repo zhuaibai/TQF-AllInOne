@@ -987,7 +987,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 //电感功率
                 InductorPwr = Values[8].Substring(0,5);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ReceiveException("HOP异常");
                 AddLog($"{command}返回数据：{value}解析异常");

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -8,9 +9,10 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using WpfApp1.Command;
+using WpfApp1.CustomMessageBox.Service;
 using WpfApp1.Models;
+using WpfApp1.ViewModels;
 
 namespace WpfApp1.Services
 {
@@ -98,15 +100,18 @@ namespace WpfApp1.Services
         /// <returns></returns>
         public static bool CloseCom()
         {
+            
             if (SerialPort.IsOpen)
             {
                 try
                 {
                     SerialPort.Close();
+                   
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     SerialPort.Close();
+                    
                     return false;
                 }
                 return true;
@@ -131,7 +136,7 @@ namespace WpfApp1.Services
                     SerialPort.Open();
                     return true;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return false;
                 }
@@ -144,7 +149,7 @@ namespace WpfApp1.Services
                     SerialPort.Open();
                     return true;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return false;
                 }
@@ -337,6 +342,9 @@ namespace WpfApp1.Services
                         //throw new TimeoutException("No data received within timeout period");
                         return string.Empty;
                     }
+                 
+                    
+               
                     // 部分数据已收到，继续处理
                 }
 
@@ -397,7 +405,7 @@ namespace WpfApp1.Services
                 string DataBuffer = Encoding.ASCII.GetString(buffer);
                 return DataBuffer;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // 超时未
                 //MessageBox.Show("超时未收到ACK");
@@ -535,7 +543,7 @@ namespace WpfApp1.Services
                 //string DataBuffer = Encoding.ASCII.GetString(buffer);
                 return buffer;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // 超时未
                 //MessageBox.Show("超时未收到ACK");
@@ -613,7 +621,7 @@ namespace WpfApp1.Services
                 string DataBuffer = Encoding.ASCII.GetString(buffer);
                 return DataBuffer;
             }
-            catch (TimeoutException ex)
+            catch (TimeoutException)
             {
                 // 超时未
                 //MessageBox.Show("超时未收到ACK");
@@ -621,7 +629,7 @@ namespace WpfApp1.Services
                 AddReceiveFrame(totalBytesRead);
                 return string.Empty;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return string.Empty;
             }

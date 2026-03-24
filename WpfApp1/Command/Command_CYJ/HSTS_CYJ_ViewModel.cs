@@ -596,7 +596,7 @@ namespace WpfApp1.Command.Command_CYJ
 
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ReceiveException("HGRID异常");
             }

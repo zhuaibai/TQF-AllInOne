@@ -2878,7 +2878,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 //并网功能
                 GridConnectedFunction = Values[19];
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //异常
                 ReceiveException("HEEP1异常");

@@ -189,7 +189,7 @@
                 <TextBlock
                     HorizontalAlignment="Center"
                     FontSize="10"
-                    Text="抗干扰模式" />
+                    Text="{DynamicResource 抗干扰模式}" />
             </StackPanel>
             <ComboBox
                 MaxHeight="30"
@@ -204,6 +204,13 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </ComboBox>
+
+            <TextBlock Text="{DynamicResource 选择串口：}" Margin=" 0,20" FontSize="15" FontFamily="楷体"></TextBlock>
+            <ComboBox  MaxHeight="30"
+                ItemsSource="{Binding SerialPortSetting.AvailablePorts}"
+                SelectedItem="{Binding SerialPortSetting.SelectedPort, Mode=TwoWay}"
+                Style="{StaticResource cmbstyle}"
+                IsEnabled="{Binding IsEnableComboBox}"></ComboBox>
         </StackPanel>
 
         <!--  下拉菜单弹出层  -->

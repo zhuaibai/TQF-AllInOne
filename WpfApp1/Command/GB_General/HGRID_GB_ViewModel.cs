@@ -660,7 +660,7 @@ namespace WpfApp1.Command.GB_General
                 //MOS_TubeCurrent = Values[8];
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ReceiveException("HGRID异常");
             }

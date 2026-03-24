@@ -14,6 +14,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Xml.Serialization;
+using System.Globalization;
 using DocumentFormat.OpenXml.Bibliography;
 using Microsoft.Win32;
 using WpfApp1.Command;
@@ -21,6 +22,7 @@ using WpfApp1.Command.BMS;
 using WpfApp1.Convert;
 using WpfApp1.Models;
 using WpfApp1.Services;
+using System.Text.RegularExpressions;
 
 namespace WpfApp1.ViewModels
 {
@@ -285,6 +287,11 @@ namespace WpfApp1.ViewModels
                 execute: () => CycleCountOperation(),
                 canExecute: () => !string.IsNullOrEmpty(CycleCount_Inputs) && !CycleCount_IsWorking // 增加处理状态检查
             );
+            //蓝牙地址
+            Command_SetBuleTooth = new RelayCommand(
+                execute: () => BuleToothOperation(),
+                canExecute: () => !string.IsNullOrEmpty(BuleTooth_Inputs) && !BuleTooth_IsWorking // 增加处理状态检查
+            );
             //零点校准系数增加
             Command_SetZeroCalibFactorInc = new RelayCommand(
                 execute: () => ZeroCalibFactorIncOperation(),
@@ -335,9 +342,9 @@ namespace WpfApp1.ViewModels
                 execute: () => ResetSysParamsOperation(),
                 canExecute: () => !ResetSysParams_IsWorking // 增加处理状态检查
             );
-            //读取历史记录
-            HistoryReadCommand = new RelayCommand(
-                execute: () => HistoryReadOperation(),
+            //读取历史记录BMS02
+            HistoryReadCommandBMS02 = new RelayCommand(
+                execute: () => HistoryReadOperationBMS02(),
                 canExecute: () => !HistoryRead_IsWorking // 增加处理状态检查
             );
             //读取历史记录BMS01
@@ -345,6 +352,11 @@ namespace WpfApp1.ViewModels
                 execute: () => HistoryReadOperationBMS01(),
                 canExecute: () => !HistoryRead_IsWorking // 增加处理状态检查
             );
+            //读取历史记录BMS03
+            HistoryReadCommandBMS03 = new RelayCommand(
+               execute: () => HistoryReadOperationBMS03(),
+               canExecute: () => !HistoryRead_IsWorking // 增加处理状态检查
+           );
             //读取充电电流校准系数
             Command_SetChgCalibFactorRead = new RelayCommand(
                 execute: () => ChgCalibFactorReadOperation(),
@@ -381,7 +393,7 @@ namespace WpfApp1.ViewModels
               canExecute: () => !TurnOff_IsWorking // 增加处理状态检查
             );
             //限流板
-            LimitCommand  = new RelayCommand(
+            LimitCommand = new RelayCommand(
                  execute: () => LimitOperation(),
               canExecute: () => !Limit_IsWorking // 增加处理状态检查
             );
@@ -414,7 +426,7 @@ namespace WpfApp1.ViewModels
             Command_SetCellTemp1Read = new RelayCommand(
                 execute: () => CellTemp1ReadOperation(),
                 canExecute: () => !CellTemp1Read_IsWorking // 增加处理状态检查
-            ); 
+            );
             //电池组温度1 写入
             Command_SetCellTemp1Write = new RelayCommand(
                 execute: () => CellTemp1WriteOperation(),
@@ -539,7 +551,9 @@ namespace WpfApp1.ViewModels
             FullCap = data[1] / 100;
             RemainCap = data[2] / 100;
             CycleCount = data[3];
+
         }
+
 
         //电芯数量
         private int cellNum = 16;
@@ -586,7 +600,7 @@ namespace WpfApp1.ViewModels
 
         public void setSystemTime(short[] time)
         {
-            if (time!=null && time.Length == 3)
+            if (time != null && time.Length == 3)
             {
                 SystemTime = ParseDateTimeRegistersLE(time[0], time[1], time[2]);
             }
@@ -601,13 +615,13 @@ namespace WpfApp1.ViewModels
         public string ParseDateTimeRegistersLE(short reg1, short reg2, short reg3)
         {
             byte year = (byte)(reg1 & 0xFF);       // 低字节
-            byte  month = (byte)(reg1 >> 8);         // 高字节
+            byte month = (byte)(reg1 >> 8);         // 高字节
 
-            byte  day = (byte)(reg2 & 0xFF);
+            byte day = (byte)(reg2 & 0xFF);
             byte hour = (byte)(reg2 >> 8);
 
             byte minute = (byte)(reg3 & 0xFF);
-            byte  second = (byte)(reg3 >> 8);
+            byte second = (byte)(reg3 >> 8);
 
 
             return "20" + year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
@@ -801,7 +815,8 @@ namespace WpfApp1.ViewModels
                 {
                     _historyLodModels = value;
                     OnPropertyChanged(nameof(HistoryLods));
-                };
+                }
+                ;
             }
 
         }
@@ -828,24 +843,25 @@ namespace WpfApp1.ViewModels
 
         private bool HistoryRead_IsWorking;
 
-        public RelayCommand HistoryReadCommand { get; }
+        public RelayCommand HistoryReadCommandBMS02 { get; }
 
         public RelayCommand HistoryReadCommandBMS01 { get; }
 
+        public RelayCommand HistoryReadCommandBMS03 { get; }
         private bool stopReadFlag;
         private bool stopReadFlag_isWorking;
 
         /// <summary>
-        /// 点击设置
+        /// BMS02点击设置
         /// </summary>
-        private async void HistoryReadOperation()
+        private async void HistoryReadOperationBMS02()
         {
             try
             {
                 HistoryRead_IsWorking = true;
                 stopReadFlag = false;
                 // 禁用按钮
-                HistoryReadCommand.RaiseCanExecuteChanged();
+                HistoryReadCommandBMS02.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
@@ -868,7 +884,7 @@ namespace WpfApp1.ViewModels
                         short[] data = ModbusRTU.ParseRead20Response(SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 4, (ushort)i), 133));
                         if (data.Length == 64)
                         {
-                            var model = new HistoryLodModel   (data, cellNum);
+                            var model = new HistoryLodModel(data, cellNum);
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 HistoryLods.Add(model);
@@ -900,7 +916,7 @@ namespace WpfApp1.ViewModels
                 HistoryRead_IsWorking = false;
                 //Status = "就绪";
                 // 重新启用按钮
-                HistoryReadCommand.RaiseCanExecuteChanged();
+                HistoryReadCommandBMS02.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
                 stopReadFlag = true;
@@ -908,7 +924,9 @@ namespace WpfApp1.ViewModels
             }
         }
 
-
+        /// <summary>
+        /// BMS01点击设置
+        /// </summary>
         private async void HistoryReadOperationBMS01()
         {
             try
@@ -916,7 +934,7 @@ namespace WpfApp1.ViewModels
                 HistoryRead_IsWorking = true;
                 stopReadFlag = false;
                 // 禁用按钮
-                HistoryReadCommand.RaiseCanExecuteChanged();
+                HistoryReadCommandBMS01.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
@@ -939,7 +957,7 @@ namespace WpfApp1.ViewModels
                         short[] data = ModbusRTU.ParseRead20Response(SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 4, (ushort)i), 133));
                         if (data.Length == 64)
                         {
-                            var model = new HistoryLodModel(data, cellNum,1);
+                            var model = new HistoryLodModel(data, cellNum, 1);
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 HistoryLods.Add(model);
@@ -971,13 +989,87 @@ namespace WpfApp1.ViewModels
                 HistoryRead_IsWorking = false;
                 //Status = "就绪";
                 // 重新启用按钮
-                HistoryReadCommand.RaiseCanExecuteChanged();
+                HistoryReadCommandBMS01.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
                 stopReadFlag = true;
                 UpdateState("历史记录读取完成");
             }
         }
+
+        /// <summary>
+        /// BMS03点击设置
+        /// </summary>
+        private async void HistoryReadOperationBMS03()
+        {
+            try
+            {
+                HistoryRead_IsWorking = true;
+                stopReadFlag = false;
+                // 禁用按钮
+                HistoryReadCommandBMS03.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在读取历史记录");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+                HistoryLods.Clear();
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    for (int i = ReadCounts; ; i++)
+                    {
+                        //读取指令
+                        Thread.Sleep(100);//没有这个延时会报错
+                        short[] data = ModbusRTU.ParseRead20Response(SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 4, (ushort)i), 133));
+                        if (data.Length == 64)
+                        {
+                            var model = new HistoryLodModel(data, cellNum, 1, 0);
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                HistoryLods.Add(model);
+                            });
+                        }
+                        else
+                        {
+                            break;
+                        }
+                        if (stopReadFlag)
+                        {
+                            break;
+                        }
+                        //HistoryLods.Add(new HistoryLodModel(data));
+                    }
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                HistoryRead_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                HistoryReadCommandBMS03.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                stopReadFlag = true;
+                UpdateState("历史记录读取完成");
+            }
+        }
+
 
         /// <summary>
         /// 停止读取历史记录
@@ -1680,6 +1772,174 @@ namespace WpfApp1.ViewModels
             }
         }
 
+        #endregion
+
+        #region 蓝牙地址
+
+        private string _BuleTooth;
+        public string BuleTooth
+        {
+            get { return _BuleTooth; }
+            set
+            {
+                _BuleTooth = value;
+                this.RaiseProperChanged(nameof(BuleTooth));
+            }
+        }
+
+        //设置项
+        private string _BuleTooth_Inputs;
+
+        public string BuleTooth_Inputs
+        {
+            get { return _BuleTooth_Inputs; }
+            set
+            {
+                _BuleTooth_Inputs = value;
+                this.RaiseProperChanged(nameof(_BuleTooth_Inputs));
+                Command_SetBuleTooth.RaiseCanExecuteChanged();
+            }
+        }
+
+        private bool BuleTooth_IsWorking;
+        public RelayCommand Command_SetBuleTooth { get; }
+
+        /// <summary>
+        /// 读取蓝牙地址
+        /// </summary>
+        /// <param name="data"></param>
+        public void ReadBuleTooth(short[] data)
+        {
+            if (data != null && data.Length >= 6)
+            {
+
+                byte[] bluetoothBytes = new byte[6];
+                for (int i = 0; i < data.Length; i++)
+                {
+                    bluetoothBytes[i] = (byte)(data[data.Length - 1 - i] >> 8);
+                }
+
+                // 格式化为 "XX:XX:XX:XX:XX:XX"
+                string bluetoothStr = string.Format("{0:X2}:{1:X2}:{2:X2}:{3:X2}:{4:X2}:{5:X2}",
+                    bluetoothBytes[0], bluetoothBytes[1], bluetoothBytes[2],
+                    bluetoothBytes[3], bluetoothBytes[4], bluetoothBytes[5]);
+
+                BuleTooth = bluetoothStr;
+            }
+            else
+            {
+                // 处理读取失败，例如显示错误信息
+                AddLog("读取蓝牙地址失败");
+            }
+        }
+
+        /// <summary>
+        /// 点击设置
+        /// </summary>
+        private async void BuleToothOperation()
+        {
+            try
+            {
+                BuleTooth_IsWorking = true;
+                // 禁用按钮
+                Command_SetBuleTooth.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 解析蓝牙地址
+                if (!TryParseBluetoothAddress(BuleTooth_Inputs, out byte[] bluetoothBytes))
+                {
+                    // 解析失败，弹出提示框
+                    MessageBox.Show(
+                        "蓝牙地址格式不正确\n例如：00:1A:7D:DA:71:13",
+                        "输入错误",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
+
+                UpdateState("正在执行设置命令");
+
+                // 执行特殊操作
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(() =>
+                {
+                    // 执行设置指令（硬件可能需要短暂延时）
+                    Thread.Sleep(2000); // 保留原延时
+     
+                    int[] BuleToothres = new int[bluetoothBytes.Length];
+                    for (int i = 0; i < bluetoothBytes.Length; i++)
+                    {
+                        BuleToothres[i] = bluetoothBytes[bluetoothBytes.Length - 1 - i] << 8;
+                    }
+                    
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(
+                        ModbusRTU.BuildWriteMultiRegisterFrame(1, 297, BuleToothres), 8);
+                   
+                }, timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+
+                BuleTooth_IsWorking = false;
+                // 重新启用按钮
+                Command_SetBuleTooth.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+        /// <summary>
+        /// 字符转换
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        public bool TryParseBluetoothAddress(string input, out byte[] bytes)
+        {
+            bytes = null;
+
+            //去除非十六进制字符和非空判断
+            string cleaned = Regex.Replace(input, @"[^0-9A-F]", "");
+            if (cleaned.Length != 12 || string.IsNullOrWhiteSpace(input))
+                return false;
+
+            try
+            {
+                bytes = new byte[6];
+                //开始转换
+                for (int i = 0; i < 6; i++)
+                {
+
+                    string byteStr = cleaned.Substring(i * 2, 2);
+
+                    bytes[i] = byte.Parse(byteStr, NumberStyles.HexNumber, null);
+                   
+                }
+                if (bytes.All(b => b == 0))
+                {
+                    return false;
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
         #endregion
 
         #region 零点校准系数、+、-
@@ -2413,7 +2673,7 @@ namespace WpfApp1.ViewModels
 
 
         #endregion
-        
+
         #region 电池组温度系数2、+、-
         //cellTemp1
         //校准系数

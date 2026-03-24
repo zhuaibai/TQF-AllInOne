@@ -348,7 +348,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 BattDisCurrLimit = Values[6];
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ReceiveException("HEEP3异常");
                 AddLog($"{command}返回数据：{value}解析异常");

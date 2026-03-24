@@ -371,7 +371,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 //市电总功率
                 ACTotalPwr = Values[2];
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ReceiveException("HIMSG2解析异常");
                 AddLog($"{command}返回数据：{value}解析异常");

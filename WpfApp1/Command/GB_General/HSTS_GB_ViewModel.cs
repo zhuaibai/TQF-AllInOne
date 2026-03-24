@@ -16,7 +16,7 @@ namespace WpfApp1.Command.GB_General
 
         public string Command { get { return command; } }
 
-        public string MachineType;
+        public string MachineType = string.Empty;
 
         ManualResetEventSlim _pauseEvent;//线程的开启、暂停
         SemaphoreSlim _semaphore;        //异步竞争，资源锁
@@ -37,7 +37,7 @@ namespace WpfApp1.Command.GB_General
         }
 
         #region 故障代码
-        private string _FaultCode;
+        private string _FaultCode = string.Empty;
         public string FaultCode
         {
             get { return _FaultCode; }
@@ -50,7 +50,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 模式
-        private string _Mode;
+        private string _Mode = string.Empty;
         public string Mode
         {
             get { return _Mode; }
@@ -91,7 +91,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region AC状态下PV馈能到负载
-        private string _PVToLoadAC;
+        private string _PVToLoadAC = string.Empty;
         public string PVToLoadAC
         {
             get { return _PVToLoadAC; }
@@ -111,7 +111,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 机器是否有输出
-        private string _OutputStatus;
+        private string _OutputStatus = string.Empty;
         public string OutputStatus
         {
             get { return _OutputStatus; }
@@ -133,7 +133,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 电池低电报警
-        private string _BattLowAlarm;
+        private string _BattLowAlarm = string.Empty;
         public string BattLowAlarm
         {
             get { return _BattLowAlarm; }
@@ -146,7 +146,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 电池未接
-        private string _BattDisconnected;
+        private string _BattDisconnected = string.Empty;
         public string BattDisconnected
         {
             get { return _BattDisconnected; }
@@ -159,7 +159,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 输出过载
-        private string _OutputOverload;
+        private string _OutputOverload = string.Empty;
         public string OutputOverload
         {
             get { return _OutputOverload; }
@@ -172,7 +172,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 机器过温
-        private string _OverTemp;
+        private string _OverTemp = string.Empty;
         public string OverTemp
         {
             get { return _OverTemp; }
@@ -185,7 +185,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region EEPROM数据异常
-        private string _EEPROM_DataErr;
+        private string _EEPROM_DataErr = string.Empty;
         public string EEPROM_DataErr
         {
             get { return _EEPROM_DataErr; }
@@ -198,7 +198,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region EEPROM读写异常
-        private string _EEPROM_IOErr;
+        private string _EEPROM_IOErr = string.Empty;
         public string EEPROM_IOErr
         {
             get { return _EEPROM_IOErr; }
@@ -211,7 +211,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region PV功率过低异常
-        private string _PVLowPwrFault;
+        private string _PVLowPwrFault = string.Empty;
         public string PVLowPwrFault
         {
             get { return _PVLowPwrFault; }
@@ -224,7 +224,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 输入电压过高
-        private string _InputOV;
+        private string _InputOV = string.Empty;
         public string InputOV
         {
             get { return _InputOV; }
@@ -237,7 +237,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 电池电压过高
-        private string _BattOV;
+        private string _BattOV = string.Empty;
         public string BattOV
         {
             get { return _BattOV; }
@@ -250,7 +250,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 风扇转速异常
-        private string _FanSpeedFault;
+        private string _FanSpeedFault = string.Empty;
         public string FanSpeedFault
         {
             get { return _FanSpeedFault; }
@@ -263,7 +263,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 并机系统里机器的总数
-        private string _ParallelUnits;
+        private string _ParallelUnits = string.Empty;
         public string ParallelUnits
         {
             get { return _ParallelUnits; }
@@ -276,7 +276,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 并网标志
-        private string _GridTieFlag;
+        private string _GridTieFlag = string.Empty;
         public string GridTieFlag
         {
             get { return _GridTieFlag; }
@@ -299,7 +299,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 并机系统中角色
-        private string _ParallelRole;
+        private string _ParallelRole = string.Empty;
         public string ParallelRole
         {
             get { return _ParallelRole; }
@@ -312,7 +312,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 主输出继电器状态
-        private string _MainRelayStat;
+        private string _MainRelayStat = string.Empty;
         public string MainRelayStat
         {
             get { return _MainRelayStat; }
@@ -334,7 +334,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 第二输出当前状态
-        private string _SecOutStat;
+        private string _SecOutStat = string.Empty;
         public string SecOutStat
         {
             get { return _SecOutStat; }
@@ -354,7 +354,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region BMS通讯异常
-        private string _BMS_ComFault;
+        private string _BMS_ComFault = string.Empty;
         public string BMS_ComFault
         {
             get { return _BMS_ComFault; }
@@ -367,7 +367,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 温度传感器异常
-        private string _TempSensorFault;
+        private string _TempSensorFault = string.Empty;
         public string TempSensorFault
         {
             get { return _TempSensorFault; }
@@ -380,7 +380,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 市电灯状态
-        private string _ACLED;
+        private string _ACLED = string.Empty;
         public string ACLED
         {
             get { return _ACLED; }
@@ -393,7 +393,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 逆变灯状态
-        private string _InvLED;
+        private string _InvLED = string.Empty;
         public string InvLED
         {
             get { return _InvLED; }
@@ -406,7 +406,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 充电灯状态
-        private string _ChgLED;
+        private string _ChgLED = string.Empty;
         public string ChgLED
         {
             get { return _ChgLED; }
@@ -419,7 +419,7 @@ namespace WpfApp1.Command.GB_General
         #endregion
 
         #region 报警灯状态
-        private string _AlarmLED;
+        private string _AlarmLED = string.Empty;
         public string AlarmLED
         {
             get { return _AlarmLED; }
@@ -589,7 +589,7 @@ namespace WpfApp1.Command.GB_General
 
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ReceiveException("HGRID异常");
             }

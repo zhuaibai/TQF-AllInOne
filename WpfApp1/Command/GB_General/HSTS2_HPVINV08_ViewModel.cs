@@ -306,7 +306,7 @@ namespace WpfApp1.Command.GB_General
                 PLLStatus = Values[2].Substring(4, 1);
                 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //异常
                 ReceiveException("HEEP1_EX");

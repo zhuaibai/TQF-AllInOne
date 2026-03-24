@@ -3402,7 +3402,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 //并网功能
                 GridConnectedFunction = Values[18].Substring(0,1);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //异常
                 ReceiveException("HEEP1异常");

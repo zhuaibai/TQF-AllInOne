@@ -103,7 +103,7 @@ namespace WpfApp1.Command.GB_General
                 PV2Pwr = Tools.RemoveLeadingZeros(Values[2]) + "W";
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ReceiveException("HPV异常");
             }

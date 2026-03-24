@@ -20,15 +20,24 @@ namespace WpfApp1.Views
     /// </summary>
     public partial class SerialPortSettingWindow : Window
     {
+
         public SerialPortSettingWindow()
         {
             InitializeComponent();
-            this.DataContext = new SerialPortSettingViewModel();
+
+        }
+
+        // 新增构造函数，接收ViewModel实例
+        public SerialPortSettingWindow(SerialPortSettingViewModel viewModel) : this()
+        {
+            this.DataContext = viewModel;
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
+
+
     }
 }
