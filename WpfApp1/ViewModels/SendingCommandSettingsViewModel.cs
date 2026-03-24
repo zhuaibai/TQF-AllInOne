@@ -552,8 +552,7 @@ namespace WpfApp1.ViewModels
             CycleCount = data[3];
             
         }
-      
-
+       
         //电芯数量
         private int cellNum = 16;
 
@@ -1777,7 +1776,7 @@ namespace WpfApp1.ViewModels
 
         public string BuleTooth
         {
-            
+           
             get { return _BuleTooth; }
             set
             {
@@ -1785,19 +1784,43 @@ namespace WpfApp1.ViewModels
                 this.RaiseProperChanged(nameof(BuleTooth));
             }
         }
-
         public void setBuletooth(string data)
         {
-            if (data == null || data.Length < 4)
+            if (data == null || data.Length < 6)
             {
                 return;
             }
             BuleTooth = data;
         }
+        public void SetBuleTooth(short[] data)
+        {
+            if (data != null && data.Length >= 6)
+            {
 
-      
+                byte[] bluetoothBytes = new byte[6];
+                bluetoothBytes[0] = (byte)(data[5] >> 8);       // 寄存器297的低字节
+                bluetoothBytes[1] = (byte)(data[4] >> 8);
+                bluetoothBytes[2] = (byte)(data[3] >> 8);
+                bluetoothBytes[3] = (byte)(data[2] >> 8);
+                bluetoothBytes[4] = (byte)(data[1] >> 8);
+                bluetoothBytes[5] = (byte)(data[0] >> 8);
 
-        private bool BuleTooth_IsWorking;
+                // 格式化为 "XX:XX:XX:XX:XX:XX"
+                string bluetoothStr = string.Format("{0:X2}:{1:X2}:{2:X2}:{3:X2}:{4:X2}:{5:X2}",
+                    bluetoothBytes[0], bluetoothBytes[1], bluetoothBytes[2],
+                    bluetoothBytes[3], bluetoothBytes[4], bluetoothBytes[5]);
+
+                setBuletooth(bluetoothStr);
+            }
+            else
+            {
+                // 处理读取失败，例如显示错误信息
+                AddLog("读取蓝牙地址失败");
+            }
+        }
+         
+
+private bool BuleTooth_IsWorking;
         //蓝牙设置值
         private string _BuleTooth_Inputs;
 
@@ -1814,37 +1837,6 @@ namespace WpfApp1.ViewModels
 
         public RelayCommand Command_SetBuleTooth { get; }
 
-      /*  public void SetBUleTooth(short[] data)
-        {
-            if (data != null && data.Length >= 3)
-            {
-                // 从 registers 还原为 6 字节（小端序组合）
-                byte[] bluetoothBytes = new byte[6];
-                bluetoothBytes[0] = (byte)data[5];       // 寄存器297
-                bluetoothBytes[1] = (byte)data[4];
-                bluetoothBytes[2] = (byte)data[3];
-                bluetoothBytes[3] = (byte)data[2];
-                bluetoothBytes[4] = (byte)data[1];
-                bluetoothBytes[5] = (byte)data[0];
-
-                // 格式化为 "XX:XX:XX:XX:XX:XX"
-                string bluetoothStr = string.Format("{0:X2}:{1:X2}:{2:X2}:{3:X2}:{4:X2}:{5:X2}",
-                    bluetoothBytes[0] >> 8, bluetoothBytes[1] << 8, bluetoothBytes[2] << 8,
-                    bluetoothBytes[3] << 8, bluetoothBytes[4] << 8, bluetoothBytes[5] << 8);
-
-                setBuletooth(bluetoothStr);
-            }
-            else
-            {
-
-                AddLog("读取蓝牙地址失败");
-            }
-        }*/
-
-        /// <summary>
-        /// 获取蓝牙地址
-        /// </summary>
-        /// <returns></returns>
         public int[] GetBullTooth()
         {
             // 先解析蓝牙地址
@@ -1866,71 +1858,13 @@ namespace WpfApp1.ViewModels
             bluetoothShort[4] = bluetoothBytes[1];
             bluetoothShort[5] = bluetoothBytes[0];
 
-             int[] BuleToothres = new int[] { bluetoothShort[0] << 8, bluetoothShort[1] << 8, bluetoothShort[2] << 8, bluetoothShort[3] << 8, bluetoothShort[4] << 8, bluetoothShort[5] << 8 };
+            int[] BuleToothres = new int[] { bluetoothShort[0] << 8, bluetoothShort[1] << 8, bluetoothShort[2] << 8, bluetoothShort[3] << 8, bluetoothShort[4] << 8, bluetoothShort[5] << 8 };
             // 将6字节蓝牙地址拆分为6个寄存器值
             return BuleToothres;
         }
 
-        /// <summary>
-        /// 点击设置
-        /// </summary>
-        //private async void BuleToothOperation()
-        //{
-        //    try
-        //    {
-        //        BuleTooth_IsWorking = true;
-        //        // 禁用按钮
-        //        Command_SetBuleTooth.RaiseCanExecuteChanged();
-
-        //        // 异步等待锁
-        //        await _semaphore.WaitAsync();
-
-        //        // 暂停后台线程
-        //        _pauseEvent.Reset();
-        //        AddLog("已暂停后台通信");
-
-        //        UpdateState("正在执行设置命令");
-
-        //        // 执行特殊操作（带超时保护）
-        //        using var timeoutCts = new CancellationTokenSource(5000);
-        //        await Task.Run(() =>
-        //        {
-        //            // 执行设置指令（硬件可能需要短暂延时）
-        //            Thread.Sleep(2000); // 保留原延时
-
-        //            byte[] receive = SerialCommunicationService.SendCommandToBMS(
-        //                ModbusRTU.BuildWriteMultiRegisterFrame(1, 297, GetBullTooth()), 8);
-        //        //    if (receive.Length != 8)
-        //        //    {
-        //        //        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 297, 6), 8);
-        //        //        if (receive.Length == 8)
-        //        //        {
-        //        //            OutIndex = receive[6];
-        //        //            // 注意：MessageBox 不能在后台线程直接调用，需要调度到 UI 线程
-        //        //            Application.Current.Dispatcher.Invoke(() =>
-        //        //                MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error));
-        //        //        }
-        //        //    }
-        //        }, timeoutCts.Token);
-        //    }
-        //    catch (OperationCanceledException)
-        //    {
-        //        AddLog("特殊操作执行超时");
-        //    }
-        //    finally
-        //    {
-        //        // 恢复后台线程
-        //        _pauseEvent.Set();
-        //        AddLog("恢复后台通信");
-
-        //        BuleTooth_IsWorking = false;
-        //        // 重新启用按钮
-        //        Command_SetBuleTooth.RaiseCanExecuteChanged();
-        //        // 确保释放锁
-        //        _semaphore.Release();
-        //        UpdateState("设置指令已经执行完");
-        //    }
-        //}
+       
+      
         private async void BuleToothOperation()
         {
             try
@@ -1944,6 +1878,7 @@ namespace WpfApp1.ViewModels
                 UpdateState("正在执行设置命令");
                 
 
+               
                 // 暂停后台线程
                 _pauseEvent.Reset();
                 AddLog("已暂停后台通信");
@@ -1952,12 +1887,24 @@ namespace WpfApp1.ViewModels
                 using var timeoutCts = new CancellationTokenSource(5000);
                 await Task.Run(new Action(() =>
                 {
-                    //执行设置指令
-                    Thread.Sleep(1000);//没有这个延时会报错
-                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteMultiRegisterFrame(1, 297, GetBullTooth()), 8);
-                    byte[] asd = receive;
-                })
-                , timeoutCts.Token);
+                    // 执行设置指令（硬件可能需要短暂延时）
+                    Thread.Sleep(2000); // 保留原延时
+
+                   
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(
+                        ModbusRTU.BuildWriteMultiRegisterFrame(1, 297, GetBullTooth()), 8);
+                    if (receive.Length != 8)
+                    {
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 14, 3), 8);
+                        if (receive.Length == 8)
+                        {
+                            OutIndex = receive[5];
+                            // 注意：MessageBox 不能在后台线程直接调用，需要调度到 UI 线程
+                            Application.Current.Dispatcher.Invoke(() =>
+                                MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error));
+                        }
+                    }
+                }, timeoutCts.Token);
             }
             catch (OperationCanceledException)
             {
