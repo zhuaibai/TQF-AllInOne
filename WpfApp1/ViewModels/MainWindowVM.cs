@@ -3516,7 +3516,7 @@ namespace WpfApp1.ViewModels
                 // 读取系统设置（寄存器297，6个寄存器）
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 297, 6), 17);
                 data = ModbusRTU.ParseRead03Response(receive);
-                BMS_Setting.SetBuleTooth(data);
+                BMS_Setting.ReadBuleTooth(data);
 
             }
             // 模式2：读取设置项并进行初始化设置
@@ -3580,7 +3580,7 @@ namespace WpfApp1.ViewModels
                 // 读取系统设置（寄存器297，6个寄存器）
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 297, 6), 17);
                 data = ModbusRTU.ParseRead03Response(receive);
-                BMS_Setting.SetBuleTooth(data);
+                BMS_Setting.ReadBuleTooth(data);
             }
             // 模式4：仅读取电芯和温度传感器数量
             else if (SelectedMode == BatteryMode.Mode4)

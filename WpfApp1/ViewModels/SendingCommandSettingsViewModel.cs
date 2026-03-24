@@ -14,6 +14,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Xml.Serialization;
+using System.Globalization;
 using DocumentFormat.OpenXml.Bibliography;
 using Microsoft.Win32;
 using WpfApp1.Command;
@@ -1774,8 +1775,8 @@ namespace WpfApp1.ViewModels
         #endregion
 
         #region 蓝牙地址
-        private string _BuleTooth;
 
+        private string _BuleTooth;
         public string BuleTooth
         {
             get { return _BuleTooth; }
@@ -1785,44 +1786,8 @@ namespace WpfApp1.ViewModels
                 this.RaiseProperChanged(nameof(BuleTooth));
             }
         }
-        public void setBuletooth(string data)
-        {
-            if (data == null || data.Length < 4)
-            {
-                return;
-            }
-            BuleTooth = data;
-        }
-        public void SetBuleTooth(short[] data)
-        {
-            if (data != null && data.Length >= 6)
-            {
 
-                byte[] bluetoothBytes = new byte[6];
-                bluetoothBytes[0] = (byte)(data[5] >> 8);       // 寄存器297的低字节
-                bluetoothBytes[1] = (byte)(data[4] >> 8);
-                bluetoothBytes[2] = (byte)(data[3] >> 8);
-                bluetoothBytes[3] = (byte)(data[2] >> 8);
-                bluetoothBytes[4] = (byte)(data[1] >> 8);
-                bluetoothBytes[5] = (byte)(data[0] >> 8);
-
-                // 格式化为 "XX:XX:XX:XX:XX:XX"
-                string bluetoothStr = string.Format("{0:X2}:{1:X2}:{2:X2}:{3:X2}:{4:X2}:{5:X2}",
-                    bluetoothBytes[0], bluetoothBytes[1], bluetoothBytes[2],
-                    bluetoothBytes[3], bluetoothBytes[4], bluetoothBytes[5]);
-
-                setBuletooth(bluetoothStr);
-            }
-            else
-            {
-                // 处理读取失败，例如显示错误信息
-                AddLog("读取蓝牙地址失败");
-            }
-        }
-
-
-        private bool BuleTooth_IsWorking;
-        //蓝牙设置值
+        //设置项
         private string _BuleTooth_Inputs;
 
         public string BuleTooth_Inputs
@@ -1836,8 +1801,37 @@ namespace WpfApp1.ViewModels
             }
         }
 
+        private bool BuleTooth_IsWorking;
         public RelayCommand Command_SetBuleTooth { get; }
 
+        /// <summary>
+        /// 读取蓝牙地址
+        /// </summary>
+        /// <param name="data"></param>
+        public void ReadBuleTooth(short[] data)
+        {
+            if (data != null && data.Length >= 6)
+            {
+
+                byte[] bluetoothBytes = new byte[6];
+                for (int i = 0; i < data.Length; i++)
+                {
+                    bluetoothBytes[i] = (byte)(data[data.Length - 1 - i] >> 8);
+                }
+
+                // 格式化为 "XX:XX:XX:XX:XX:XX"
+                string bluetoothStr = string.Format("{0:X2}:{1:X2}:{2:X2}:{3:X2}:{4:X2}:{5:X2}",
+                    bluetoothBytes[0], bluetoothBytes[1], bluetoothBytes[2],
+                    bluetoothBytes[3], bluetoothBytes[4], bluetoothBytes[5]);
+
+                BuleTooth = bluetoothStr;
+            }
+            else
+            {
+                // 处理读取失败，例如显示错误信息
+                AddLog("读取蓝牙地址失败");
+            }
+        }
 
         /// <summary>
         /// 点击设置
@@ -1856,20 +1850,22 @@ namespace WpfApp1.ViewModels
                 // 暂停后台线程
                 _pauseEvent.Reset();
                 AddLog("已暂停后台通信");
-                // 先解析蓝牙地址
+
+                // 解析蓝牙地址
                 if (!TryParseBluetoothAddress(BuleTooth_Inputs, out byte[] bluetoothBytes))
                 {
                     // 解析失败，弹出提示框
                     MessageBox.Show(
-                        "蓝牙地址格式不正确\n例如："00:1A:7D:DA:71:13",
+                        "蓝牙地址格式不正确\n例如：00:1A:7D:DA:71:13",
                         "输入错误",
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
                     return;
                 }
+
                 UpdateState("正在执行设置命令");
 
-                // 执行特殊操作（带超时保护）
+                // 执行特殊操作
                 using var timeoutCts = new CancellationTokenSource(5000);
                 await Task.Run(() =>
                 {
@@ -1906,24 +1902,31 @@ namespace WpfApp1.ViewModels
             }
         }
 
+        /// <summary>
+        /// 字符转换
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
         public bool TryParseBluetoothAddress(string input, out byte[] bytes)
         {
             bytes = null;
-            if (string.IsNullOrWhiteSpace(input))
-                return false;
 
+            //去除非十六进制字符和非空判断
             string cleaned = Regex.Replace(input, @"[^0-9A-F]", "");
-            if (cleaned.Length != 12)
+            if (cleaned.Length != 12 || string.IsNullOrWhiteSpace(input))
                 return false;
 
             try
             {
                 bytes = new byte[6];
+                //开始转换
                 for (int i = 0; i < 6; i++)
                 {
+
                     string byteStr = cleaned.Substring(i * 2, 2);
 
-                    bytes[i] = byte.Parse(byteStr, System.Globalization.NumberStyles.HexNumber, null);
+                    bytes[i] = byte.Parse(byteStr, NumberStyles.HexNumber, null);
                    
                 }
                 if (bytes.All(b => b == 0))
