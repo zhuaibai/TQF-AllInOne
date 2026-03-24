@@ -33,7 +33,7 @@ namespace WpfApp1.ViewModels
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        
+
         ManualResetEventSlim _pauseEvent;//线程的开启、暂停
         SemaphoreSlim _semaphore;        //异步竞争，资源锁
         Action<string> AddLog;           //添加日志委托
@@ -57,7 +57,7 @@ namespace WpfApp1.ViewModels
             WriteCommandByBMS01 = new RelayCommand(ExecuteWriteAsyncByBMS01, () => IsButtonEnabled);
             StopReadComamnd = new RelayCommand(StopReadOperation, () => !stopReadFlag_isWorking);
             Command_SetSystemTime = new RelayCommand(SystemTimeOperation, () => !SystemTime_IsWorking);
-            Command_SetBuleTooth = new RelayCommand(BuleToothOperation, () => !BuleTooth_IsWorking);
+
             #region 初始化参数分类
 
             //单体过充
@@ -287,10 +287,10 @@ namespace WpfApp1.ViewModels
                 canExecute: () => !string.IsNullOrEmpty(CycleCount_Inputs) && !CycleCount_IsWorking // 增加处理状态检查
             );
             //蓝牙地址
-            //Command_SetBuleTooth = new RelayCommand(
-            //    execute: () => BuleToothOperation(),
-            //    canExecute: () => !string.IsNullOrEmpty(BuleTooth_Inputs) && !BuleTooth_IsWorking // 增加处理状态检查
-            //);
+            Command_SetBuleTooth = new RelayCommand(
+                execute: () => BuleToothOperation(),
+                canExecute: () => !string.IsNullOrEmpty(BuleTooth_Inputs) && !BuleTooth_IsWorking // 增加处理状态检查
+            );
             //零点校准系数增加
             Command_SetZeroCalibFactorInc = new RelayCommand(
                 execute: () => ZeroCalibFactorIncOperation(),
@@ -392,7 +392,7 @@ namespace WpfApp1.ViewModels
               canExecute: () => !TurnOff_IsWorking // 增加处理状态检查
             );
             //限流板
-            LimitCommand  = new RelayCommand(
+            LimitCommand = new RelayCommand(
                  execute: () => LimitOperation(),
               canExecute: () => !Limit_IsWorking // 增加处理状态检查
             );
@@ -425,7 +425,7 @@ namespace WpfApp1.ViewModels
             Command_SetCellTemp1Read = new RelayCommand(
                 execute: () => CellTemp1ReadOperation(),
                 canExecute: () => !CellTemp1Read_IsWorking // 增加处理状态检查
-            ); 
+            );
             //电池组温度1 写入
             Command_SetCellTemp1Write = new RelayCommand(
                 execute: () => CellTemp1WriteOperation(),
@@ -550,9 +550,10 @@ namespace WpfApp1.ViewModels
             FullCap = data[1] / 100;
             RemainCap = data[2] / 100;
             CycleCount = data[3];
-            
+
         }
-       
+
+
         //电芯数量
         private int cellNum = 16;
 
@@ -598,7 +599,7 @@ namespace WpfApp1.ViewModels
 
         public void setSystemTime(short[] time)
         {
-            if (time!=null && time.Length == 3)
+            if (time != null && time.Length == 3)
             {
                 SystemTime = ParseDateTimeRegistersLE(time[0], time[1], time[2]);
             }
@@ -613,13 +614,13 @@ namespace WpfApp1.ViewModels
         public string ParseDateTimeRegistersLE(short reg1, short reg2, short reg3)
         {
             byte year = (byte)(reg1 & 0xFF);       // 低字节
-            byte  month = (byte)(reg1 >> 8);         // 高字节
+            byte month = (byte)(reg1 >> 8);         // 高字节
 
-            byte  day = (byte)(reg2 & 0xFF);
+            byte day = (byte)(reg2 & 0xFF);
             byte hour = (byte)(reg2 >> 8);
 
             byte minute = (byte)(reg3 & 0xFF);
-            byte  second = (byte)(reg3 >> 8);
+            byte second = (byte)(reg3 >> 8);
 
 
             return "20" + year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
@@ -813,7 +814,8 @@ namespace WpfApp1.ViewModels
                 {
                     _historyLodModels = value;
                     OnPropertyChanged(nameof(HistoryLods));
-                };
+                }
+                ;
             }
 
         }
@@ -881,7 +883,7 @@ namespace WpfApp1.ViewModels
                         short[] data = ModbusRTU.ParseRead20Response(SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 4, (ushort)i), 133));
                         if (data.Length == 64)
                         {
-                            var model = new HistoryLodModel   (data, cellNum);
+                            var model = new HistoryLodModel(data, cellNum);
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 HistoryLods.Add(model);
@@ -954,7 +956,7 @@ namespace WpfApp1.ViewModels
                         short[] data = ModbusRTU.ParseRead20Response(SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 4, (ushort)i), 133));
                         if (data.Length == 64)
                         {
-                            var model = new HistoryLodModel(data, cellNum,1);
+                            var model = new HistoryLodModel(data, cellNum, 1);
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 HistoryLods.Add(model);
@@ -1776,7 +1778,6 @@ namespace WpfApp1.ViewModels
 
         public string BuleTooth
         {
-           
             get { return _BuleTooth; }
             set
             {
@@ -1786,7 +1787,7 @@ namespace WpfApp1.ViewModels
         }
         public void setBuletooth(string data)
         {
-            if (data == null || data.Length < 6)
+            if (data == null || data.Length < 4)
             {
                 return;
             }
@@ -1818,9 +1819,9 @@ namespace WpfApp1.ViewModels
                 AddLog("读取蓝牙地址失败");
             }
         }
-         
 
-private bool BuleTooth_IsWorking;
+
+        private bool BuleTooth_IsWorking;
         //蓝牙设置值
         private string _BuleTooth_Inputs;
 
@@ -1863,8 +1864,9 @@ private bool BuleTooth_IsWorking;
             return BuleToothres;
         }
 
-       
-      
+        /// <summary>
+        /// 点击设置
+        /// </summary>
         private async void BuleToothOperation()
         {
             try
@@ -1875,22 +1877,21 @@ private bool BuleTooth_IsWorking;
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
-                
 
-               
                 // 暂停后台线程
                 _pauseEvent.Reset();
                 AddLog("已暂停后台通信");
 
+                UpdateState("正在执行设置命令");
+
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(() =>
                 {
                     // 执行设置指令（硬件可能需要短暂延时）
                     Thread.Sleep(2000); // 保留原延时
 
-                   
+
                     byte[] receive = SerialCommunicationService.SendCommandToBMS(
                         ModbusRTU.BuildWriteMultiRegisterFrame(1, 297, GetBullTooth()), 8);
                     if (receive.Length != 8)
@@ -1915,8 +1916,8 @@ private bool BuleTooth_IsWorking;
                 // 恢复后台线程
                 _pauseEvent.Set();
                 AddLog("恢复后台通信");
+
                 BuleTooth_IsWorking = false;
-                //Status = "就绪";
                 // 重新启用按钮
                 Command_SetBuleTooth.RaiseCanExecuteChanged();
                 // 确保释放锁
@@ -1924,31 +1925,7 @@ private bool BuleTooth_IsWorking;
                 UpdateState("设置指令已经执行完");
             }
         }
-        /*  public bool TryParseBluetoothAddress(string input, out byte[] bytes)
-          {
-              bytes = null;
-              if (string.IsNullOrWhiteSpace(input))
-                  return false;
 
-              // 严格匹配：6组两位十六进制，冒号分隔
-              if (!System.Text.RegularExpressions.Regex.IsMatch(input, @"^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$"))
-                  return false;
-
-              string[] parts = input.Split(':');
-              try
-              {
-                  bytes = new byte[6];
-                  for (int i = 0; i < 6; i++)
-                  {
-                      bytes[i] = byte.Parse(parts[i], System.Globalization.NumberStyles.HexNumber);
-                  }
-                  return true;
-              }
-              catch
-              {
-                  return false;
-              }
-          }*/
         public bool TryParseBluetoothAddress(string input, out byte[] bytes)
         {
             bytes = null;
@@ -2708,7 +2685,7 @@ private bool BuleTooth_IsWorking;
 
 
         #endregion
-        
+
         #region 电池组温度系数2、+、-
         //cellTemp1
         //校准系数

@@ -3513,8 +3513,7 @@ namespace WpfApp1.ViewModels
                 _pauseEvent.Wait(token);
                 //读写入的参数设置值
                 Thread.Sleep(300);
-                
-                // 读取系统设置（寄存器297，6个寄存器）
+                // 读取蓝牙地址（寄存器297，6个寄存器）
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 297, 6), 17);
                 data = ModbusRTU.ParseRead03Response(receive);
                
@@ -3579,8 +3578,7 @@ namespace WpfApp1.ViewModels
                 _pauseEvent.Wait(token);
                 //读写入的参数设置值
                 Thread.Sleep(300);
-                // 读取系统设置（寄存器297，3个寄存器）
-               
+                // 读取蓝牙地址（寄存器297，6个寄存器）
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 297, 6), 17);
                 data = ModbusRTU.ParseRead03Response(receive);
                 BMS_Setting.SetBuleTooth(data);
