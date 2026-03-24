@@ -1845,11 +1845,11 @@ namespace WpfApp1.ViewModels
             {
                 // 解析失败，弹出提示框
                 MessageBox.Show(
-                    "蓝牙地址格式不正确，应为12位十六进制数（可包含冒号或短横分隔）\n例如：00:1A:7D:DA:71:13",
+                    "蓝牙地址格式不正确，应为12位十六进制数\n例如：00:1A:7D:DA:71:13",
                     "输入错误",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
-                return null;
+                
             }
             ushort[] bluetoothShort = new ushort[6];
             bluetoothShort[0] = bluetoothBytes[5];
@@ -1881,7 +1881,17 @@ namespace WpfApp1.ViewModels
                 // 暂停后台线程
                 _pauseEvent.Reset();
                 AddLog("已暂停后台通信");
-
+                // 先解析蓝牙地址
+                if (!TryParseBluetoothAddress(BuleTooth_Inputs, out byte[] bluetoothBytes))
+                {
+                    // 解析失败，弹出提示框
+                    MessageBox.Show(
+                        "蓝牙地址格式不正确\n例如：00:1A:7D:DA:71:13",
+                        "输入错误",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
                 UpdateState("正在执行设置命令");
 
                 // 执行特殊操作（带超时保护）
@@ -1890,21 +1900,16 @@ namespace WpfApp1.ViewModels
                 {
                     // 执行设置指令（硬件可能需要短暂延时）
                     Thread.Sleep(2000); // 保留原延时
-
-
-                    byte[] receive = SerialCommunicationService.SendCommandToBMS(
-                        ModbusRTU.BuildWriteMultiRegisterFrame(1, 297, GetBullTooth()), 8);
-                    if (receive.Length != 8)
+     
+                    int[] BuleToothres = new int[bluetoothBytes.Length];
+                    for (int i = 0; i < bluetoothBytes.Length; i++)
                     {
-                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 14, 3), 8);
-                        if (receive.Length == 8)
-                        {
-                            OutIndex = receive[5];
-                            // 注意：MessageBox 不能在后台线程直接调用，需要调度到 UI 线程
-                            Application.Current.Dispatcher.Invoke(() =>
-                                MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error));
-                        }
+                        BuleToothres[i] = bluetoothBytes[bluetoothBytes.Length - 1 - i] << 8;
                     }
+                    
+                    byte[] receive = SerialCommunicationService.SendCommandToBMS(
+                        ModbusRTU.BuildWriteMultiRegisterFrame(1, 297, BuleToothres), 8);
+                   
                 }, timeoutCts.Token);
             }
             catch (OperationCanceledException)
@@ -1932,7 +1937,7 @@ namespace WpfApp1.ViewModels
             if (string.IsNullOrWhiteSpace(input))
                 return false;
 
-            string cleaned = Regex.Replace(input, @"[^0-9A-Fa-f]", "");
+            string cleaned = Regex.Replace(input, @"[^0-9A-F]", "");
             if (cleaned.Length != 12)
                 return false;
 
@@ -1944,6 +1949,11 @@ namespace WpfApp1.ViewModels
                     string byteStr = cleaned.Substring(i * 2, 2);
 
                     bytes[i] = byte.Parse(byteStr, System.Globalization.NumberStyles.HexNumber, null);
+                   
+                }
+                if (bytes.All(b => b == 0))
+                {
+                    return false;
                 }
                 return true;
             }
