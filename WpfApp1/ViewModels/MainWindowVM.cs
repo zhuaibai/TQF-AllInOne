@@ -3272,14 +3272,14 @@ namespace WpfApp1.ViewModels
             Thread.Sleep(200);
             // 等待暂停或取消信号
             _pauseEvent.Wait(token);
-            //发送查询机器指令
+            //发送查询机器指令(QPRTL\r)
             string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
             MachineType = receive_MachineType.Substring(1, 8);
             //解析指令
             SerialCommunicationService.MachineType = receive_MachineType;
 
             Thread.Sleep(200);
-            //发送HGRID指令
+            //发送市电电压和市电频率指令(HGRID\r)
             _pauseEvent.Wait(token);
             receive = SerialCommunicationService.SendCommand(HGRID_CYJ.Command, 50);
             //解析返回命令
@@ -3292,7 +3292,7 @@ namespace WpfApp1.ViewModels
             Thread.Sleep(200);
             // 等待暂停或取消信号
             _pauseEvent.Wait(token);
-            //发送HOP指令
+            //发送输出电压指令（HOP\r）
             receive = SerialCommunicationService.SendCommand(HOP_PDF.Command, 50);
             //解析返回命令
             HOP_PDF.AnalysisStringToElement(receive);
@@ -3300,27 +3300,27 @@ namespace WpfApp1.ViewModels
             InvTotalPwr = StringToIntConversion(HOP_PDF.LoadPercent);
 
             Thread.Sleep(200);
-            //发送HBAT指令
+            //发送查询电池指令(HBAT\r)
             _pauseEvent.Wait(token);
             receive = SerialCommunicationService.SendCommand(HBAT_VQ2.Command, 50);
             HBAT_VQ2.AnalysisStringToElement(receive);
             BattPercent = StringToIntConversion(HBAT_VQ2.BattCapacity);
 
             Thread.Sleep(200);
-            //发送HSTS指令
+            //发送查询机器状态指令(HSTS\r)
             _pauseEvent.Wait(token);
             receive = SerialCommunicationService.SendCommand(HSTS_CYJ.Command, 40);
             HSTS_CYJ.AnalyseStringToElement(receive);
 
             Thread.Sleep(200);
-            //发送HTEMP指令
+            //发送查询温度指令(HTEMP\r)
             _pauseEvent.Wait(token);
             receive = SerialCommunicationService.SendCommand(HTEMP_PDF.Command, 50);
             HTEMP_PDF.AnalysisStringToElement(receive);
             ShowError(receive, "HTEMP");
 
             Thread.Sleep(200);
-            //发送HIMSG1指令
+            //发送查询软件版本指令(HIMSG1\r)
             _pauseEvent.Wait(token);
             receive = SerialCommunicationService.SendCommand(HIMSG1.Command, 21);
             HIMSG1.AnalysisStringToElement(receive);

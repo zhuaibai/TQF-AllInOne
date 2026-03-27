@@ -950,7 +950,7 @@
                             Grid.Row="8"
                             Grid.Column="3"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding HEEP1_LB6.OutputStatus}" />
+                            Text="{Binding HEEP1_LB6.ChgStage}" />
                     </Grid>
                 </GroupBox>
             </ScrollViewer>
@@ -1200,24 +1200,24 @@
                             <TextBlock
                                 Grid.Row="7"
                                 Style="{StaticResource ContentText}"
-                                Text="{DynamicResource 电池高压锁机电压}" />
+                                Text="{DynamicResource 电池高压锁机电压}" />                                                                                    
                             <TextBlock
                                 Grid.Row="7"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding HEEP1_CYJ.BattHvLockVolt}" />
-                            <!--<TextBox
+                            <TextBox
                             Grid.Row="7"
                             Grid.Column="2"
                             Style="{StaticResource InputBox}"
                             Text="{Binding HEEP1_CYJ.AC_ChargingCurrent_Inputs, UpdateSourceTrigger=PropertyChanged}"
                             ToolTip="030" />
-                        <Button
+                            <Button
                             Grid.Row="7"
                             Grid.Column="3"
                             Command="{Binding DataContext.HEEP1_CYJ.Command_SetAC_ChargingCurrent, RelativeSource={RelativeSource AncestorType=Window}}"
                             Content="{DynamicResource 设置}"
-                            Style="{StaticResource ActionButton}" />-->
+                            Style="{StaticResource ActionButton}" />
 
                             <!--  强充时间  -->
                             <!--
