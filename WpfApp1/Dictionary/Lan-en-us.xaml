@@ -9,6 +9,8 @@
     <s:String x:Key="异常!">Exception!</s:String>
     <s:String x:Key="启动时间">Time:</s:String>
     <s:String x:Key="自动保存数据">AutoSave</s:String>
+    <s:String x:Key="PBUS电压">PBUSVolt</s:String>
+    <s:String x:Key="NBUS电压">NBUSVolt</s:String>
     <s:String x:Key="蓝牙地址">BluetoothAddress‌</s:String>
     <s:String x:Key="选择串口：">SerialPort:</s:String>
     <s:String x:Key="功能选项">FunctionOptions</s:String>

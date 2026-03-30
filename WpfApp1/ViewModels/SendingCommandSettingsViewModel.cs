@@ -49,7 +49,7 @@ namespace WpfApp1.ViewModels
             AddLog = addLog;
             UpdateState = _updateState;
 
-            SendingCommands = LoadSettings();
+            SendingCommands = LoadSettings("default.xml");
             SaveCommand = new DelegateCommand(SaveSettings);
             SaveCommandToFile = new DelegateCommand(SaveSettingsToAtherFile);
             LoadFromFile = new DelegateCommand((object ds) => { SendingCommands = LoadSettingsFromFile(); });
@@ -4222,11 +4222,11 @@ namespace WpfApp1.ViewModels
         /// 加载默认配置文件
         /// </summary>
         /// <returns></returns>
-        public ObservableCollection<SendingCommand> LoadSettings()
+        public ObservableCollection<SendingCommand> LoadSettings(string path)
         {
             try
             {
-                string path = "default.xml";
+               // string path = "default.xml";
                 filePathToSave = path;
                 if (File.Exists(path))
                 {
@@ -4302,6 +4302,7 @@ namespace WpfApp1.ViewModels
             return new ObservableCollection<SendingCommand>();
         }
 
+      
         /// <summary>
         /// 导入配置文件
         /// </summary>
@@ -4767,21 +4768,21 @@ namespace WpfApp1.ViewModels
             if (view == "VQ3024")
             {
                 filePathToSave = "VQ3024.xml";
-                SendingCommands = LoadSettings();
+                SendingCommands = LoadSettings("default.xml");
                 SelectedMachineItem = "VQ3024";
             }
             else if (view == "UPSLB600")
             {
                 filePathToSave = "UPSLB600.xml";
                 //重新加载配置文件
-                SendingCommands = LoadSettings();
+                SendingCommands = LoadSettings("default.xml");
                 //下拉框显示
                 SelectedMachineItem = "UPSLB600";
             }
             else
             {
                 filePathToSave = "VDF.xml";
-                SendingCommands = LoadSettings();
+                SendingCommands = LoadSettings("default.xml");
                 SelectedMachineItem = "VDF";
             }
             FileName = filePathToSave;

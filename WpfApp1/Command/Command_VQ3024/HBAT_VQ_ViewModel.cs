@@ -35,6 +35,11 @@ namespace WpfApp1.Command.Command_VQ3024
                 execute: () => BusVoltOperation(),
                 canExecute: () => Validate(nameof(BusVolt_Inputs)) && !BusVolt_IsWorking // 增加处理状态检查
             );
+            //NBUS电压
+            Command_SetNBusVolt = new RelayCommand(
+            execute: () => NBusVoltOperation(),
+            canExecute: () => Validate(nameof(NBusVolt_Inputs)) && !NBusVolt_IsWorking // 增加处理状态检查
+            );
             //PFC工作状态
             Command_SetPFCStatus = new RelayCommand(
                execute: () => PFCStatusOperation(),
@@ -489,18 +494,106 @@ namespace WpfApp1.Command.Command_VQ3024
 
         #endregion
 
+        #region N母线电压
+        private string _NBusVolt;
+
+        public string NBusVolt
+        {
+            get { return _NBusVolt; }
+            set
+            {
+                _BusVolt = Tools.RemoveLeadingZeros(value) + "V";
+                this.RaiseProperChanged(nameof(NBusVolt));
+            }
+        }
+
+
+        private bool NBusVolt_IsWorking;
+
+
+        //设置值
+        private string _NBusVolt_Inputs;
+
+        public string NBusVolt_Inputs
+        {
+            get { return _NBusVolt_Inputs; }
+            set
+            {
+                _NBusVolt_Inputs = value;
+                this.RaiseProperChanged(nameof(NBusVolt_Inputs));
+                Command_SetNBusVolt.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        public RelayCommand Command_SetNBusVolt { get; }
+
+        /// <summary>
+        /// 点击设置
+        /// </summary>
+        private async void NBusVoltOperation()
+        {
+            try
+            {
+                NBusVolt_IsWorking = true;
+                // 禁用按钮
+                Command_SetNBusVolt.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState("正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    Thread.Sleep(2000);//没有这个延时会报错
+                    string receive = SerialCommunicationService.SendSettingCommand("设置指令", NBusVolt_Inputs);
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                NBusVolt_IsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetNBusVolt.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+        #endregion
+
         #region 通用方法
 
         private bool Validate(string value)
         {
             switch (value)
             {
-                //市电电压       
+                //母线电压       
                 case "BusVolt_Inputs":
                     return !string.IsNullOrWhiteSpace(BusVolt_Inputs);
                 //PFC工作状态   
                 case "PFCStatus_Inputs":
                     return !string.IsNullOrWhiteSpace(PFCStatus_Inputs);
+                case "NBusVolt_Inputs":
+                    return !string.IsNullOrWhiteSpace(NBusVolt_Inputs);
                 ////市电功率   
                 //case "ACPower_Inputs":
                 //    return !string.IsNullOrWhiteSpace(ACPower_Inputs);
@@ -552,6 +645,8 @@ namespace WpfApp1.Command.Command_VQ3024
                 BattDisCurr = Values[4];
                 //母线电压
                 BusVolt = Values[5];
+                //NBUS电压
+                NBusVolt = Values[6];
                 //充电总开关
                 ChgMasterSW = Values[6].Substring(0, 1);
                 //太阳能充电开关
@@ -589,6 +684,8 @@ namespace WpfApp1.Command.Command_VQ3024
             BattDisCurr = exceptionDescription;
             //母线电压
             BusVolt = exceptionDescription;
+            //NBUS电压
+            NBusVolt = exceptionDescription;
             //充电总开关
             ChgMasterSW = exceptionDescription;
             //太阳能充电开关

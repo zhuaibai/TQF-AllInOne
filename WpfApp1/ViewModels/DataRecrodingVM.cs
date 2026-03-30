@@ -95,7 +95,7 @@ namespace WpfApp1.ViewModels
         }
 
         /// <summary>
-        /// 配置数据和头部
+        /// HPVINV02/06的Excel配置
         /// </summary>
         /// <returns></returns>
         private static DeviceExcelConfig GetHPVINVConfig()
@@ -246,6 +246,10 @@ namespace WpfApp1.ViewModels
             }
         }
 
+        /// <summary>
+        /// HPVINV04的Excel配置
+        /// </summary>
+        /// <returns></returns>
         private static DeviceExcelConfig GetHPVINV04Config()
         {
             var config = new DeviceExcelConfig
@@ -398,6 +402,10 @@ namespace WpfApp1.ViewModels
             }
         }
 
+        /// <summary>
+        /// HPVINV07的Excel配置
+        /// </summary>
+        /// <returns></returns>
         private static DeviceExcelConfig GetHPVINV07Config()
         {
             var config = new DeviceExcelConfig
@@ -505,7 +513,7 @@ namespace WpfApp1.ViewModels
         }
 
         /// <summary>
-        /// 
+        /// HPVINV08的Excel配置
         /// </summary>
         /// <returns></returns>
         private static DeviceExcelConfig GetHPVINV08Config()
@@ -666,7 +674,7 @@ namespace WpfApp1.ViewModels
         }
 
         /// <summary>
-        /// 
+        /// UPSCYX01的Excel配置
         /// </summary>
         /// <returns></returns>
         private static DeviceExcelConfig GetUPSCYX01Config()
@@ -774,7 +782,7 @@ namespace WpfApp1.ViewModels
         }
 
         /// <summary>
-        /// 
+        /// LB6的Excel配置
         /// </summary>
         /// <returns></returns>
         private static DeviceExcelConfig GetLB6Config()
@@ -839,7 +847,7 @@ namespace WpfApp1.ViewModels
                     new ColumnInfo("电池容量(%)", "BattCapacity", 15, "0%"),
                     new ColumnInfo("电池节数", "BattCells", 15, "0"),
                     new ColumnInfo("电池类型", "BatteryType", 15),
-                    new ColumnInfo("电池充电电流(A)", "V", 15, "0.0")
+                    new ColumnInfo("电池充电电流(A)", "BattChgCurr", 15, "0.0")
                 }
             },
             new ColumnGroup
@@ -885,7 +893,7 @@ namespace WpfApp1.ViewModels
         }
 
         /// <summary>
-        /// 
+        /// LPVINV02的Excel配置
         /// </summary>
         /// <returns></returns>
         private static DeviceExcelConfig GetLPVINV02Config()

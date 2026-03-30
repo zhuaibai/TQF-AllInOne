@@ -488,6 +488,7 @@ namespace WpfApp1.ViewModels
         public BMS_UserControl BMS02 { get; set; }
         public BMS01_UserControl BMS01 { get; set; }
         public BMS03_UserControl BMS03 { get; set; }
+
         public ObservableCollection<string> MachineItems { get; } = new(){
         "HPVINV02",
         "HPVINV04",
@@ -499,7 +500,8 @@ namespace WpfApp1.ViewModels
         "LB6",
         "BMS01",
         "BMS02",
-        "BMS03"
+        "BMS03",
+        "CG000001"
          };
 
         //切换指令
@@ -574,6 +576,10 @@ namespace WpfApp1.ViewModels
                 case "BMS03":
                     ContentUC = BMS03;
                     SelectedMachineItem = "BMS03";
+                    break;
+                case "CG000001":
+                    ContentUC = new CG_MonitorUC();
+                    SelectedMachineItem = "CG000001";
                     break;
             }
         }
@@ -680,6 +686,17 @@ namespace WpfApp1.ViewModels
                 else if ((receive_MachineType.Substring(0, 9) == "LB6"))
                 {
                     SwitchViewToVQorGB("LB6");
+                    //默认设置抗干扰模式
+                    IsChecked = true;
+                    OnceOpenCRC = true;
+                    SerialCommunicationService.OpenReceiveCRC(true);
+                    //返回机器类型
+                    machine = receive_MachineType;
+                    return true;
+                }
+                else if ((receive_MachineType.Substring(0, 9) == "CG000001"))
+                {
+                    SwitchViewToVQorGB("CG000001");
                     //默认设置抗干扰模式
                     IsChecked = true;
                     OnceOpenCRC = true;
@@ -1140,7 +1157,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        #endregion
+        #endregion     
 
         #region 串口工具
 
@@ -1648,10 +1665,15 @@ namespace WpfApp1.ViewModels
                 if (SelectedMachineItem == "BMS01")
                 {
                     //补丁，BMS01时单位稍作修改
-                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings2());
+                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings("default2.xml"));
+                }
+                else if (SelectedMachineItem == "BMS03")
+                {
+                    //补丁，BMS03时单位稍作修改
+                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings("default3.xml"));
                 }
                 else
-                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings());
+                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings("default.xml"));
                 //COM通讯
                 while (!token.IsCancellationRequested)//检查是否请求取消
                 {
@@ -1693,6 +1715,10 @@ namespace WpfApp1.ViewModels
                     else if (SelectedMachineItem == "LB6")
                     {
                         CommunicationWith_LB6(token);
+                    }
+                    else if (SelectedMachineItem == "CG000001")
+                    {
+                        CommunicationWith_CG(token);
                     }
                     else if (SelectedMachineItem == "BMS02")
                     {
@@ -3353,6 +3379,154 @@ namespace WpfApp1.ViewModels
                 InvTime = HEEP1_CYJ.InvTime,//逆变时间
 
                 BattVolt = HBAT_VQ.BattVolt,//电池电压
+                BattCells = HBAT_VQ2.BattCells,//电池节数
+                BattCapacity = HBAT_VQ.BattCapacity,//电池容量
+                BattChgCurr = HBAT_VQ2.BattChgCurr,//电池充电电流
+                BatteryType = HEEP1_LB6.BatteryType,//电池类型
+
+                InvTemp = HTEMP_PDF.InvTemp,//逆变温度
+                MaxTemp = HTEMP_PDF.MaxTemp,//当前最高温度
+                FaultCode = HSTS_GB.FaultCode,//故障代码
+                Mode = HSTS_GB.Mode,//模式
+                OutputStatus = HSTS_GB.OutputStatus,//机器是否有输出
+                BattLowAlarm = HSTS_GB.BattLowAlarm,//电池低电报警
+                BattDisconnected = HSTS_GB.BattDisconnected,//电池未接
+                OutputOverload = HSTS_GB.OutputOverload,//输出过载
+                OverTemp = HSTS_GB.OverTemp,//机器过温
+                EEPROM_DataErr = HSTS_GB.EEPROM_DataErr,//EEPROM数据异常
+                EEPROM_IOErr = HSTS_GB.EEPROM_IOErr,//EEPROM读写异常
+                InputOV = HSTS_GB.InputOV,//输入电压过高
+                BattOV = HSTS_GB.BattOV,//电池电压过高
+                FanSpeedFault = HSTS_GB.FanSpeedFault,//风扇转速异常
+                AutoStartEnable = HEEP1_CYJ.AutoStartEnable,//自动开机使能
+                ChgStage = HEEP1_LB6.ChgStage//充电阶段
+
+            };
+
+            // 最新在最前
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+
+                if (DR_Monitor.IsSaving && DR_Monitor._savePath != null)
+                {
+                    DR_Monitor.SaveToExcel(Common_Data);
+                }
+
+            });
+
+        }
+        #endregion
+
+        #region CG通讯
+        /// <summary>
+        /// CG通讯
+        /// </summary>
+        /// <param name="token"></param>
+        private void CommunicationWith_CG(CancellationToken token)
+        {
+            string receive = string.Empty;
+
+            //判断是否开启CRC接收校验（抗干扰 默认开启
+            if (IsChecked)
+            {
+                //发送HOSTCRCEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "EN");
+                ShowError(receive, "HOSTCRC");
+            }
+            else if (OnceOpenCRC)
+            {
+                //发送HOSTCRDEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "DN");
+                OnceOpenCRC = false;
+                IsChecked = false;
+                SerialCommunicationService.OpenReceiveCRC(false);
+            }
+
+            Thread.Sleep(200);
+            // 等待暂停或取消信号
+            _pauseEvent.Wait(token);
+            //发送查询机器指令(QPRTL\r)
+            string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
+            MachineType = receive_MachineType.Substring(1, 8);
+            //解析指令
+            SerialCommunicationService.MachineType = receive_MachineType;
+
+            Thread.Sleep(200);
+            //发送市电电压和市电频率指令(HGRID\r)
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HGRID_CYJ.Command, 50);
+            //解析返回命令
+            HGRID_CYJ.AnalyseStringToElement(receive);
+            //显示
+            ACPowerVM = StringToIntConversion(HGRID_CYJ.ACPower);
+            //市电百分比
+            ACTotalPwr = CountPercent(HGRID_CYJ.ACPower, HIGSG2_PDF.ACTotalPwr);
+
+            Thread.Sleep(200);
+            // 等待暂停或取消信号
+            _pauseEvent.Wait(token);
+            //发送输出电压指令（HOP\r）
+            receive = SerialCommunicationService.SendCommand(HOP_PDF.Command, 50);
+            //解析返回命令
+            HOP_PDF.AnalysisStringToElement(receive);
+            //逆变百分比
+            InvTotalPwr = StringToIntConversion(HOP_PDF.LoadPercent);
+
+            Thread.Sleep(200);
+            //发送查询电池指令(HBAT\r)
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HBAT_VQ2.Command, 50);
+            HBAT_VQ2.AnalysisStringToElement(receive);
+            BattPercent = StringToIntConversion(HBAT_VQ2.BattCapacity);
+
+            Thread.Sleep(200);
+            //发送查询机器状态指令(HSTS\r)
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HSTS_CYJ.Command, 40);
+            HSTS_CYJ.AnalyseStringToElement(receive);
+
+            Thread.Sleep(200);
+            //发送查询温度指令(HTEMP\r)
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HTEMP_PDF.Command, 50);
+            HTEMP_PDF.AnalysisStringToElement(receive);
+            ShowError(receive, "HTEMP");
+
+            Thread.Sleep(200);
+            //发送查询软件版本指令(HIMSG1\r)
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HIMSG1.Command, 21);
+            HIMSG1.AnalysisStringToElement(receive);
+            ShowError(receive, "HIMSG1");
+
+            Thread.Sleep(200);
+            //发送HEEP1指令
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HEEP1_LB6.Command, 80);
+            HEEP1_LB6.AnalyseStringToElement(receive);
+
+            //数据
+            var Common_Data = new Common_Data
+            {
+                DataNow = DateTime.Now,//日期
+
+                MainsVoltage = HGRID_GB.MainsVoltage,//市电电压
+                MainsFrequency = HGRID_GB.MainsFrequency,//市电频率
+
+                OutVolt = HOP_PDF.OutVolt,//输出电压
+                OutFreq = HOP_PDF.OutFreq,//输出频率
+                ApparentPwr = HOP_PDF.ApparentPwr,//视在功率
+                ActivePwr = HOP_PDF.ActivePwr,//有功功率
+                LoadPercent = HOP_PDF.LoadPercent,//负载百分比
+                RatedPwr = HOP_PDF.RatedPwr,//满载有功功率
+                InductorCurr = HOP_PDF.InductorCurr,//电感电流
+
+                BoostTime = HEEP1_CYJ.BoostTime,//强充时间
+                InvTime = HEEP1_CYJ.InvTime,//逆变时间
+
+                BattVolt = HBAT_VQ.BattVolt,//电池电压
                 BatCurr = HBAT_VQ.BatCurr, //电池电流
                 BattCells = HBAT_VQ2.BattCells,//电池节数
                 BattCapacity = HBAT_VQ.BattCapacity,//电池容量
@@ -4468,11 +4642,17 @@ namespace WpfApp1.ViewModels
             if (SelectedMachineItem == "BMS01")
             {
                 //补丁，BMS01时单位稍作修改
-                ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings2());
+                ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings("default2.xml"));
+
+            }
+            if (SelectedMachineItem == "BMS03")
+            {
+                //补丁，BMS03时单位稍作修改
+                ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings("default3.xml"));
 
             }
             else
-                ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings());
+                ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings("default.xml"));
 
         }
 

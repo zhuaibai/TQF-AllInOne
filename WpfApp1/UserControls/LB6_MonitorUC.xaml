@@ -1206,7 +1206,7 @@
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding HEEP1_CYJ.BattHvLockVolt}" />
-                            <TextBox
+                            <!--<TextBox
                             Grid.Row="7"
                             Grid.Column="2"
                             Style="{StaticResource InputBox}"
@@ -1217,7 +1217,7 @@
                             Grid.Column="3"
                             Command="{Binding DataContext.HEEP1_CYJ.Command_SetAC_ChargingCurrent, RelativeSource={RelativeSource AncestorType=Window}}"
                             Content="{DynamicResource 设置}"
-                            Style="{StaticResource ActionButton}" />
+                            Style="{StaticResource ActionButton}" />-->
 
                             <!--  强充时间  -->
                             <!--
