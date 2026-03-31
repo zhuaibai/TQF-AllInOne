@@ -267,7 +267,7 @@ namespace WpfApp1.Services
                 AddSendFrame(Command.Length);
                  
                 // 需要读取的字节数
-                int bytesToRead =  returnCount;
+                //int bytesToRead =  returnCount;
                 ////读取输入缓冲区
                 //byte[] buffer = new byte[bytesToRead];
                 //totalBytesRead = 0;

@@ -13,6 +13,7 @@ using System.Xml.Serialization;
 using WpfApp1.Command;
 using WpfApp1.Command.BMS;
 using WpfApp1.Command.Comand_GB3024;
+using WpfApp1.Command.Command_CG;
 using WpfApp1.Command.Command_CYJ;
 using WpfApp1.Command.Command_LB6;
 using WpfApp1.Command.Command_PDF302;
@@ -108,6 +109,10 @@ namespace WpfApp1.ViewModels
             _Clock = new ClockViewModel();
             //初始化 LB6 ViewModel
             _HEEP1_LB6 = new HEEP1_LB6_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            //初始化 CG ViewModel
+            _HBAT_CG = new HBAT_CG_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HEEP1_CG = new HEEP1_CG_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HOP_CG = new HOP_CG_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
 
             #endregion
 
@@ -683,7 +688,7 @@ namespace WpfApp1.ViewModels
                     machine = receive_MachineType;
                     return true;
                 }
-                else if ((receive_MachineType.Substring(0, 9) == "LB6"))
+                else if ((receive_MachineType.Substring(0, 9) == "(UPSLB600"))
                 {
                     SwitchViewToVQorGB("LB6");
                     //默认设置抗干扰模式
@@ -694,7 +699,7 @@ namespace WpfApp1.ViewModels
                     machine = receive_MachineType;
                     return true;
                 }
-                else if ((receive_MachineType.Substring(0, 9) == "CG000001"))
+                else if ((receive_MachineType.Substring(0, 9) == "(UPSLB601"))
                 {
                     SwitchViewToVQorGB("CG000001");
                     //默认设置抗干扰模式
@@ -1157,6 +1162,48 @@ namespace WpfApp1.ViewModels
             }
         }
 
+        #endregion
+
+        #region CG指令ViewModel
+        /// <summary>
+        /// HEEP1_CG
+        /// </summary>
+        private HEEP1_CG_ViewModel _HEEP1_CG;
+
+        public HEEP1_CG_ViewModel HEEP1_CG
+        {
+            get { return _HEEP1_CG; }
+            set
+            {
+                _HEEP1_CG = value;
+                this.RaiseProperChanged(nameof(HEEP1_CG));
+            }
+        }
+
+        private HBAT_CG_ViewModel _HBAT_CG;
+
+        public HBAT_CG_ViewModel HBAT_CG
+        {
+            get { return _HBAT_CG; }
+            set
+            {
+                _HBAT_CG = value;
+                this.RaiseProperChanged(nameof(HBAT_CG));
+            }
+        }
+
+        //HOP
+        private HOP_CG_ViewModel _HOP_CG;
+
+        public HOP_CG_ViewModel HOP_CG
+        {
+            get { return _HOP_CG; }
+            set
+            {
+                _HOP_CG = value;
+                this.RaiseProperChanged(nameof(HOP_CG));
+            }
+        }
         #endregion     
 
         #region 串口工具
@@ -3280,19 +3327,20 @@ namespace WpfApp1.ViewModels
             //判断是否开启CRC接收校验（抗干扰 默认开启
             if (IsChecked)
             {
-                //发送HOSTCRCEN指令
-                _pauseEvent.Wait(token);
-                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "EN");
-                ShowError(receive, "HOSTCRC");
-            }
-            else if (OnceOpenCRC)
-            {
                 //发送HOSTCRDEN指令
                 _pauseEvent.Wait(token);
                 receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "DN");
                 OnceOpenCRC = false;
                 IsChecked = false;
                 SerialCommunicationService.OpenReceiveCRC(false);
+            }
+            else if (OnceOpenCRC)
+            {
+                //发送HOSTCRCEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "EN");
+                ShowError(receive, "HOSTCRC");
+                
             }
 
             Thread.Sleep(200);
@@ -3310,20 +3358,18 @@ namespace WpfApp1.ViewModels
             receive = SerialCommunicationService.SendCommand(HGRID_CYJ.Command, 50);
             //解析返回命令
             HGRID_CYJ.AnalyseStringToElement(receive);
-            //显示
-            ACPowerVM = StringToIntConversion(HGRID_CYJ.ACPower);
-            //市电百分比
-            ACTotalPwr = CountPercent(HGRID_CYJ.ACPower, HIGSG2_PDF.ACTotalPwr);
 
             Thread.Sleep(200);
             // 等待暂停或取消信号
             _pauseEvent.Wait(token);
             //发送输出电压指令（HOP\r）
-            receive = SerialCommunicationService.SendCommand(HOP_PDF.Command, 50);
+            receive = SerialCommunicationService.SendCommand(HOP_CG.Command, 50);
             //解析返回命令
-            HOP_PDF.AnalysisStringToElement(receive);
-            //逆变百分比
-            InvTotalPwr = StringToIntConversion(HOP_PDF.LoadPercent);
+            HOP_CG.AnalysisStringToElement(receive);
+            //输出有功功率
+            InvTotalPwr = StringToIntConversion(HOP_CG.ActivePwr);
+            //负载百分比
+            ACTotalPwr = StringToIntConversion(HOP_CG.LoadPercent);
 
             Thread.Sleep(200);
             //发送查询电池指令(HBAT\r)
@@ -3364,23 +3410,23 @@ namespace WpfApp1.ViewModels
             {
                 DataNow = DateTime.Now,//日期
 
-                MainsVoltage = HGRID_GB.MainsVoltage,//市电电压
-                MainsFrequency = HGRID_GB.MainsFrequency,//市电频率
+                MainsVoltage = HGRID_CYJ.MainsVoltage,//市电电压
+                MainsFrequency = HGRID_CYJ.MainsFrequency,//市电频率
 
-                OutVolt = HOP_PDF.OutVolt,//输出电压
-                OutFreq = HOP_PDF.OutFreq,//输出频率
-                ApparentPwr = HOP_PDF.ApparentPwr,//视在功率
-                ActivePwr = HOP_PDF.ActivePwr,//有功功率
-                LoadPercent = HOP_PDF.LoadPercent,//负载百分比
-                RatedPwr = HOP_PDF.RatedPwr,//满载有功功率
-                InductorCurr = HOP_PDF.InductorCurr,//电感电流
+                OutVolt = HOP_CG.OutVolt,//输出电压
+                OutFreq = HOP_CG.OutFreq,//输出频率
+                ApparentPwr = HOP_CG.ApparentPwr,//视在功率
+                ActivePwr = HOP_CG.ActivePwr,//有功功率
+                LoadPercent = HOP_CG.LoadPercent,//负载百分比
+                RatedPwr = HOP_CG.FullloadPwr,//满载有功功率
+                InductorCurr = HOP_CG.InductorCurr,//电感电流
 
-                BoostTime = HEEP1_CYJ.BoostTime,//强充时间
-                InvTime = HEEP1_CYJ.InvTime,//逆变时间
+                BoostTime = HEEP1_LB6.BoostTime,//强充时间
+                InvTime = HEEP1_LB6.InvTime,//逆变时间
 
-                BattVolt = HBAT_VQ.BattVolt,//电池电压
+                BattVolt = HBAT_VQ2.BattVolt,//电池电压
                 BattCells = HBAT_VQ2.BattCells,//电池节数
-                BattCapacity = HBAT_VQ.BattCapacity,//电池容量
+                BattCapacity = HBAT_VQ2.BattCapacity,//电池容量
                 BattChgCurr = HBAT_VQ2.BattChgCurr,//电池充电电流
                 BatteryType = HEEP1_LB6.BatteryType,//电池类型
 
@@ -3398,7 +3444,7 @@ namespace WpfApp1.ViewModels
                 InputOV = HSTS_GB.InputOV,//输入电压过高
                 BattOV = HSTS_GB.BattOV,//电池电压过高
                 FanSpeedFault = HSTS_GB.FanSpeedFault,//风扇转速异常
-                AutoStartEnable = HEEP1_CYJ.AutoStartEnable,//自动开机使能
+                AutoStartEnable = HEEP1_LB6.AutoStartEnable,//自动开机使能
                 ChgStage = HEEP1_LB6.ChgStage//充电阶段
 
             };
@@ -3426,15 +3472,8 @@ namespace WpfApp1.ViewModels
         {
             string receive = string.Empty;
 
-            //判断是否开启CRC接收校验（抗干扰 默认开启
+            //判断是否开启CRC接收校验（默认关闭
             if (IsChecked)
-            {
-                //发送HOSTCRCEN指令
-                _pauseEvent.Wait(token);
-                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "EN");
-                ShowError(receive, "HOSTCRC");
-            }
-            else if (OnceOpenCRC)
             {
                 //发送HOSTCRDEN指令
                 _pauseEvent.Wait(token);
@@ -3442,6 +3481,14 @@ namespace WpfApp1.ViewModels
                 OnceOpenCRC = false;
                 IsChecked = false;
                 SerialCommunicationService.OpenReceiveCRC(false);
+            }
+            else if (OnceOpenCRC)
+            {
+                //发送HOSTCRCEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "EN");
+                ShowError(receive, "HOSTCRC");
+                
             }
 
             Thread.Sleep(200);
@@ -3459,27 +3506,25 @@ namespace WpfApp1.ViewModels
             receive = SerialCommunicationService.SendCommand(HGRID_CYJ.Command, 50);
             //解析返回命令
             HGRID_CYJ.AnalyseStringToElement(receive);
-            //显示
-            ACPowerVM = StringToIntConversion(HGRID_CYJ.ACPower);
-            //市电百分比
-            ACTotalPwr = CountPercent(HGRID_CYJ.ACPower, HIGSG2_PDF.ACTotalPwr);
 
             Thread.Sleep(200);
             // 等待暂停或取消信号
             _pauseEvent.Wait(token);
             //发送输出电压指令（HOP\r）
-            receive = SerialCommunicationService.SendCommand(HOP_PDF.Command, 50);
+            receive = SerialCommunicationService.SendCommand(HOP_CG.Command, 50);
             //解析返回命令
-            HOP_PDF.AnalysisStringToElement(receive);
-            //逆变百分比
-            InvTotalPwr = StringToIntConversion(HOP_PDF.LoadPercent);
+            HOP_CG.AnalysisStringToElement(receive);
+            //输出有功功率
+            InvTotalPwr = StringToIntConversion(HOP_CG.ActivePwr);
+            //负载百分比
+            ACTotalPwr = StringToIntConversion(HOP_CG.LoadPercent);
 
             Thread.Sleep(200);
             //发送查询电池指令(HBAT\r)
             _pauseEvent.Wait(token);
-            receive = SerialCommunicationService.SendCommand(HBAT_VQ2.Command, 50);
-            HBAT_VQ2.AnalysisStringToElement(receive);
-            BattPercent = StringToIntConversion(HBAT_VQ2.BattCapacity);
+            receive = SerialCommunicationService.SendCommand(HBAT_CG.Command, 50);
+            HBAT_CG.AnalysisStringToElement(receive);
+            BattPercent = StringToIntConversion(HBAT_CG.BattCapacity);
 
             Thread.Sleep(200);
             //发送查询机器状态指令(HSTS\r)
@@ -3504,52 +3549,56 @@ namespace WpfApp1.ViewModels
             Thread.Sleep(200);
             //发送HEEP1指令
             _pauseEvent.Wait(token);
-            receive = SerialCommunicationService.SendCommand(HEEP1_LB6.Command, 80);
-            HEEP1_LB6.AnalyseStringToElement(receive);
+            receive = SerialCommunicationService.SendCommand(HEEP1_CG.Command, 80);
+            HEEP1_CG.AnalyseStringToElement(receive);
 
             //数据
             var Common_Data = new Common_Data
             {
                 DataNow = DateTime.Now,//日期
 
-                MainsVoltage = HGRID_GB.MainsVoltage,//市电电压
-                MainsFrequency = HGRID_GB.MainsFrequency,//市电频率
+                MainsVoltage = HGRID_CYJ.MainsVoltage,//市电电压
+                MainsFrequency = HGRID_CYJ.MainsFrequency,//市电频率
 
-                OutVolt = HOP_PDF.OutVolt,//输出电压
-                OutFreq = HOP_PDF.OutFreq,//输出频率
-                ApparentPwr = HOP_PDF.ApparentPwr,//视在功率
-                ActivePwr = HOP_PDF.ActivePwr,//有功功率
-                LoadPercent = HOP_PDF.LoadPercent,//负载百分比
-                RatedPwr = HOP_PDF.RatedPwr,//满载有功功率
-                InductorCurr = HOP_PDF.InductorCurr,//电感电流
+                OutVolt = HOP_CG.OutVolt,//输出电压
+                OutFreq = HOP_CG.OutFreq,//输出频率
+                ApparentPwr = HOP_CG.ApparentPwr,//视在功率
+                ActivePwr = HOP_CG.ActivePwr,//有功功率
+                LoadPercent = HOP_CG.LoadPercent,//负载百分比
+                FullloadPwr = HOP_CG.FullloadPwr,//满载有功功率
+                InductorCurr = HOP_CG.InductorCurr,//电感电流
+                Outputpowerfactor = HEEP1_CG.Outputpowerfactor,//输出功率因数
+                BypasshighDropout = HEEP1_CG.BypasshighDropout,//旁路高退电压
+                BypasslowDropout = HEEP1_CG.BypasslowDropout,//旁路低退电压
 
-                BoostTime = HEEP1_CYJ.BoostTime,//强充时间
-                InvTime = HEEP1_CYJ.InvTime,//逆变时间
+                BatteryloadlimitTime = HEEP1_CG.BatteryloadlimitTime,//电池限载时间
+                BatterydischargelimitTime = HEEP1_CG.BatterydischargelimitTime,//电池放电限载时间
 
-                BattVolt = HBAT_VQ.BattVolt,//电池电压
-                BatCurr = HBAT_VQ.BatCurr, //电池电流
-                BattCells = HBAT_VQ2.BattCells,//电池节数
-                BattCapacity = HBAT_VQ.BattCapacity,//电池容量
-                BusVolt = HBAT_VQ.BusVolt, //母线电压
-                BattChgCurr = HBAT_VQ2.BattChgCurr,//电池充电电流
-                BatteryType = HEEP1_LB6.BatteryType,//电池类型
+                BattVolt = HBAT_CG.BattVolt,//电池电压
+                BattCells = HBAT_CG.BattCells,//电池节数
+                BattCapacity = HBAT_CG.BattCapacity,//电池容量
+                BusVolt = HBAT_CG.BusVolt, //母线电压
+                NBusVolt = HBAT_CG.NBusVolt,//负母线电压
 
                 InvTemp = HTEMP_PDF.InvTemp,//逆变温度
                 MaxTemp = HTEMP_PDF.MaxTemp,//当前最高温度
-                FaultCode = HSTS_GB.FaultCode,//故障代码
-                Mode = HSTS_GB.Mode,//模式
-                OutputStatus = HSTS_GB.OutputStatus,//机器是否有输出
-                BattLowAlarm = HSTS_GB.BattLowAlarm,//电池低电报警
-                BattDisconnected = HSTS_GB.BattDisconnected,//电池未接
-                OutputOverload = HSTS_GB.OutputOverload,//输出过载
-                OverTemp = HSTS_GB.OverTemp,//机器过温
-                EEPROM_DataErr = HSTS_GB.EEPROM_DataErr,//EEPROM数据异常
-                EEPROM_IOErr = HSTS_GB.EEPROM_IOErr,//EEPROM读写异常
-                InputOV = HSTS_GB.InputOV,//输入电压过高
-                BattOV = HSTS_GB.BattOV,//电池电压过高
-                FanSpeedFault = HSTS_GB.FanSpeedFault,//风扇转速异常
-                AutoStartEnable = HEEP1_CYJ.AutoStartEnable,//自动开机使能
-                ChgStage = HEEP1_LB6.ChgStage//充电阶段
+                FaultCode = HSTS_CYJ.FaultCode,//故障代码
+                Mode = HSTS_CYJ.Mode,//模式
+                OutputStatus = HSTS_CYJ.OutputStatus,//机器是否有输出
+                BattLowAlarm = HSTS_CYJ.BattLowAlarm,//电池低电报警
+                BattDisconnected = HSTS_CYJ.BattDisconnected,//电池未接
+                OutputOverload = HSTS_CYJ.OutputOverload,//输出过载
+                OverTemp = HSTS_CYJ.OverTemp,//机器过温
+                EEPROM_DataErr = HSTS_CYJ.EEPROM_DataErr,//EEPROM数据异常
+                EEPROM_IOErr = HSTS_CYJ.EEPROM_IOErr,//EEPROM读写异常
+                InputOV = HSTS_CYJ.InputOV,//输入电压过高
+                BattOV = HSTS_CYJ.BattOV,//电池电压过高
+                FanSpeedFault = HSTS_CYJ.FanSpeedFault,//风扇转速异常
+                AutoStartEnable = HEEP1_CG.AutoStartEnable,//自动开机使能
+                AutoRestartAC = HEEP1_CG.AutoRestartAC,//市电恢复自动重启
+                ECOMode = HEEP1_CG.ECOMode,//节能模式
+                PassFunctionEnable = HEEP1_CG.PassFunctionEnable,//旁路功能使能
+                Frequencyrestrictionmode = HEEP1_CG.Frequencyrestrictionmode// 频率限制模式
 
             };
 
@@ -4638,7 +4687,6 @@ namespace WpfApp1.ViewModels
         /// </summary>
         public void RefleshSettingParamToLanguage(string Lan)
         {
-
             if (SelectedMachineItem == "BMS01")
             {
                 //补丁，BMS01时单位稍作修改
@@ -4653,7 +4701,6 @@ namespace WpfApp1.ViewModels
             }
             else
                 ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings("default.xml"));
-
         }
 
         /// <summary>

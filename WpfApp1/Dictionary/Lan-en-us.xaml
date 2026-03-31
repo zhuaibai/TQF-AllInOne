@@ -11,6 +11,15 @@
     <s:String x:Key="自动保存数据">AutoSave</s:String>
     <s:String x:Key="PBUS电压">PBUSVolt</s:String>
     <s:String x:Key="NBUS电压">NBUSVolt</s:String>
+    <s:String x:Key="电池带载限制时间">BatteryloadlimitTime</s:String>
+    <s:String x:Key="电池放电限制时间">BatterydischargelimitTime</s:String>
+    <s:String x:Key="输出功率因数">Outputpowerfactor</s:String>
+    <s:String x:Key="旁路高退电压">BypasshighDropout</s:String>
+    <s:String x:Key="旁路低退电压">BypasslowDropout</s:String>
+    <s:String x:Key="ECO模式">ECO Mode</s:String>
+    <s:String x:Key="市电自动重启">AutoRestartAC</s:String>
+    <s:String x:Key="旁路使能">PassFunctionEnable</s:String>
+    <s:String x:Key="频率限制模式">FrequencyRestrictionMode</s:String>
     <s:String x:Key="蓝牙地址">BluetoothAddress‌</s:String>
     <s:String x:Key="选择串口：">SerialPort:</s:String>
     <s:String x:Key="功能选项">FunctionOptions</s:String>

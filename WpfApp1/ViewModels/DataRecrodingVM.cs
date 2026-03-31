@@ -882,6 +882,124 @@ namespace WpfApp1.ViewModels
         }
         #endregion
 
+        #region CG000001的保存命令和配置
+        private ICommand _CGSaveCommand;
+        public ICommand CGSaveCommand
+        {
+            get
+            {
+                return _CGSaveCommand ?? (_CGSaveCommand = new RelayCommand(() => StartSavingWithConfig(GetCGConfig())));
+            }
+        }
+
+        /// <summary>
+        /// LB6的Excel配置
+        /// </summary>
+        /// <returns></returns>
+        private static DeviceExcelConfig GetCGConfig()
+        {
+            var config = new DeviceExcelConfig
+            {
+                DeviceName = "CG01",
+                ColumnGroups = new List<ColumnGroup>
+        {
+            new ColumnGroup
+            {
+                GroupName = "基本信息",
+                GroupColor = System.Drawing.Color.LightGray,
+                Columns = new List<ColumnInfo>
+                {
+                    new ColumnInfo("日期", "DataNow", 12),
+                    new ColumnInfo("时间", "Time", 10)
+                }
+            },
+            new ColumnGroup
+            {
+                GroupName = "市电",
+                GroupColor = System.Drawing.Color.LightBlue,
+                Columns = new List<ColumnInfo>
+                {
+                    new ColumnInfo("市电电压(V)", "MainsVoltage", 15, "0.0"),
+                    new ColumnInfo("市电频率(Hz)", "MainsFrequency", 15, "0.0"),
+                }
+            },
+            new ColumnGroup
+            {
+                GroupName = "输出",
+                GroupColor = System.Drawing.Color.LightGreen,
+                Columns = new List<ColumnInfo>
+                {
+                    new ColumnInfo("输出电压(V)", "OutVolt", 15, "0.0"),
+                    new ColumnInfo("输出频率(Hz)", "OutFreq", 15, "0.0"),
+                    new ColumnInfo("视在功率(W)", "ApparentPwr", 15, "0"),
+                    new ColumnInfo("有功功率(W)", "ActivePwr", 15, "0"),
+                    new ColumnInfo("负载百分比(%)", "LoadPercent", 15, "0%"),
+                    new ColumnInfo("满载有功功率(W)", "FullloadPwr", 15, "0"),
+                    new ColumnInfo("输出功率因数(%)", "Outputpowerfactor", 15, "10%"),
+                    new ColumnInfo("旁路高退电压(V)", "BypasshighDropout", 15, "0"),
+                    new ColumnInfo("旁路低退电压(V)", "BypasslowDropout", 15, "0"),
+                    new ColumnInfo("电感电流(A)", "InductorCurr", 15, "0.0")
+                }
+            },
+            new ColumnGroup
+            {
+                GroupName = "Time",
+                GroupColor = System.Drawing.Color.LightYellow,
+                Columns = new List<ColumnInfo>
+                {
+                    new ColumnInfo("电池带载限制时间(min)", "BatteryloadlimitTime", 20),
+                    new ColumnInfo("电池放电限制时间(min)", "BatterydischargelimitTime", 20)
+
+                }
+            },
+            new ColumnGroup
+            {
+                GroupName = "电池",
+                GroupColor = System.Drawing.Color.LightPink,
+                Columns = new List<ColumnInfo>
+                {
+                    new ColumnInfo("电池电压(V)", "BattVolt", 15, "0.0"),
+                    new ColumnInfo("电池容量(%)", "BattCapacity", 15, "0%"),
+                    new ColumnInfo("电池节数", "BattCells", 15, "0"),
+                    new ColumnInfo("PBUS电压(V)", "BusVolt", 15,"0"),
+                    new ColumnInfo("NBUS电压(V)", "NBusVolt", 15, "0")
+                }
+            },
+            new ColumnGroup
+            {
+                GroupName = "机器状态",
+                GroupColor = System.Drawing.Color.LightGray,
+                Columns = new List<ColumnInfo>
+                {
+                    new ColumnInfo("故障代码", "FaultCode", 15),
+                    new ColumnInfo("逆变温度(℃)", "InvTemp", 15, "0.0"),
+                    new ColumnInfo("模式", "Mode", 15),
+                    new ColumnInfo("当前最高温度(℃)", "MaxTemp", 15, "0.0"),
+                    new ColumnInfo("电池未接", "BattDisconnected", 15),
+                    new ColumnInfo("输出过载", "OutputOverload", 15),
+                    new ColumnInfo("机器过温(℃)", "OverTemp", 15,"0.0"),
+                    new ColumnInfo("电池低电报警", "BattLowAlarm", 15),
+                    new ColumnInfo("EEPROM数据异常", "EEPROM_DataErr", 15),
+                    new ColumnInfo("EEPROM读写异常", "EEPROM_IOErr", 15),
+                    new ColumnInfo("输入电压过高", "InputOV", 15),
+                    new ColumnInfo("电池电压过高", "BattOV", 15),
+                    new ColumnInfo("风扇转速异常", "FanSpeedFault", 15),
+                    new ColumnInfo("旁路功能使能", "PassFunctionEnable", 15),
+                    new ColumnInfo("市电恢复自动重启", "AutoRestartAC", 15),
+                    new ColumnInfo("ECO模式", "ECOMode", 15),
+                    new ColumnInfo("频率限制模式", "Frequencyrestrictionmode", 15),
+                    new ColumnInfo("自动开机使能", "AutoStartEnable", 15),
+                    new ColumnInfo("机器是否有输出", "OutputStatus", 15)
+                }
+
+            }
+        }
+            };
+
+            return config;
+        }
+        #endregion
+
         #region LPVINV02的保存命令和配置
         private ICommand _LPVINV02SaveCommand;
         public ICommand LPVINV02SaveCommand

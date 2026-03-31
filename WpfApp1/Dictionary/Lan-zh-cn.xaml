@@ -9,6 +9,15 @@
     <s:String x:Key="异常!">异常!</s:String>
     <s:String x:Key="电池">电池</s:String>
     <s:String x:Key="蓝牙地址">蓝牙地址</s:String>
+    <s:String x:Key="电池带载限制时间">电池带载限制时间</s:String>
+    <s:String x:Key="电池放电限制时间">电池放电限制时间</s:String>
+    <s:String x:Key="ECO模式">ECO模式</s:String>
+    <s:String x:Key="市电自动重启">市电自动重启</s:String>
+    <s:String x:Key="旁路使能">旁路使能</s:String>
+    <s:String x:Key="频率限制模式">频率限制模式</s:String>
+    <s:String x:Key="输出功率因数">输出功率因数</s:String>
+    <s:String x:Key="旁路高退电压">旁路高退电压</s:String>
+    <s:String x:Key="旁路低退电压">旁路低退电压</s:String>
     <s:String x:Key="PBUS电压">PBUS电压</s:String>
     <s:String x:Key="NBUS电压">NBUS电压</s:String>
     <s:String x:Key="选择串口：">选择串口:</s:String>

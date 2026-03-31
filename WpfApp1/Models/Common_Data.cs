@@ -47,6 +47,15 @@ namespace WpfApp1.Models
 
         public string LoadPercent { get; set; }//负载百分比
 
+        public string FullloadPwr { get; set; }//满载有功功率
+
+
+        public string Outputpowerfactor { get; set; }//输出功率因数
+
+
+        public string BypasshighDropout { get; set; }//旁路高退电压
+        public string BypasslowDropout { get; set; }//旁路低退电压
+
         public string DCOffset { get; set; }//直流分量
 
         public string InductorCurr { get; set; }//电感电流
@@ -66,6 +75,11 @@ namespace WpfApp1.Models
         public string BoostTemp { get; set; }//升压温度
 
         public string XfmrTemp { get; set; }//变压器温度
+
+        public string AutoRestartAC { get; set; }//市电自动重启
+        public string ECOMode { get; set; }//ECO模式
+        public string PassFunctionEnable { get; set; }//旁路使能
+        public string Frequencyrestrictionmode { get; set; }//频率限制模式
 
         public string MaxTemp { get; set; }//当前最高温度
 
@@ -204,6 +218,7 @@ namespace WpfApp1.Models
         public string BattCapacity { get; set; }//电池容量
 
         public string BusVolt { get; set; }//母线电压
+        public string NBusVolt { get; set; }//N母线电压
 
         public string BattCells { get; set; }//电池节数
 
@@ -244,6 +259,8 @@ namespace WpfApp1.Models
         public string InvTime { get; set; }//逆变时间
 
         public string LoadTime { get; set; } //带载时间
+        public string BatteryloadlimitTime { get; set; }//电池带载限制时间
+        public string BatterydischargelimitTime { get; set; }//电池放电限制时间
         #endregion
     }
 }

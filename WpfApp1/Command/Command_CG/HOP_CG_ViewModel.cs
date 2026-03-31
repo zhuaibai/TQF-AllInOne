@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DocumentFormat.OpenXml.Drawing;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,9 +8,9 @@ using WpfApp1.Convert;
 using WpfApp1.Services;
 using WpfApp1.ViewModels;
 
-namespace WpfApp1.Command.Command_PDF3024
+namespace WpfApp1.Command.Command_CG
 {
-    public class HOP_PDF_ViewModel:BaseViewModel
+    public class HOP_CG_ViewModel:BaseViewModel
     {
         //指令
         private string command = "HOP\r";
@@ -20,9 +21,9 @@ namespace WpfApp1.Command.Command_PDF3024
         Action<string> AddLog;           //添加日志委托
         Action<string> UpdateState;      //更新状态日志
 
-        public HOP_PDF_ViewModel( ManualResetEventSlim pauseEvent, SemaphoreSlim semaphore, Action<string> addLog, Action<string> updateState)
+        public HOP_CG_ViewModel(ManualResetEventSlim pauseEvent, SemaphoreSlim semaphore, Action<string> addLog, Action<string> updateState)
         {
-            
+
             _pauseEvent = pauseEvent;
             _semaphore = semaphore;
             AddLog = addLog;
@@ -54,20 +55,10 @@ namespace WpfApp1.Command.Command_PDF3024
                 execute: () => LoadPercentOperation(),
                 canExecute: () => Validate(nameof(LoadPercent_Inputs)) && !LoadPercent_IsWorking // 增加处理状态检查
             );
-            //直流分量
-            Command_SetDCOffset = new RelayCommand(
-                execute: () => DCOffsetOperation(),
-                canExecute: () => Validate(nameof(DCOffset_Inputs)) && !DCOffset_IsWorking // 增加处理状态检查
-            );
-            //额定功率
-            Command_SetRatedPwr = new RelayCommand(
-                execute: () => RatedPwrOperation(),
-                canExecute: () => Validate(nameof(RatedPwr_Inputs)) && !RatedPwr_IsWorking // 增加处理状态检查
-            );
-            //电感功率
-            Command_SetInductorPwr = new RelayCommand(
-                execute: () => InductorPwrOperation(),
-                canExecute: () => Validate(nameof(InductorPwr_Inputs)) && !InductorPwr_IsWorking // 增加处理状态检查
+            //满载有功功率
+            Command_SetFullloadPwr = new RelayCommand(
+                execute: () => FullloadPwrOperation(),
+                canExecute: () => Validate(nameof(FullloadPwr_Inputs)) && !FullloadPwr_IsWorking // 增加处理状态检查
             );
             //电感电流
             Command_SetInductorCurr = new RelayCommand(
@@ -76,7 +67,6 @@ namespace WpfApp1.Command.Command_PDF3024
             );
             #endregion
         }
-
 
         #region 输出电压
 
@@ -88,7 +78,7 @@ namespace WpfApp1.Command.Command_PDF3024
             get { return _OutVolt2; }
             set
             {
-                _OutVolt2 = value+"V";
+                _OutVolt2 = value;
                 this.RaiseProperChanged(nameof(OutVolt2));
             }
         }
@@ -621,270 +611,6 @@ namespace WpfApp1.Command.Command_PDF3024
 
         #endregion
 
-        #region 直流分量
-
-        //直流分量
-        private string _DCOffset;
-
-        public string DCOffset
-        {
-            get { return _DCOffset; }
-            set
-            {
-                _DCOffset = Tools.RemoveLeadingZeros(value);
-                this.RaiseProperChanged(nameof(DCOffset));
-            }
-        }
-
-
-        private bool DCOffset_IsWorking;
-
-
-        //设置值
-        private string _DCOffset_Inputs;
-
-        public string DCOffset_Inputs
-        {
-            get { return _DCOffset_Inputs; }
-            set
-            {
-                _DCOffset_Inputs = value;
-                this.RaiseProperChanged(nameof(DCOffset_Inputs));
-                Command_SetDCOffset.RaiseCanExecuteChanged();
-            }
-        }
-
-
-        public RelayCommand Command_SetDCOffset { get; }
-
-        /// <summary>
-        /// 点击设置
-        /// </summary>
-        private async void DCOffsetOperation()
-        {
-            try
-            {
-                DCOffset_IsWorking = true;
-                // 禁用按钮
-                Command_SetDCOffset.RaiseCanExecuteChanged();
-
-                // 异步等待锁
-                await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
-                //Status = "正在执行特殊操作...";
-
-                // 暂停后台线程
-                _pauseEvent.Reset();
-                AddLog("已暂停后台通信");
-
-                // 执行特殊操作（带超时保护）
-                using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
-                {
-                    //执行设置指令
-                    Thread.Sleep(2000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("设置指令", DCOffset_Inputs);
-
-                })
-                , timeoutCts.Token);
-            }
-            catch (OperationCanceledException)
-            {
-                AddLog("特殊操作执行超时");
-            }
-            finally
-            {
-                // 恢复后台线程
-                _pauseEvent.Set();
-                AddLog("恢复后台通信");
-                DCOffset_IsWorking = false;
-                //Status = "就绪";
-                // 重新启用按钮
-                Command_SetDCOffset.RaiseCanExecuteChanged();
-                // 确保释放锁
-                _semaphore.Release();
-                UpdateState("设置指令已经执行完");
-            }
-        }
-
-        #endregion
-
-        #region 额定功率
-
-        //额定功率
-        private string _RatedPwr;
-
-        public string RatedPwr
-        {
-            get { return _RatedPwr; }
-            set
-            {
-                _RatedPwr = Tools.RemoveLeadingZeros(value);
-                this.RaiseProperChanged(nameof(RatedPwr));
-            }
-        }
-
-
-        private bool RatedPwr_IsWorking;
-
-
-        //设置值
-        private string _RatedPwr_Inputs;
-
-        public string RatedPwr_Inputs
-        {
-            get { return _RatedPwr_Inputs; }
-            set
-            {
-                _RatedPwr_Inputs = value;
-                this.RaiseProperChanged(nameof(RatedPwr_Inputs));
-                Command_SetRatedPwr.RaiseCanExecuteChanged();
-            }
-        }
-
-
-        public RelayCommand Command_SetRatedPwr { get; }
-
-        /// <summary>
-        /// 点击设置
-        /// </summary>
-        private async void RatedPwrOperation()
-        {
-            try
-            {
-                RatedPwr_IsWorking = true;
-                // 禁用按钮
-                Command_SetRatedPwr.RaiseCanExecuteChanged();
-
-                // 异步等待锁
-                await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
-                //Status = "正在执行特殊操作...";
-
-                // 暂停后台线程
-                _pauseEvent.Reset();
-                AddLog("已暂停后台通信");
-
-                // 执行特殊操作（带超时保护）
-                using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
-                {
-                    //执行设置指令
-                    Thread.Sleep(2000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("设置指令", RatedPwr_Inputs);
-
-                })
-                , timeoutCts.Token);
-            }
-            catch (OperationCanceledException)
-            {
-                AddLog("特殊操作执行超时");
-            }
-            finally
-            {
-                // 恢复后台线程
-                _pauseEvent.Set();
-                AddLog("恢复后台通信");
-                RatedPwr_IsWorking = false;
-                //Status = "就绪";
-                // 重新启用按钮
-                Command_SetRatedPwr.RaiseCanExecuteChanged();
-                // 确保释放锁
-                _semaphore.Release();
-                UpdateState("设置指令已经执行完");
-            }
-        }
-
-        #endregion
-
-        #region 电感功率
-
-        //电感功率
-        private string _InductorPwr;
-
-        public string InductorPwr
-        {
-            get { return _InductorPwr; }
-            set
-            {
-                _InductorPwr = Tools.RemoveLeadingZeros(value);
-                this.RaiseProperChanged(nameof(InductorPwr));
-            }
-        }
-
-
-        private bool InductorPwr_IsWorking;
-
-
-        //设置值
-        private string _InductorPwr_Inputs;
-
-        public string InductorPwr_Inputs
-        {
-            get { return _InductorPwr_Inputs; }
-            set
-            {
-                _InductorPwr_Inputs = value;
-                this.RaiseProperChanged(nameof(InductorPwr_Inputs));
-                Command_SetInductorPwr.RaiseCanExecuteChanged();
-            }
-        }
-
-
-        public RelayCommand Command_SetInductorPwr { get; }
-
-        /// <summary>
-        /// 点击设置
-        /// </summary>
-        private async void InductorPwrOperation()
-        {
-            try
-            {
-                InductorPwr_IsWorking = true;
-                // 禁用按钮
-                Command_SetInductorPwr.RaiseCanExecuteChanged();
-
-                // 异步等待锁
-                await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
-                //Status = "正在执行特殊操作...";
-
-                // 暂停后台线程
-                _pauseEvent.Reset();
-                AddLog("已暂停后台通信");
-
-                // 执行特殊操作（带超时保护）
-                using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
-                {
-                    //执行设置指令
-                    Thread.Sleep(2000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("设置指令", InductorPwr_Inputs);
-
-                })
-                , timeoutCts.Token);
-            }
-            catch (OperationCanceledException)
-            {
-                AddLog("特殊操作执行超时");
-            }
-            finally
-            {
-                // 恢复后台线程
-                _pauseEvent.Set();
-                AddLog("恢复后台通信");
-                InductorPwr_IsWorking = false;
-                //Status = "就绪";
-                // 重新启用按钮
-                Command_SetInductorPwr.RaiseCanExecuteChanged();
-                // 确保释放锁
-                _semaphore.Release();
-                UpdateState("设置指令已经执行完");
-            }
-        }
-
-        #endregion
-
         #region 电感电流
 
         //电感电流
@@ -972,24 +698,6 @@ namespace WpfApp1.Command.Command_PDF3024
         }
         #endregion
 
-        #region 内部数据
-
-        //内部数据
-        private string date;
-
-        public string Data
-        {
-            get { return date; }
-            set
-            {
-                date = value;
-                this.RaiseProperChanged(nameof(Data));
-            }
-        }
-
-
-        #endregion
-
         #region 通用方法
         /// <summary>
         /// 判断输入是否正确
@@ -1016,15 +724,9 @@ namespace WpfApp1.Command.Command_PDF3024
                 //负载百分比
                 case "LoadPercent_Inputs":
                     return !string.IsNullOrWhiteSpace(LoadPercent_Inputs);
-                //直流分量
-                case "DCOffset_Inputs":
-                    return !string.IsNullOrWhiteSpace(DCOffset_Inputs);
-                //额定功率
-                case "RatedPwr_Inputs":
-                    return !string.IsNullOrWhiteSpace(RatedPwr_Inputs);
-                //电感功率
-                case "InductorPwr_Inputs":
-                    return !string.IsNullOrWhiteSpace(InductorPwr_Inputs);
+                //满载有功功率
+                case "FullloadPwr_Inputs":
+                    return !string.IsNullOrWhiteSpace(FullloadPwr_Inputs);
                 //电感电流
                 case "InductorCurr_Inputs":
                     return !string.IsNullOrWhiteSpace(InductorCurr_Inputs);
@@ -1047,7 +749,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 ReceiveException("空");
                 return;
             }
-            if(value.StartsWith("-1"))
+            if (value.StartsWith("-1"))
             {
                 ReceiveException("CRC异常");
                 AddLog(value);
@@ -1058,23 +760,20 @@ namespace WpfApp1.Command.Command_PDF3024
             try
             {
                 //输出电压
-                OutVolt = Values[0].Substring(1,5);
+                OutVolt = Values[0].Substring(1, 5);
                 //输出频率
                 OutFreq = Values[1];
-                //视在频率
-                ApparentPwr= Values[2];
+                //视在功率
+                ApparentPwr = Values[2];
                 //有功功率
                 ActivePwr = Values[3];
                 //负载百分比
                 LoadPercent = Values[4];
-                //直流分量
-                DCOffset = Values[5];
-                //额定功率
-                RatedPwr = Values[6];
+                //满载有功功率
+                FullloadPwr = Values[6];
                 //电感电流
                 InductorCurr = Values[7];
-                //电感功率
-                InductorPwr = Values[8].Substring(0,5);
+
             }
             catch (Exception)
             {
@@ -1099,14 +798,11 @@ namespace WpfApp1.Command.Command_PDF3024
             ActivePwr = exceptionDescription;
             //负载百分比
             LoadPercent = exceptionDescription;
-            //直流分量
-            DCOffset = exceptionDescription;
-            //额定功率
-            RatedPwr = exceptionDescription;
+            //满载有功功率
+            FullloadPwr = exceptionDescription;
             //电感电流
             InductorCurr = exceptionDescription;
-            //电感功率
-            InductorPwr = exceptionDescription;
+
         }
         #endregion
     }

@@ -4262,45 +4262,45 @@ namespace WpfApp1.ViewModels
             return new ObservableCollection<SendingCommand>();
         }
 
-        public ObservableCollection<SendingCommand> LoadSettings2()
-        {
-            try
-            {
-                string path = "default2.xml";
-                filePathToSave = path;
-                if (File.Exists(path))
-                {
-                    // 1. 读取文件内容
-                    using var fileStream = new FileStream(path, FileMode.Open);
-                    var wrapperSerializer = new XmlSerializer(typeof(ConfigWrapper));
-                    var wrapper = (ConfigWrapper)wrapperSerializer.Deserialize(fileStream);
+        //public ObservableCollection<SendingCommand> LoadSettings2()
+        //{
+        //    try
+        //    {
+        //        string path = "default2.xml";
+        //        filePathToSave = path;
+        //        if (File.Exists(path))
+        //        {
+        //            // 1. 读取文件内容
+        //            using var fileStream = new FileStream(path, FileMode.Open);
+        //            var wrapperSerializer = new XmlSerializer(typeof(ConfigWrapper));
+        //            var wrapper = (ConfigWrapper)wrapperSerializer.Deserialize(fileStream);
 
-                    // 2. 计算读取数据的哈希（直接对字节数组计算）
-                    using var sha256 = SHA256.Create();
-                    string computedHashString = System.Convert.ToBase64String(sha256.ComputeHash(wrapper.DataBytes));
+        //            // 2. 计算读取数据的哈希（直接对字节数组计算）
+        //            using var sha256 = SHA256.Create();
+        //            string computedHashString = System.Convert.ToBase64String(sha256.ComputeHash(wrapper.DataBytes));
 
-                    // 3. 验证哈希
-                    if (computedHashString != wrapper.Hash)
-                    {
-                        MessageBox.Show("配置文件已损坏或被篡改！", "错误",
-                            MessageBoxButton.OK, MessageBoxImage.Error);
-                        return new ObservableCollection<SendingCommand>();
-                    }
+        //            // 3. 验证哈希
+        //            if (computedHashString != wrapper.Hash)
+        //            {
+        //                MessageBox.Show("配置文件已损坏或被篡改！", "错误",
+        //                    MessageBoxButton.OK, MessageBoxImage.Error);
+        //                return new ObservableCollection<SendingCommand>();
+        //            }
 
-                    // 4. 反序列化原始数据
-                    using var dataStream = new MemoryStream(wrapper.DataBytes);
-                    var serializer = new XmlSerializer(typeof(ObservableCollection<SendingCommand>));
-                    return (ObservableCollection<SendingCommand>)serializer.Deserialize(dataStream);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("配置文件已损坏或被篡改！", "错误",
-                            MessageBoxButton.OK, MessageBoxImage.Error);
-                Console.WriteLine($"加载设置时出错: {ex.Message}");
-            }
-            return new ObservableCollection<SendingCommand>();
-        }
+        //            // 4. 反序列化原始数据
+        //            using var dataStream = new MemoryStream(wrapper.DataBytes);
+        //            var serializer = new XmlSerializer(typeof(ObservableCollection<SendingCommand>));
+        //            return (ObservableCollection<SendingCommand>)serializer.Deserialize(dataStream);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show("配置文件已损坏或被篡改！", "错误",
+        //                    MessageBoxButton.OK, MessageBoxImage.Error);
+        //        Console.WriteLine($"加载设置时出错: {ex.Message}");
+        //    }
+        //    return new ObservableCollection<SendingCommand>();
+        //}
 
       
         /// <summary>
