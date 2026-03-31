@@ -3324,7 +3324,7 @@ namespace WpfApp1.ViewModels
         {
             string receive = string.Empty;
 
-            //判断是否开启CRC接收校验（抗干扰 默认开启
+            //判断是否开启CRC接收校验（抗干扰 默认关闭
             if (IsChecked)
             {
                 //发送HOSTCRDEN指令
