@@ -1206,7 +1206,7 @@
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding HEEP1_LB6.BattHvLockVolt}" />
-                            <TextBox
+                            <!--<TextBox
                             Grid.Row="7"
                             Grid.Column="2"
                             Style="{StaticResource InputBox}"
@@ -1217,7 +1217,7 @@
                             Grid.Column="3"
                             Command="{Binding DataContext.HEEP1_LB6.Command_SetBattHvLockVolt, RelativeSource={RelativeSource AncestorType=Window}}"
                             Content="{DynamicResource 设置}"
-                            Style="{StaticResource ActionButton}" />
+                            Style="{StaticResource ActionButton}" />-->
 
                             <!--  强充时间  -->
                             <!--
@@ -1352,72 +1352,70 @@
                                 HorizontalAlignment="Center"
                                 Style="{StaticResource HeaderText}"
                                 Text="{DynamicResource 操作}" />
-
-                            <!--  LCD背光  -->
-                            <TextBlock
-                                Grid.Row="4"
-                                Style="{StaticResource ContentText}"
-                                Text="{DynamicResource LCD背光}" />
-                            <TextBlock
-                                Grid.Row="4"
-                                Grid.Column="1"
-                                Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_LB6.LCD_Backlight}" />
-                            <ComboBox
-                                Grid.Row="4"
-                                Grid.Column="2"
-                                ItemsSource="{Binding HEEP1_LB6.LCD_BacklightOptions}"
-                                SelectedItem="{Binding HEEP1_LB6.LCD_Backlight_Inputs, UpdateSourceTrigger=PropertyChanged}"
-                                Style="{StaticResource SelectBox}" />
-                            <Button
-                                Grid.Row="4"
-                                Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_LB6.Command_SetLCD_Backlight, RelativeSource={RelativeSource AncestorType=Window}}"
-                                Content="{DynamicResource 设置}"
-                                Style="{StaticResource ActionButton}" />
-
                             <!--  输出设定频率  -->
                             <TextBlock
-                                Grid.Row="3"
+                                Grid.Row="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource 输出频率}" />
                             <TextBlock
-                                Grid.Row="3"
+                                Grid.Row="1"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding HEEP1_LB6.OutputSettingFrequency2}" Margin="0,0,0,11" VerticalAlignment="Bottom" />
                             <ComboBox
-                                Grid.Row="3"
+                                Grid.Row="1"
                                 Grid.Column="2"
                                 ItemsSource="{Binding HEEP1_LB6.OutputSettingFrequencyOptions}"
                                 SelectedItem="{Binding HEEP1_LB6.OutputSettingFrequency_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
-                                Grid.Row="3"
+                                Grid.Row="1"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HEEP1_LB6.Command_SetOutputSettingFrequency, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
 
+                            <!--  LCD背光  -->
+                            <TextBlock
+                                Grid.Row="2"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource LCD背光}" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP1_LB6.LCD_Backlight}" />
+                            <ComboBox
+                                Grid.Row="2"
+                                Grid.Column="2"
+                                ItemsSource="{Binding HEEP1_LB6.LCD_BacklightOptions}"
+                                SelectedItem="{Binding HEEP1_LB6.LCD_Backlight_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{StaticResource SelectBox}" />
+                            <Button
+                                Grid.Row="2"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP1_LB6.Command_SetLCD_Backlight, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Style="{StaticResource ActionButton}" />
 
                             <!--  故障记录  -->
                             <TextBlock
-                                Grid.Row="8"
+                                Grid.Row="3"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource 故障记录}" />
                             <TextBlock
-                                Grid.Row="8"
+                                Grid.Row="3"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding HEEP1_LB6.FaultLog}" />
                             <ComboBox
-                                Grid.Row="8"
+                                Grid.Row="3"
                                 Grid.Column="2"
                                 ItemsSource="{Binding HEEP1_LB6.FaultLogOptions}"
                                 SelectedItem="{Binding HEEP1_LB6.FaultLog_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
-                                Grid.Row="8"
+                                Grid.Row="3"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HEEP1_LB6.Command_SetFaultLog, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
@@ -1426,27 +1424,48 @@
 
                             <!--  蜂鸣器状态  -->
                             <TextBlock
-                                Grid.Row="10"
+                                Grid.Row="4"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource 蜂鸣器状态}" />
                             <TextBlock
-                                Grid.Row="10"
+                                Grid.Row="4"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding HEEP1_LB6.BuzzerStatus}" />
                             <ComboBox
-                                Grid.Row="10"
+                                Grid.Row="4"
                                 Grid.Column="2"
                                 ItemsSource="{Binding HEEP1_LB6.BuzzerStatusOptions}"
                                 SelectedItem="{Binding HEEP1_LB6.BuzzerStatus_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
-                                Grid.Row="10"
+                                Grid.Row="4"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HEEP1_LB6.Command_SetBuzzerStatus, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
-
+                            <!--  电池类型  -->
+                            <TextBlock
+                                Grid.Row="5"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 电池类型}" />
+                            <TextBlock
+                                Grid.Row="5"
+                                Grid.Column="1"
+                                Text="{Binding HEEP1_LB6.BatteryType}" 
+                                Style="{StaticResource ContentText}" />
+                            <ComboBox
+                                Grid.Row="5"
+                                Grid.Column="2"
+                                ItemsSource="{Binding HEEP1_LB6.BatteryTypeOptions}"
+                                SelectedItem="{Binding HEEP1_LB6.BatteryTypeSelectedOption, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{StaticResource SelectBox}" />
+                            <Button
+                                Grid.Row="5"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP1_LB6.Command_SetBatteryType, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Style="{StaticResource ActionButton}" />
                             <!--  自动返回首页  -->
                             <!--<TextBlock
                                 Grid.Row="12"
@@ -1469,9 +1488,8 @@
                                 Command="{Binding DataContext.HEEP1_LB6.Command_SetAutoReturnHome, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />-->
-
                             <!--  自动开机使能  -->
-                            <TextBlock
+                           <!-- <TextBlock
                                 Grid.Row="13"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource 自动开机使能}" />
@@ -1491,7 +1509,7 @@
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HEEP1_LB6.Command_SetAutoStartEnable, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
-                                Style="{StaticResource ActionButton}" />
+                                Style="{StaticResource ActionButton}" />-->
                             <!--  定时关机  -->
                             <!--<TextBlock
                                 Grid.Row="14"

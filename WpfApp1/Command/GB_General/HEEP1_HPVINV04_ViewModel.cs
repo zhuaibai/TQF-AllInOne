@@ -61,12 +61,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 execute: () => StrongChargeVoltageOperation(),
                 canExecute: () => Validate(nameof(StrongChargeVoltage_Inputs)) && !StrongChargeVoltage_IsWorking
             );
-            //强充电压
-            Command_SetStrongChargeVoltage = new RelayCommand(
-                execute: () => StrongChargeVoltageOperation(),
-                canExecute: () => Validate(nameof(StrongChargeVoltage_Inputs)) && !StrongChargeVoltage_IsWorking
-            );
-            //强充电压
+            //浮充电压
             Command_SetFloatChargeVolage = new RelayCommand(
                 execute: () => FloatChargeVolageOperation(),
                 canExecute: () => Validate(nameof(FloatChargeVolage_Inputs)) && !FloatChargeVolage_IsWorking

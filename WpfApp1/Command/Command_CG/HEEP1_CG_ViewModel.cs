@@ -49,7 +49,17 @@ namespace WpfApp1.Command.Command_CG
                 canExecute: () => Validate(nameof(BypasshighDropout_Inputs)) && !_BypasshighDropoutIsWorking
             );
 
+            //旁路低退频率
+            Command_SetBypasslowFrequency = new RelayCommand(
+                execute: () => BypasslowFrequencyOperation(),
+                canExecute: () => Validate(nameof(BypasslowFrequency_Inputs)) && !_BypasslowFrequencyIsWorking
+            );
 
+            //旁路高退频率
+            Command_SetBypasshighFrequency = new RelayCommand(
+                execute: () => BypasshighFrequencyOperation(),
+                canExecute: () => Validate(nameof(BypasshighFrequency_Inputs)) && !_BypasshighFrequencyIsWorking
+            );
 
             //强充电压
             Command_SetStrongChargeVoltage = new RelayCommand(
@@ -141,6 +151,11 @@ namespace WpfApp1.Command.Command_CG
               execute: () => BatterydischargelimitTimeOperation(),
               canExecute: () => Validate(nameof(BatterydischargelimitTime_Inputs)) && !BatterydischargelimitTime_IsWorking
              );
+            //电池类型
+            Command_SetBatteryType = new RelayCommand(
+              execute: () => BatteryTypeOperation(),
+              canExecute: () => Validate(nameof(BatteryTypeSelectedOption)) && !_BatteryIsWorking
+             );
             #endregion
         }
 
@@ -231,7 +246,14 @@ namespace WpfApp1.Command.Command_CG
                     //执行设置指令
                     Thread.Sleep(1000);
                     string receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(BuzzerStatus_Inputs)));
-
+                    if (receive.StartsWith("(ACK"))
+                    {
+                        AddLog("设置蜂鸣器状态成功！");
+                    }
+                    else 
+                    {
+                        AddLog("设置蜂鸣器状态失败！");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -340,7 +362,14 @@ namespace WpfApp1.Command.Command_CG
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
                     string receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(LCD_Backlight_Inputs)));
-
+                    if (receive.StartsWith("(ACK"))
+                    {
+                        AddLog("设置LCD背光成功！");
+                    }
+                    else
+                    {
+                        AddLog("设置LCD背光失败！");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -450,7 +479,14 @@ namespace WpfApp1.Command.Command_CG
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
                     string receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(FaultLog_Inputs)));
-
+                    if (receive.StartsWith("(ACK"))
+                    {
+                        AddLog("设置故障记录成功！");
+                    }
+                    else
+                    {
+                        AddLog("设置故障记录失败！");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -799,7 +835,12 @@ namespace WpfApp1.Command.Command_CG
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
                     string receive = SerialCommunicationService.SendSettingCommand("F", OutputSettingFrequency_Inputs);
-
+                    if (receive.StartsWith("(ACK"))
+                    {
+                        AddLog("设置系统频率成功");
+                    }else {
+                        AddLog("设置系统频率失败");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -1019,7 +1060,14 @@ namespace WpfApp1.Command.Command_CG
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
                     string receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(PassFunctionEnable_Inputs)));
-
+                    if (receive.StartsWith("(ACK"))
+                    {
+                        AddLog("设置旁路使能成功！");
+                    }
+                    else if(receive.StartsWith("(NACK"))
+                    {
+                        AddLog("设置旁路使能失败！");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -1128,7 +1176,14 @@ namespace WpfApp1.Command.Command_CG
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
                     string receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(Frequencyrestrictionmode_Inputs)));
-
+                    if (receive.StartsWith("(ACK"))
+                    {
+                        AddLog("设置频率限制模式成功！");
+                    }
+                    else
+                    {
+                        AddLog("设置频率限制模式失败！");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -1217,7 +1272,14 @@ namespace WpfApp1.Command.Command_CG
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
                     string receive = SerialCommunicationService.SendSettingCommand("V", OutSetVolt_Inputs);
-
+                    if (receive.StartsWith("(ACK"))
+                    {
+                        AddLog("设置输出电压成功！");
+                    }
+                    else
+                    {
+                        AddLog("设置输出电压失败！");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -1254,17 +1316,9 @@ namespace WpfApp1.Command.Command_CG
             get { return _BatteryType; }
             set
             {
-                if (value == "0") { _BatteryType = "AGM"; }
-                else if (value == "1") { _BatteryType = "FLD"; }
-                else if (value == "2") { _BatteryType = "USER"; }
-                else if (value == "3") { _BatteryType = "LIA"; }
-                else if (value == "4") { _BatteryType = "PYL"; }
-                else if (value == "5") { _BatteryType = "TQF"; }
-                else if (value == "6") { _BatteryType = "GRO"; }
-                else if (value == "7") { _BatteryType = "LIB"; }
-                else if (value == "8") { _BatteryType = "LIC"; }
-
-
+                if (value == "00") { _BatteryType = "AGM"; }
+                else if (value == "01") { _BatteryType = "FLD"; }
+                else if (value == "02") { _BatteryType = "USER"; }
                 else
                     _BatteryType = value;
                 RaiseProperChanged(nameof(BatteryType));
@@ -1274,7 +1328,7 @@ namespace WpfApp1.Command.Command_CG
 
 
         //电池类型可选项
-        private List<string> _BatteryTypeOptions = new List<string> { "AGM", "FLD", "USE", "LIA", "PYL", "TQF", "GRO", "LIB", "LIC" };
+        private List<string> _BatteryTypeOptions = new List<string> { "AGM", "FLD", "USE"};
 
         public List<string> BatteryTypeOptions
         {
@@ -1287,9 +1341,9 @@ namespace WpfApp1.Command.Command_CG
         }
 
         //电池类型已选项
-        private string? _BatteryTypeSelectedOption;
+        private string _BatteryTypeSelectedOption;
 
-        public string? BatteryTypeSelectedOption
+        public string BatteryTypeSelectedOption
         {
             get { return _BatteryTypeSelectedOption; }
             set
@@ -1329,7 +1383,14 @@ namespace WpfApp1.Command.Command_CG
                     //执行设置指令
                     Thread.Sleep(1000);
                     string receive = SerialCommunicationService.SendSettingCommand("PBT", getSelectedToCommad(nameof(BatteryTypeSelectedOption)));
-
+                    if (receive.StartsWith("(ACK"))
+                    {
+                        AddLog("设置电池类型成功！");
+                    }
+                    else
+                    {
+                        AddLog("设置电池类型失败！");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -1609,7 +1670,14 @@ namespace WpfApp1.Command.Command_CG
                     //执行设置指令
                     Thread.Sleep(2000);//没有这个延时会报错
                     string receive = SerialCommunicationService.SendSettingCommand("PSLV", Tools.FormatToXxx(BattLowAlarmVolt_Inputs));
-
+                    if (receive.StartsWith("(ACK"))
+                    {
+                        AddLog("设置低电告警电压成功！");
+                    }
+                    else
+                    {
+                        AddLog("设置低电告警电压失败！");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -1696,7 +1764,14 @@ namespace WpfApp1.Command.Command_CG
                     //执行设置指令
                     //Thread.Sleep(2000);
                     string receive = SerialCommunicationService.SendSettingCommand("PSDV", Tools.FormatToXxx(LowPowerLock_Inputs));
-
+                    if (receive.StartsWith("(ACK"))
+                    {
+                        AddLog("设置低电锁机电压成功！");
+                    }
+                    else
+                    {
+                        AddLog("设置低电锁机电压失败！");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -2045,8 +2120,15 @@ namespace WpfApp1.Command.Command_CG
                 {
                     //执行设置指令
                     //Thread.Sleep(2000);
-                    string receive = SerialCommunicationService.SendSettingCommand("V", BypasshighDropout_Inputs);
-
+                    string receive = SerialCommunicationService.SendSettingCommand("BPHLV", BypasshighDropout_Inputs);
+                    if (receive.StartsWith("(ACK"))
+                    {
+                        AddLog("设置旁路高退电压成功！");
+                    }
+                    else
+                    {
+                        AddLog("设置旁路高退电压失败！");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -2104,7 +2186,6 @@ namespace WpfApp1.Command.Command_CG
             }
         }
 
-
         public RelayCommand Command_SetBypasslowDropout { get; }
 
         /// <summary>
@@ -2133,8 +2214,15 @@ namespace WpfApp1.Command.Command_CG
                 {
                     //执行设置指令
                     //Thread.Sleep(2000);
-                    string receive = SerialCommunicationService.SendSettingCommand("V", BypasslowDropout_Inputs);
-
+                    string receive = SerialCommunicationService.SendSettingCommand("BPLLV", BypasslowDropout_Inputs);
+                    if (receive.StartsWith("(ACK"))
+                    {
+                        AddLog("设置旁路低退电压成功！");
+                    }
+                    else
+                    {
+                        AddLog("设置旁路低退电压失败！");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -2151,6 +2239,182 @@ namespace WpfApp1.Command.Command_CG
                 //Status = "就绪";
                 // 重新启用按钮
                 Command_SetBypasslowDropout.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+
+        #endregion
+
+        #region 旁路高退频率
+
+        //旁路高退频率
+        private string _BypasshighFrequency;
+
+        public string BypasshighFrequency
+        {
+            get { return _BypasshighFrequency; }
+            set
+            {
+                _BypasshighFrequency = Tools.RemoveLeadingZeros(value);
+                RaiseProperChanged(nameof(BypasshighFrequency));
+            }
+        }
+
+        private bool _BypasshighFrequencyIsWorking;
+
+
+        //设置值
+        private string _BypasshighFrequency_Inputs;
+
+        public string BypasshighFrequency_Inputs
+        {
+            get { return _BypasshighFrequency_Inputs; }
+            set
+            {
+                _BypasshighFrequency_Inputs = value;
+                RaiseProperChanged(nameof(BypasshighFrequency_Inputs));
+                Command_SetBypasshighFrequency.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        public RelayCommand Command_SetBypasshighFrequency { get; }
+
+        /// <summary>
+        /// 点击工作模式设置
+        /// </summary>
+        private async void BypasshighFrequencyOperation()
+        {
+            try
+            {
+                _BypasshighFrequencyIsWorking = true;
+                // 禁用按钮
+                Command_SetBypasshighFrequency.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState($"正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    //Thread.Sleep(2000);
+                    string receive = SerialCommunicationService.SendSettingCommand("BPHLF", BypasshighFrequency_Inputs);
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                _BypasshighFrequencyIsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetBypasshighFrequency.RaiseCanExecuteChanged();
+                // 确保释放锁
+                _semaphore.Release();
+                UpdateState("设置指令已经执行完");
+            }
+        }
+
+
+        #endregion
+
+        #region 旁路低退频率
+
+        //旁路低退频率
+        private string _BypasslowFrequency;
+
+        public string BypasslowFrequency
+        {
+            get { return _BypasslowFrequency; }
+            set
+            {
+                _BypasslowFrequency = Tools.RemoveLeadingZeros(value);
+                RaiseProperChanged(nameof(BypasslowFrequency));
+            }
+        }
+
+        private bool _BypasslowFrequencyIsWorking;
+
+
+        //设置值
+        private string _BypasslowFrequency_Inputs;
+
+        public string BypasslowFrequency_Inputs
+        {
+            get { return _BypasslowFrequency_Inputs; }
+            set
+            {
+                _BypasslowFrequency_Inputs = value;
+                RaiseProperChanged(nameof(BypasslowFrequency_Inputs));
+                Command_SetBypasslowFrequency.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        public RelayCommand Command_SetBypasslowFrequency { get; }
+
+        /// <summary>
+        /// 点击工作模式设置
+        /// </summary>
+        private async void BypasslowFrequencyOperation()
+        {
+            try
+            {
+                _BypasslowFrequencyIsWorking = true;
+                // 禁用按钮
+                Command_SetBypasslowFrequency.RaiseCanExecuteChanged();
+
+                // 异步等待锁
+                await _semaphore.WaitAsync();
+                UpdateState($"正在执行设置命令");
+                //Status = "正在执行特殊操作...";
+
+                // 暂停后台线程
+                _pauseEvent.Reset();
+                AddLog("已暂停后台通信");
+
+                // 执行特殊操作（带超时保护）
+                using var timeoutCts = new CancellationTokenSource(5000);
+                await Task.Run(new Action(() =>
+                {
+                    //执行设置指令
+                    //Thread.Sleep(2000);
+                    string receive = SerialCommunicationService.SendSettingCommand("BPLLF", BypasslowFrequency_Inputs);
+
+                })
+                , timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("特殊操作执行超时");
+            }
+            finally
+            {
+                // 恢复后台线程
+                _pauseEvent.Set();
+                AddLog("恢复后台通信");
+                _BypasslowFrequencyIsWorking = false;
+                //Status = "就绪";
+                // 重新启用按钮
+                Command_SetBypasslowFrequency.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
                 UpdateState("设置指令已经执行完");
@@ -2182,26 +2446,20 @@ namespace WpfApp1.Command.Command_CG
                     return !string.IsNullOrWhiteSpace(OutputSettingFrequency_Inputs);            //输出频率
                 case "OutSetVolt_Inputs":
                     return !string.IsNullOrWhiteSpace(OutSetVolt_Inputs);                        //输出电压
-                case "AutoStartEnable_Inputs":
-                    return !string.IsNullOrWhiteSpace(AutoStartEnable_Inputs);                   //自动开机使能
-                case "AutoRestartAC_Inputs":
-                    return !string.IsNullOrWhiteSpace(AutoRestartAC_Inputs);                     //市电自动重启
-                case "ECOMode_Inputs":
-                    return !string.IsNullOrWhiteSpace(ECOMode_Inputs);                           //ECO模式
                 case "PassFunctionEnable_Inputs":
-                    return !string.IsNullOrWhiteSpace(PassFunctionEnable_Inputs);                 //旁路使能
+                    return !string.IsNullOrWhiteSpace(PassFunctionEnable_Inputs);                //旁路使能
                 case "Frequencyrestrictionmode_Inputs":
-                    return !string.IsNullOrWhiteSpace(Frequencyrestrictionmode_Inputs);            //频率限制模式
+                    return !string.IsNullOrWhiteSpace(Frequencyrestrictionmode_Inputs);          //频率限制模式
                 case "BypasshighDropout_Inputs":
-                    return !string.IsNullOrWhiteSpace(BypasshighDropout_Inputs);                   //旁路高退电压
+                    return !string.IsNullOrWhiteSpace(BypasshighDropout_Inputs);                 //旁路高退电压
                 case "BypasslowDropout_Inputs":
-                    return !string.IsNullOrWhiteSpace(BypasslowDropout_Inputs);                          //旁路低退电压
-                case "Outputpowerfactor_Inputs":
-                    return !string.IsNullOrWhiteSpace(Outputpowerfactor_Inputs);                          //功率因数
-                case "BatteryloadlimitTime_Inputs":
-                    return !string.IsNullOrWhiteSpace(BatteryloadlimitTime_Inputs);                          //电池带载限制时间
-                case "BatterydischargelimitTime_Inputs":
-                    return !string.IsNullOrWhiteSpace(BatterydischargelimitTime_Inputs);                          //电池放电限制时间
+                    return !string.IsNullOrWhiteSpace(BypasslowDropout_Inputs);                  //旁路低退电压
+                case "BypasslowFrequency_Inputs":
+                    return !string.IsNullOrWhiteSpace(BypasslowFrequency_Inputs);                 //旁路低退频率
+                case "BypasshighFrequency_Inputs":
+                    return !string.IsNullOrWhiteSpace(BypasshighFrequency_Inputs);              //旁路高退频率
+                case "BatteryTypeSelectedOption":
+                    return !string.IsNullOrWhiteSpace(BatteryTypeSelectedOption);                //电池类型
                 default:
                     return false;
             }
@@ -2265,6 +2523,10 @@ namespace WpfApp1.Command.Command_CG
                 BatteryloadlimitTime = Values[9];
                 //电池放电限制时间
                 BatterydischargelimitTime = Values[10];
+                //旁路高退频率
+                // BypasshighFrequency = Values[15]
+                //旁路低退频率
+                // BypasslowFrequency = Values[16]
                 //旁路高退电压
                 BypasshighDropout = Values[13];
                 //旁路低退电压
@@ -2308,37 +2570,26 @@ namespace WpfApp1.Command.Command_CG
                 case "FaultLog_Inputs":
                     if (FaultLog_Inputs == "开启/On"){ return "PEz";}
                     else if (FaultLog_Inputs == "关闭/Off"){  return "PDz";}
-                    else return FaultLog_Inputs;
+                    else return "";
 
-                //自动开机使能
-                case "AutoStartEnable_Inputs":
-                    if (AutoStartEnable_Inputs == "开启/On") { return "1"; }
-                    else if (AutoStartEnable_Inputs == "关闭/Off") { return "0"; }
-                    else return AutoStartEnable_Inputs;
-
-                //市电自动重启
-                case "AutoRestartAC_Inputs":
-                    if (AutoRestartAC_Inputs == "开启/On") { return "1"; }
-                    else if (AutoRestartAC_Inputs == "关闭/Off") { return "0"; }
-                    else return AutoRestartAC_Inputs;
-
-                //ECO模式
-                case "ECOMode_Inputs":
-                    if (ECOMode_Inputs == "开启/On") { return "PEj"; }
-                    else if (ECOMode_Inputs == "关闭/Off") { return "PDj"; }
-                    else return ECOMode_Inputs;
+                //电池类型
+                case "BatteryTypeSelectedOption":
+                    if (BatteryTypeSelectedOption == "AGM") { return "00"; }
+                    else if (BatteryTypeSelectedOption == "FLD") { return "01"; }
+                    else if (BatteryTypeSelectedOption == "USE") { return "02"; }
+                    else return "";
 
                 //旁路使能
                 case "PassFunctionEnable_Inputs":
-                    if (PassFunctionEnable_Inputs == "开启/On") { return "1"; }
-                    else if (PassFunctionEnable_Inputs == "关闭/Off") { return "0"; }
-                    else return PassFunctionEnable_Inputs;
+                    if (PassFunctionEnable_Inputs == "开启/On") { return "PEb"; }
+                    else if (PassFunctionEnable_Inputs == "关闭/Off") { return "PDb"; }
+                    else return "";
 
                 //频率限制模式
                 case "Frequencyrestrictionmode_Inputs":
-                    if (Frequencyrestrictionmode_Inputs == "开启/On") { return "1"; }
-                    else if (Frequencyrestrictionmode_Inputs == "关闭/Off") { return "0"; }
-                    else return Frequencyrestrictionmode_Inputs;
+                    if (Frequencyrestrictionmode_Inputs == "开启/On") { return "CFMODE1"; }
+                    else if (Frequencyrestrictionmode_Inputs == "关闭/Off") { return "CFMODE0"; }
+                    else return "";
 
                 default:
                     return "";
@@ -2389,6 +2640,10 @@ namespace WpfApp1.Command.Command_CG
             BypasshighDropout = exceptionDescription;
             //旁路低退电压
             BypasslowDropout = exceptionDescription;
+            //旁路高退频率
+            // BypasshighFrequency = exceptionDescription;
+            //旁路低退频率
+            // BypasslowFrequency = exceptionDescription;
         }
         #endregion
     }

@@ -96,7 +96,11 @@ namespace WpfApp1.Command.Command_LB6
               execute: () => BattHvLockVoltOperation(),
               canExecute: () => Validate(nameof(BattHvLockVolt_Inputs)) && !BattHvLockVolt_IsWorking
              );
-
+            //电池类型
+            Command_SetBatteryType = new RelayCommand(
+              execute: () => BatteryTypeOperation(),
+              canExecute: () => Validate(nameof(BatteryTypeSelectedOption)) && !_BatteryIsWorking
+             );
             #endregion
         }
 
@@ -775,14 +779,6 @@ namespace WpfApp1.Command.Command_LB6
                 if (value == "0") { _BatteryType = "AGM"; }
                 else if (value == "1") { _BatteryType = "FLD"; }
                 else if (value == "2") { _BatteryType = "USER"; }
-                else if (value == "3") { _BatteryType = "LIA"; }
-                else if (value == "4") { _BatteryType = "PYL"; }
-                else if (value == "5") { _BatteryType = "TQF"; }
-                else if (value == "6") { _BatteryType = "GRO"; }
-                else if (value == "7") { _BatteryType = "LIB"; }
-                else if (value == "8") { _BatteryType = "LIC"; }
-
-
                 else
                     _BatteryType = value;
                 RaiseProperChanged(nameof(BatteryType));
@@ -792,7 +788,7 @@ namespace WpfApp1.Command.Command_LB6
 
 
         //电池类型可选项
-        private List<string> _BatteryTypeOptions = new List<string> { "AGM", "FLD", "USE", "LIA", "PYL", "TQF", "GRO", "LIB", "LIC" };
+        private List<string> _BatteryTypeOptions = new List<string> { "AGM", "FLD", "USE"};
 
         public List<string> BatteryTypeOptions
         {
@@ -1630,10 +1626,10 @@ namespace WpfApp1.Command.Command_LB6
                     return !string.IsNullOrWhiteSpace(OutputSettingFrequency_Inputs);            //输出频率
                 case "OutSetVolt_Inputs":
                     return !string.IsNullOrWhiteSpace(OutSetVolt_Inputs);                        //输出电压
-                case "AutoStartEnable_Inputs":
-                    return !string.IsNullOrWhiteSpace(AutoStartEnable_Inputs);                   //自动开机使能
                 case "FaultLog_Inputs":
                     return !string.IsNullOrWhiteSpace(FaultLog_Inputs);                          //故障记录
+                case "BatteryTypeSelectedOption":                       
+                        return !string.IsNullOrWhiteSpace(BatteryTypeSelectedOption);             //电池类型
                 default:
                     return false;
             }
@@ -1727,13 +1723,13 @@ namespace WpfApp1.Command.Command_LB6
                     else
                         return "";
 
-                //系统频率
-                case "OutputSettingFrequency_Inputs":
-                    if (string.IsNullOrWhiteSpace(OutputSettingFrequency_Inputs)) { return string.Empty; }
-                    else if (OutputSettingFrequency_Inputs == "50") { return "0"; }
-                    else if (OutputSettingFrequency_Inputs == "60") { return "1"; }
-                    else
-                        return OutputSettingFrequency_Inputs;
+                ////系统频率
+                //case "OutputSettingFrequency_Inputs":
+                //    if (string.IsNullOrWhiteSpace(OutputSettingFrequency_Inputs)) { return string.Empty; }
+                //    else if (OutputSettingFrequency_Inputs == "50") { return "0"; }
+                //    else if (OutputSettingFrequency_Inputs == "60") { return "1"; }
+                //    else
+                //        return OutputSettingFrequency_Inputs;
 
                 //故障记录
                 case "FaultLog_Inputs":
@@ -1747,14 +1743,6 @@ namespace WpfApp1.Command.Command_LB6
                     }
                     else
                         return FaultLog_Inputs;
-
-                //自动开机
-                case "AutoStartEnable_Inputs":
-                    if (string.IsNullOrWhiteSpace(AutoStartEnable_Inputs)) { return string.Empty; }
-                    else if (AutoStartEnable_Inputs == "开启/On") { return "1"; }
-                    else if (AutoStartEnable_Inputs == "关闭/Off") { return "0"; }
-                    else
-                        return AutoStartEnable_Inputs;
 
                 default:
                     return "";

@@ -699,7 +699,7 @@ namespace WpfApp1.ViewModels
                     machine = receive_MachineType;
                     return true;
                 }
-                else if ((receive_MachineType.Substring(0, 9) == "(UPSLB601"))
+                else if ((receive_MachineType.Substring(0, 9) == "(CG000001"))
                 {
                     SwitchViewToVQorGB("CG000001");
                     //默认设置抗干扰模式
@@ -3324,8 +3324,15 @@ namespace WpfApp1.ViewModels
         {
             string receive = string.Empty;
 
-            //判断是否开启CRC接收校验（抗干扰 默认关闭
+            //判断是否开启CRC接收校验（默认开启)
             if (IsChecked)
+            {
+                //发送HOSTCRCEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "EN");
+                ShowError(receive, "HOSTCRC");
+            }
+            else if (OnceOpenCRC)
             {
                 //发送HOSTCRDEN指令
                 _pauseEvent.Wait(token);
@@ -3333,13 +3340,7 @@ namespace WpfApp1.ViewModels
                 OnceOpenCRC = false;
                 IsChecked = false;
                 SerialCommunicationService.OpenReceiveCRC(false);
-            }
-            else if (OnceOpenCRC)
-            {
-                //发送HOSTCRCEN指令
-                _pauseEvent.Wait(token);
-                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "EN");
-                ShowError(receive, "HOSTCRC");
+                
                 
             }
 
@@ -3399,7 +3400,6 @@ namespace WpfApp1.ViewModels
             ShowError(receive, "HIMSG1");
 
             Thread.Sleep(200);
-
             //发送HEEP1指令
             _pauseEvent.Wait(token);
             receive = SerialCommunicationService.SendCommand(HEEP1_LB6.Command, 80);
@@ -3472,23 +3472,24 @@ namespace WpfApp1.ViewModels
         {
             string receive = string.Empty;
 
-            //判断是否开启CRC接收校验（默认关闭
+            //判断是否开启CRC接收校验（默认开启)
             if (IsChecked)
             {
+                //发送HOSTCRCEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "EN");
+                ShowError(receive, "HOSTCRC");
+            }
+            else if (OnceOpenCRC)
+            {
+                
                 //发送HOSTCRDEN指令
                 _pauseEvent.Wait(token);
                 receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "DN");
                 OnceOpenCRC = false;
                 IsChecked = false;
                 SerialCommunicationService.OpenReceiveCRC(false);
-            }
-            else if (OnceOpenCRC)
-            {
-                //发送HOSTCRCEN指令
-                _pauseEvent.Wait(token);
-                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "EN");
-                ShowError(receive, "HOSTCRC");
-                
+
             }
 
             Thread.Sleep(200);
@@ -3567,7 +3568,6 @@ namespace WpfApp1.ViewModels
                 LoadPercent = HOP_CG.LoadPercent,//负载百分比
                 FullloadPwr = HOP_CG.FullloadPwr,//满载有功功率
                 InductorCurr = HOP_CG.InductorCurr,//电感电流
-                Outputpowerfactor = HEEP1_CG.Outputpowerfactor,//输出功率因数
                 BypasshighDropout = HEEP1_CG.BypasshighDropout,//旁路高退电压
                 BypasslowDropout = HEEP1_CG.BypasslowDropout,//旁路低退电压
 
@@ -3577,8 +3577,8 @@ namespace WpfApp1.ViewModels
                 BattVolt = HBAT_CG.BattVolt,//电池电压
                 BattCells = HBAT_CG.BattCells,//电池节数
                 BattCapacity = HBAT_CG.BattCapacity,//电池容量
-                BusVolt = HBAT_CG.BusVolt, //母线电压
-                NBusVolt = HBAT_CG.NBusVolt,//负母线电压
+                BusVolt = HBAT_CG.BusVolt, //P母线电压
+                NBusVolt = HBAT_CG.NBusVolt,//N母线电压
 
                 InvTemp = HTEMP_PDF.InvTemp,//逆变温度
                 MaxTemp = HTEMP_PDF.MaxTemp,//当前最高温度

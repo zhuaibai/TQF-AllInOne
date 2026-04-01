@@ -935,7 +935,6 @@ namespace WpfApp1.ViewModels
                     new ColumnInfo("有功功率(W)", "ActivePwr", 15, "0"),
                     new ColumnInfo("负载百分比(%)", "LoadPercent", 15, "0%"),
                     new ColumnInfo("满载有功功率(W)", "FullloadPwr", 15, "0"),
-                    new ColumnInfo("输出功率因数(%)", "Outputpowerfactor", 15, "10%"),
                     new ColumnInfo("旁路高退电压(V)", "BypasshighDropout", 15, "0"),
                     new ColumnInfo("旁路低退电压(V)", "BypasslowDropout", 15, "0"),
                     new ColumnInfo("电感电流(A)", "InductorCurr", 15, "0.0")

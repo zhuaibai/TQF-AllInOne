@@ -156,17 +156,7 @@
                         Grid.Column="1"
                         Style="{StaticResource ContentText}"
                         Text="{Binding HBAT_CG.BattCapacity, StringFormat={}{0}%}" />
-                    <!--  电池类型  -->
-                    <!--<TextBlock
-                        Grid.Row="1"
-                        Grid.Column="2"
-                        Style="{StaticResource ContentText}"
-                        Text="{DynamicResource 电池类型}" />
-                    <TextBlock
-                        Grid.Row="1"
-                        Grid.Column="3"
-                        Style="{StaticResource ContentText}"
-                        Text="{Binding HEEP1_LB6.BatteryType}" />-->
+
 
 
                     <!--  PBUS电压  -->
@@ -192,6 +182,17 @@
                         Style="{StaticResource ContentText}"
                         Text="{Binding HBAT_CG.NBusVolt}" />
 
+                    <!--  电池类型  -->
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="2"
+                        Style="{StaticResource ContentText}"
+                        Text="{DynamicResource 电池类型}" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="3"
+                        Style="{StaticResource ContentText}"
+                        Text="{Binding HEEP1_CG.BatteryType}" />
                     <!--  电池放电电流  -->
                     <!--<TextBlock
                         Grid.Row="2"
@@ -241,6 +242,7 @@
                             Grid.Column="2"
                             Style="{StaticResource HeaderText}"
                             Text="{DynamicResource 单位}" />
+
                         <!--  市电电压  -->
                         <TextBlock
                             Grid.Row="1"
@@ -248,9 +250,8 @@
                             Text="{DynamicResource 市电电压}" />
                         <TextBlock
                             Grid.Row="1"
-                            Grid.Column="1"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding HGRID_CYJ.MainsVoltage}" />
+                            Text="{Binding HGRID_CYJ.MainsVoltage}" Grid.ColumnSpan="3" Margin="90,0,45,0" />
                         <TextBlock
                             Grid.Row="1"
                             Grid.Column="2"
@@ -260,16 +261,15 @@
 
                         <!--  市电频率  -->
                         <TextBlock
-                            Grid.Row="3"
+                            Grid.Row="2"
                             Style="{StaticResource ContentText}"
                             Text="{DynamicResource 市电频率}" />
                         <TextBlock
-                            Grid.Row="3"
-                            Grid.Column="1"
+                            Grid.Row="2"
                             Style="{StaticResource ContentText}"
-                            Text="{Binding HGRID_CYJ.MainsFrequency}" />
+                            Text="{Binding HGRID_CYJ.MainsFrequency}" Grid.ColumnSpan="3" Margin="90,0,45,0" />
                         <TextBlock
-                            Grid.Row="3"
+                            Grid.Row="2"
                             Grid.Column="2"
                             Style="{StaticResource ContentText}"
                             Text="Hz" />
@@ -931,7 +931,7 @@
                         Style="{StaticResource ContentText}"
                         Text="V" />
                     <!--  输出功率因数  -->
-                    <TextBlock
+                    <!--<TextBlock
                         Grid.Row="8"
                         Style="{StaticResource ContentText}"
                         Text="{DynamicResource 输出功率因数}" />
@@ -944,40 +944,40 @@
                         Grid.Row="8"
                         Grid.Column="2"
                         Style="{StaticResource ContentText}"
-                        Text="10%" />
+                        Text="10%" />-->
                     <!--  旁路高退电压  -->
                     <TextBlock
-                        Grid.Row="9"
+                        Grid.Row="8"
                         Style="{StaticResource ContentText}"
                         Text="{DynamicResource 旁路高退电压}" />
                     <TextBlock
-                        Grid.Row="9"
+                        Grid.Row="8"
                         Grid.Column="1"
                         Style="{StaticResource ContentText}"
                         Text="{Binding HEEP1_CG.BypasshighDropout}" />
                     <TextBlock
-                        Grid.Row="9"
+                        Grid.Row="8"
                         Grid.Column="2"
                         Style="{StaticResource ContentText}"
                         Text="V" />
                     <!--  旁路低退电压  -->
                     <TextBlock
-                        Grid.Row="10"
+                        Grid.Row="9"
                         Style="{StaticResource ContentText}"
                         Text="{DynamicResource 旁路低退电压}" />
                     <TextBlock
-                        Grid.Row="10"
+                        Grid.Row="9"
                         Grid.Column="1"
                         Style="{StaticResource ContentText}"
                         Text="{Binding HEEP1_CG.BypasslowDropout}" />
                     <TextBlock
-                        Grid.Row="10"
+                        Grid.Row="9"
                         Grid.Column="2"
                         Style="{StaticResource ContentText}"
                         Text="V" />
                 </Grid>
             </GroupBox>
-            
+
             <!--  系统信息与状态  -->
             <ScrollViewer 
                 Grid.Row="2"
@@ -996,7 +996,7 @@
                             <RowDefinition />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-                        
+
                         <!--  版本号  -->
                         <TextBlock 
                             Grid.Row="1"
@@ -1170,92 +1170,90 @@
                                 Style="{StaticResource HeaderText}"
                                 Text="{DynamicResource 操作}" />
 
-
-
                             <!--  输出设定电压  -->
                             <TextBlock
-                                Grid.Row="2"
+                                Grid.Row="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource 输出电压}" />
                             <TextBlock
-                                Grid.Row="2"
+                                Grid.Row="1"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding HEEP1_CG.OutSetVolt}" />
                             <TextBox
-                                Grid.Row="2"
+                                Grid.Row="1"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"
                                 Text="{Binding HEEP1_CG.OutSetVolt_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 ToolTip="230" />
                             <Button
-                                Grid.Row="2"
+                                Grid.Row="1"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HEEP1_CG.Command_SetOutSetVolt, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  强充电压  -->
                             <TextBlock
-                                Grid.Row="3"
+                                Grid.Row="2"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource 强充电压}" />
                             <TextBlock
-                                Grid.Row="3"
+                                Grid.Row="2"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding HEEP1_CG.StrongChargeVoltage}" />
                             <TextBox
-                                Grid.Row="3"
+                                Grid.Row="2"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"
                                 Text="{Binding HEEP1_CG.StrongChargeVoltage_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 ToolTip="00.0" />
                             <Button
-                                Grid.Row="3"
+                                Grid.Row="2"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HEEP1_CG.Command_SetStrongChargeVoltage, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  浮充电压  -->
                             <TextBlock
-                                Grid.Row="4"
+                                Grid.Row="3"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource 浮充电压}" />
                             <TextBlock
-                                Grid.Row="4"
+                                Grid.Row="3"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding HEEP1_CG.FloatChargeVolage}" />
                             <TextBox
-                                Grid.Row="4"
+                                Grid.Row="3"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"
                                 Text="{Binding HEEP1_CG.FloatChargeVolage_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 ToolTip="00.0" />
                             <Button
-                                Grid.Row="4"
+                                Grid.Row="3"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HEEP1_CG.Command_SetFloatChargeVolage, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  低电锁机电压  -->
                             <TextBlock
-                                Grid.Row="6"
+                                Grid.Row="4"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource 锁机电压}" />
                             <TextBlock
-                                Grid.Row="6"
+                                Grid.Row="4"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding HEEP1_CG.LowPowerLock}" />
                             <TextBox
-                                Grid.Row="6"
+                                Grid.Row="4"
                                 Grid.Column="2"
                                 Style="{StaticResource InputBox}"
                                 Text="{Binding HEEP1_CG.LowPowerLock_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 ToolTip="00.0" />
                             <Button
-                                Grid.Row="6"
+                                Grid.Row="4"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HEEP1_CG.Command_SetLowPowerLock, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
@@ -1286,115 +1284,94 @@
 
                             <!--  旁路高退电压  -->
                             <TextBlock
-                                Grid.Row="7"
+                                Grid.Row="6"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource 旁路高退电压}" />
                             <TextBlock
-                                Grid.Row="7"
+                                Grid.Row="6"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding HEEP1_CG.BypasshighDropout}" />
                             <TextBox
-                            Grid.Row="7"
+                            Grid.Row="6"
                             Grid.Column="2"
                             Style="{StaticResource InputBox}"
                             Text="{Binding HEEP1_CG.BypasshighDropout_Inputs, UpdateSourceTrigger=PropertyChanged}"
                             ToolTip="030" />
                             <Button
-                            Grid.Row="7"
+                            Grid.Row="6"
                             Grid.Column="3"
                             Command="{Binding DataContext.HEEP1_CG.Command_SetBypasshighDropout, RelativeSource={RelativeSource AncestorType=Window}}"
                             Content="{DynamicResource 设置}"
                             Style="{StaticResource ActionButton}" />
 
                             <!--  旁路低退电压  -->
-                        <TextBlock
-                            Grid.Row="8"
+                            <TextBlock
+                            Grid.Row="7"
                             Style="{StaticResource ContentText}"
                             Text="{DynamicResource 旁路低退电压}" />
-                        <TextBlock
-                            Grid.Row="8"
+                            <TextBlock
+                            Grid.Row="7"
                             Grid.Column="1"
                             Style="{StaticResource ContentText}"
                             Text="{Binding HEEP1_CG.BypasslowDropout}" />
-                        <TextBox
-                            Grid.Row="8"
+                            <TextBox
+                            Grid.Row="7"
                             Grid.Column="2"
                             Style="{StaticResource InputBox}"
                             Text="{Binding HEEP1_CG.BypasslowDropout_Inputs, UpdateSourceTrigger=PropertyChanged}"
                             ToolTip="030" />
-                        <Button
-                            Grid.Row="8"
+                            <Button
+                            Grid.Row="7"
                             Grid.Column="3"
                             Command="{Binding DataContext.HEEP1_CG.Command_SetBypasslowDropout, RelativeSource={RelativeSource AncestorType=Window}}"
                             Content="{DynamicResource 设置}"
                             Style="{StaticResource ActionButton}" />
-                            <!--  输出功率因数  -->
-                            <TextBlock
-    Grid.Row="9"
-    Style="{StaticResource ContentText}"
-    Text="{DynamicResource 输出功率因数}" />
-                            <TextBlock
-    Grid.Row="9"
-    Grid.Column="1"
-    Style="{StaticResource ContentText}"
-    Text="{Binding HEEP1_CG.Outputpowerfactor}" />
-                            <TextBox
-    Grid.Row="9"
-    Grid.Column="2"
-    Style="{StaticResource InputBox}"
-    Text="{Binding HEEP1_CG.Outputpowerfactor_Inputs, UpdateSourceTrigger=PropertyChanged}"
-    ToolTip="030" />
-                            <Button
-    Grid.Row="9"
-    Grid.Column="3"
-    Command="{Binding DataContext.HEEP1_CG.Command_Outputpowerfactor, RelativeSource={RelativeSource AncestorType=Window}}"
-    Content="{DynamicResource 设置}"
-    Style="{StaticResource ActionButton}" />
+
                             <!--  电池带载限制时间  -->
+                            <!--<TextBlock
+                            Grid.Row="8"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource 电池带载限制时间}" />
                             <TextBlock
-    Grid.Row="10"
-    Style="{StaticResource ContentText}"
-    Text="{DynamicResource 电池带载限制时间}" />
-                            <TextBlock
-    Grid.Row="10"
-    Grid.Column="1"
-    Style="{StaticResource ContentText}"
-    Text="{Binding HEEP1_CG.BatteryloadlimitTime}" />
+                            Grid.Row="8"
+                            Grid.Column="1"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding HEEP1_CG.BatteryloadlimitTime}" />
                             <TextBox
-    Grid.Row="10"
-    Grid.Column="2"
-    Style="{StaticResource InputBox}"
-    Text="{Binding HEEP1_CG.BatteryloadlimitTime_Inputs, UpdateSourceTrigger=PropertyChanged}"
-    ToolTip="030" />
+                            Grid.Row="8"
+                            Grid.Column="2"
+                            Style="{StaticResource InputBox}"
+                            Text="{Binding HEEP1_CG.BatteryloadlimitTime_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                            ToolTip="030" />
                             <Button
-    Grid.Row="10"
-    Grid.Column="3"
-    Command="{Binding DataContext.HEEP1_CG.Command_BatteryloadlimitTime, RelativeSource={RelativeSource AncestorType=Window}}"
-    Content="{DynamicResource 设置}"
-    Style="{StaticResource ActionButton}" />
+                            Grid.Row="8"
+                            Grid.Column="3"
+                            Command="{Binding DataContext.HEEP1_CG.Command_BatteryloadlimitTime, RelativeSource={RelativeSource AncestorType=Window}}"
+                            Content="{DynamicResource 设置}"
+                            Style="{StaticResource ActionButton}" />-->
                             <!--  电池放电限制时间  -->
+                            <!--<TextBlock
+                            Grid.Row="9"
+                            Style="{StaticResource ContentText}"
+                            Text="{DynamicResource 电池放电限制时间}" />
                             <TextBlock
-    Grid.Row="11"
-    Style="{StaticResource ContentText}"
-    Text="{DynamicResource 电池放电限制时间}" />
-                            <TextBlock
-    Grid.Row="11"
-    Grid.Column="1"
-    Style="{StaticResource ContentText}"
-    Text="{Binding HEEP1_CG.BatterydischargelimitTime}" />
+                            Grid.Row="9"
+                            Grid.Column="1"
+                            Style="{StaticResource ContentText}"
+                            Text="{Binding HEEP1_CG.BatterydischargelimitTime}" />
                             <TextBox
-    Grid.Row="11"
-    Grid.Column="2"
-    Style="{StaticResource InputBox}"
-    Text="{Binding HEEP1_CG.BatterydischargelimitTime_Inputs, UpdateSourceTrigger=PropertyChanged}"
-    ToolTip="030" />
+                            Grid.Row="9"
+                            Grid.Column="2"
+                            Style="{StaticResource InputBox}"
+                            Text="{Binding HEEP1_CG.BatterydischargelimitTime_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                            ToolTip="030" />
                             <Button
-    Grid.Row="11"
-    Grid.Column="3"
-    Command="{Binding DataContext.HEEP1_CG.Command_BatterydischargelimitTime, RelativeSource={RelativeSource AncestorType=Window}}"
-    Content="{DynamicResource 设置}"
-    Style="{StaticResource ActionButton}" />
+                            Grid.Row="9"
+                            Grid.Column="3"
+                            Command="{Binding DataContext.HEEP1_CG.Command_BatterydischargelimitTime, RelativeSource={RelativeSource AncestorType=Window}}"
+                            Content="{DynamicResource 设置}"
+                            Style="{StaticResource ActionButton}" />-->
 
                             <!--  逆变时间  -->
                             <!--
@@ -1506,74 +1483,70 @@
                                 Style="{StaticResource HeaderText}"
                                 Text="{DynamicResource 操作}" />
 
-
-
-
-                            <!--  LCD背光  -->
-                            <TextBlock
-                                Grid.Row="4"
-                                Style="{StaticResource ContentText}"
-                                Text="{DynamicResource LCD背光}" />
-                            <TextBlock
-                                Grid.Row="4"
-                                Grid.Column="1"
-                                Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_CG.LCD_Backlight}" />
-                            <ComboBox
-                                Grid.Row="4"
-                                Grid.Column="2"
-                                ItemsSource="{Binding HEEP1_CG.LCD_BacklightOptions}"
-                                SelectedItem="{Binding HEEP1_CG.LCD_Backlight_Inputs, UpdateSourceTrigger=PropertyChanged}"
-                                Style="{StaticResource SelectBox}" />
-                            <Button
-                                Grid.Row="4"
-                                Grid.Column="3"
-                                Command="{Binding DataContext.HEEP1_CG.Command_SetLCD_Backlight, RelativeSource={RelativeSource AncestorType=Window}}"
-                                Content="{DynamicResource 设置}"
-                                Style="{StaticResource ActionButton}" />
-
                             <!--  输出设定频率  -->
                             <TextBlock
-                                Grid.Row="3"
+                                Grid.Row="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource 输出频率}" />
                             <TextBlock
-                                Grid.Row="3"
+                                Grid.Row="1"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding HEEP1_CG.OutputSettingFrequency2}" />
                             <ComboBox
-                                Grid.Row="3"
+                                Grid.Row="1"
                                 Grid.Column="2"
                                 ItemsSource="{Binding HEEP1_CG.OutputSettingFrequencyOptions}"
                                 SelectedItem="{Binding HEEP1_CG.OutputSettingFrequency_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
-                                Grid.Row="3"
+                                Grid.Row="1"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HEEP1_CG.Command_SetOutputSettingFrequency, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
 
+                            <!--  LCD背光  -->
+                            <TextBlock
+                                Grid.Row="2"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource LCD背光}" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="1"
+                                Style="{StaticResource ContentText}"
+                                Text="{Binding HEEP1_CG.LCD_Backlight}" />
+                            <ComboBox
+                                Grid.Row="2"
+                                Grid.Column="2"
+                                ItemsSource="{Binding HEEP1_CG.LCD_BacklightOptions}"
+                                SelectedItem="{Binding HEEP1_CG.LCD_Backlight_Inputs, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{StaticResource SelectBox}" />
+                            <Button
+                                Grid.Row="2"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP1_CG.Command_SetLCD_Backlight, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Style="{StaticResource ActionButton}" />
 
                             <!--  故障记录  -->
                             <TextBlock
-                                Grid.Row="8"
+                                Grid.Row="3"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource 故障记录}" />
                             <TextBlock
-                                Grid.Row="8"
+                                Grid.Row="3"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding HEEP1_CG.FaultLog}" />
                             <ComboBox
-                                Grid.Row="8"
+                                Grid.Row="3"
                                 Grid.Column="2"
                                 ItemsSource="{Binding HEEP1_CG.FaultLogOptions}"
                                 SelectedItem="{Binding HEEP1_CG.FaultLog_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
-                                Grid.Row="8"
+                                Grid.Row="3"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HEEP1_CG.Command_SetFaultLog, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
@@ -1582,135 +1555,160 @@
 
                             <!--  蜂鸣器状态  -->
                             <TextBlock
-                                Grid.Row="10"
+                                Grid.Row="4"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource 蜂鸣器状态}" />
                             <TextBlock
-                                Grid.Row="10"
+                                Grid.Row="4"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
                                 Text="{Binding HEEP1_CG.BuzzerStatus}" />
                             <ComboBox
-                                Grid.Row="10"
+                                Grid.Row="4"
                                 Grid.Column="2"
                                 ItemsSource="{Binding HEEP1_CG.BuzzerStatusOptions}"
                                 SelectedItem="{Binding HEEP1_CG.BuzzerStatus_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
-                                Grid.Row="10"
+                                Grid.Row="4"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HEEP1_CG.Command_SetBuzzerStatus, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
 
                             <!--  自动开机使能  -->
-                            <TextBlock
-                                Grid.Row="13"
+                            <!--<TextBlock
+                                Grid.Row="5"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource 自动开机使能}" />
                             <TextBlock
-                                Grid.Row="13"
+                                Grid.Row="5"
                                 Grid.Column="1"
                                 Text="{Binding HEEP1_CG.AutoStartEnable}" 
                                 Style="{StaticResource ContentText}" />
                             <ComboBox
-                                Grid.Row="13"
+                                Grid.Row="5"
                                 Grid.Column="2"
                                 ItemsSource="{Binding HEEP1_CG.AutoStartEnableOptions}"
                                 SelectedItem="{Binding HEEP1_CG.AutoStartEnable_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
-                                Grid.Row="13"
+                                Grid.Row="5"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HEEP1_CG.Command_SetAutoStartEnable, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
-                                Style="{StaticResource ActionButton}" />
+                                Style="{StaticResource ActionButton}" />-->
+
                             <!--  市电自动重启  -->
-                            <TextBlock
-                                Grid.Row="14"
+                            <!--<TextBlock
+                                Grid.Row="6"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource 市电自动重启}" />
                             <TextBlock
-                                Grid.Row="14"
+                                Grid.Row="6"
                                 Grid.Column="1"
                                 Text="{Binding HEEP1_CG.AutoRestartAC}" 
                                 Style="{StaticResource ContentText}" />
                             <ComboBox
-                                Grid.Row="14"
+                                Grid.Row="6"
                                 Grid.Column="2"
                                 ItemsSource="{Binding HEEP1_CG.AutoRestartACOptions}"
                                 SelectedItem="{Binding HEEP1_CG.AutoRestartAC_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
-                                Grid.Row="14"
+                                Grid.Row="6"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HEEP1_CG.Command_SetAutoStartEnable, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
-                                Style="{StaticResource ActionButton}" />
+                                Style="{StaticResource ActionButton}" />-->
+
                             <!--  ECO模式  -->
-                            <TextBlock
-                                Grid.Row="15"
+                            <!--<TextBlock
+                                Grid.Row="7"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource ECO模式}" />
                             <TextBlock
-                                Grid.Row="15"
+                                Grid.Row="7"
                                 Grid.Column="1"
                                 Text="{Binding HEEP1_CG.ECOMode}" 
                                 Style="{StaticResource ContentText}" />
                             <ComboBox
-                                Grid.Row="15"
+                                Grid.Row="7"
                                 Grid.Column="2"
                                 ItemsSource="{Binding HEEP1_CG.ECOModeOptions}"
                                 SelectedItem="{Binding HEEP1_CG.ECOMode_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
-                                Grid.Row="15"
+                                Grid.Row="7"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HEEP1_CG.Command_ECOMode, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
-                                Style="{StaticResource ActionButton}" />
+                                Style="{StaticResource ActionButton}" />-->
+
                             <!--  旁路使能  -->
                             <TextBlock
-                                Grid.Row="16"
+                                Grid.Row="5"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource 旁路使能}" />
                             <TextBlock
-                                Grid.Row="16"
+                                Grid.Row="5"
                                 Grid.Column="1"
                                 Text="{Binding HEEP1_CG.PassFunctionEnable}" 
                                 Style="{StaticResource ContentText}" />
                             <ComboBox
-                                Grid.Row="16"
+                                Grid.Row="5"
                                 Grid.Column="2"
                                 ItemsSource="{Binding HEEP1_CG.PassFunctionEnableOptions}"
                                 SelectedItem="{Binding HEEP1_CG.PassFunctionEnable_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
-                                Grid.Row="16"
+                                Grid.Row="5"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HEEP1_CG.Command_PassFunctionEnable, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
                             <!--  频率限制模式  -->
                             <TextBlock
-                                Grid.Row="17"
+                                Grid.Row="6"
                                 Style="{StaticResource ContentText}"
                                 Text="{DynamicResource 频率限制模式}" />
                             <TextBlock
-                                Grid.Row="17"
+                                Grid.Row="6"
                                 Grid.Column="1"
                                 Text="{Binding HEEP1_CG.Frequencyrestrictionmode}" 
                                 Style="{StaticResource ContentText}" />
                             <ComboBox
-                                Grid.Row="17"
+                                Grid.Row="6"
                                 Grid.Column="2"
                                 ItemsSource="{Binding HEEP1_CG.FrequencyrestrictionmodeOptions}"
                                 SelectedItem="{Binding HEEP1_CG.Frequencyrestrictionmode_Inputs, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource SelectBox}" />
                             <Button
-                                Grid.Row="17"
+                                Grid.Row="6"
                                 Grid.Column="3"
                                 Command="{Binding DataContext.HEEP1_CG.Command_Frequencyrestrictionmode, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Content="{DynamicResource 设置}"
+                                Style="{StaticResource ActionButton}" />
+                            <!--  电池类型  -->
+                            <TextBlock
+                                Grid.Row="7"
+                                Style="{StaticResource ContentText}"
+                                Text="{DynamicResource 电池类型}" />
+                            <TextBlock
+                                Grid.Row="7"
+                                Grid.Column="1"
+                                Text="{Binding HEEP1_CG.BatteryType}" 
+                                Style="{StaticResource ContentText}" />
+                            <ComboBox
+                                Grid.Row="7"
+                                Grid.Column="2"
+                                ItemsSource="{Binding HEEP1_CG.BatteryTypeOptions}"
+                                SelectedItem="{Binding HEEP1_CG.BatteryTypeSelectedOption, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{StaticResource SelectBox}" />
+                            <Button
+                                Grid.Row="7"
+                                Grid.Column="3"
+                                Command="{Binding DataContext.HEEP1_CG.Command_SetBatteryType, RelativeSource={RelativeSource AncestorType=Window}}"
                                 Content="{DynamicResource 设置}"
                                 Style="{StaticResource ActionButton}" />
                         </Grid>
