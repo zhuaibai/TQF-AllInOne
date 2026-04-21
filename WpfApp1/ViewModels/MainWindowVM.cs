@@ -287,7 +287,7 @@ namespace WpfApp1.ViewModels
                 BluetoothScanIconOpen = Visibility.Visible;
             }
         }
-        #endregion
+       
 
         /// <summary>
         /// 打开蓝牙扫描(已打开则关闭蓝牙扫描)
@@ -332,7 +332,9 @@ namespace WpfApp1.ViewModels
                 {
                     BlueToothSettings.StatusMessage = $"扫描异常:{ex.Message}";
                 }
-                finally {                     BlueToothSettings.IsBusy = false; }
+                finally {            
+                    BlueToothSettings.IsBusy = false; 
+                }
                 
             }
         }
@@ -414,6 +416,9 @@ namespace WpfApp1.ViewModels
             }
 
         }
+        #endregion
+
+
         #endregion
 
     

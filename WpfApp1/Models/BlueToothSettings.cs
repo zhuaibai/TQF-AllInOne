@@ -106,10 +106,7 @@ namespace WpfApp1.Models
         #region 命令执行方法
         public async Task StartScanAsync()
         {
-            IsBusy = true;
-            Devices.Clear();
             await _bluetoothService.StartScanningAsync();
-            IsBusy = false;
         }
 
         public void StopScan()
