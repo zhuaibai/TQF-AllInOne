@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml.Serialization;
+using Windows.Devices.Bluetooth;
 using WpfApp1.Command;
 using WpfApp1.Command.BMS;
 using WpfApp1.Command.Comand_GB3024;
@@ -65,6 +66,8 @@ namespace WpfApp1.ViewModels
             //绑定发送接收帧计数委托
             SerialCommunicationService.AddReceiveFrame = SerialCountVM.AddReceiveFrame;
             SerialCommunicationService.AddSendFrame = SerialCountVM.AddSendFrame;
+
+            _blueToothSettings = new BlueToothSettings(new WindowsBluetoothService(_pauseEvent, _semaphore, AddLog, UpdateState));
 
             //BMS
             BMS_Command_Setting = new SendingCommandSettingsViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
@@ -144,6 +147,16 @@ namespace WpfApp1.ViewModels
             App.ChangeLanguageWithSetting = RefleshSettingParamToLanguage;
         }
 
+        private BlueToothSettings _blueToothSettings;
+        public BlueToothSettings BlueToothSettings
+        {
+            get => _blueToothSettings;
+            set
+            {
+                _blueToothSettings = value;
+                OnPropertyChanged(nameof(BlueToothSettings));
+            }
+        }
 
         private SerialPortSettingViewModel _serialPortSetting;
 
@@ -3624,7 +3637,6 @@ namespace WpfApp1.ViewModels
         /// <param name="token"></param>
         private void CommunicationWithBMS02(CancellationToken token)
         {
-
             byte[] receive; // 接收到的原始字节数据
             short[] data; // 解析后的寄存器数据（16位整数数组）
 
@@ -3736,7 +3748,7 @@ namespace WpfApp1.ViewModels
                 _pauseEvent.Wait(token);
                 //读写入的参数设置值
                 Thread.Sleep(300);
-                // 读取系统设置（寄存器297，6个寄存器）
+                // 读取蓝牙地址（寄存器297，6个寄存器）
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 297, 6), 17);
                 data = ModbusRTU.ParseRead03Response(receive);
                 BMS_Setting.ReadBuleTooth(data);
@@ -3800,7 +3812,7 @@ namespace WpfApp1.ViewModels
                 _pauseEvent.Wait(token);
                 //读写入的参数设置值
                 Thread.Sleep(300);
-                // 读取系统设置（寄存器297，6个寄存器）
+                // 读取蓝牙地址（寄存器297，6个寄存器）
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 297, 6), 17);
                 data = ModbusRTU.ParseRead03Response(receive);
                 BMS_Setting.ReadBuleTooth(data);
@@ -3821,7 +3833,6 @@ namespace WpfApp1.ViewModels
                 }
                 Thread.Sleep(500);
             }
-
             // 模式5：实时监控模式（读取数据并保存到列表和Excel）
             else if (SelectedMode == BatteryMode .Mode5)     //实时监控
             {
@@ -3960,7 +3971,6 @@ namespace WpfApp1.ViewModels
                         RT_Monitor.SaveToExcel(polling);
                 });
             }
-
         }
         #endregion
 

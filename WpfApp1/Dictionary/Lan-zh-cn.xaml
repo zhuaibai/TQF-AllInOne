@@ -8,11 +8,16 @@
     <s:String x:Key="自动保存数据">自动保存数据</s:String>
     <s:String x:Key="异常!">异常!</s:String>
     <s:String x:Key="电池">电池</s:String>
-    <s:String x:Key="蓝牙地址">蓝牙地址</s:String>
+    <s:String x:Key="机型">机型:</s:String>
+    <s:String x:Key="蓝牙状态">蓝牙状态:</s:String>
     <s:String x:Key="电池带载限制时间">电池带载限制时间</s:String>
     <s:String x:Key="电池放电限制时间">电池放电限制时间</s:String>
     <s:String x:Key="ECO模式">ECO模式</s:String>
     <s:String x:Key="市电自动重启">市电自动重启</s:String>
+    <s:String x:Key="停止扫描">停止扫描</s:String>
+    <s:String x:Key="开始扫描">开始扫描</s:String>
+    <s:String x:Key="断开蓝牙">断开蓝牙</s:String>
+    <s:String x:Key="连接蓝牙">连接蓝牙</s:String>
     <s:String x:Key="旁路使能">旁路使能</s:String>
     <s:String x:Key="频率限制模式">频率限制模式</s:String>
     <s:String x:Key="输出功率因数">输出功率因数</s:String>

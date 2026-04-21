@@ -128,6 +128,7 @@
                 Margin="10,20,5,20"
                 BorderBrush="White"
                 BorderThickness="2,0,0,0" />
+
             <!--<Button
         Background="#FF1677FF"
         Command="{Binding SwitchViewToVQ}"
@@ -190,10 +191,52 @@
                     HorizontalAlignment="Center"
                     FontSize="10"
                     Text="{DynamicResource 抗干扰模式}" />
+                
             </StackPanel>
+            <Border
+                Margin="10,20,5,20"
+                BorderBrush="White"
+                BorderThickness="2,0,0,0" />
+            <Button
+                Background="#FF1677FF"
+                Command="{Binding OpenCom}"
+                Content="{DynamicResource 开始扫描}"
+                Style="{StaticResource BluetoothStyleBtn}"
+                Tag="&#xe65d;"
+                Visibility="{Binding ComIconOpen}" />
+            <Button
+                Background="#FFF75231"
+                Command="{Binding OpenCom}"
+                Content="{DynamicResource 停止扫描}"
+                Style="{StaticResource MenuStyleBtn}"
+                Tag="&#xe800;"
+                Visibility="{Binding ComIconClose}" />
+           
+            <Button
+                Background="#FF1677FF"
+                Command="{Binding OpenCom}"
+                Content="{DynamicResource 连接蓝牙}"
+                Style="{StaticResource BluetoothStyleBtn}"
+                Tag="&#xe639;"
+                Visibility="{Binding ComIconOpen}" />
+            <Button
+                Background="#FFF75231"
+                Command="{Binding OpenCom}"
+                Content="{DynamicResource 断开蓝牙}"
+                Style="{StaticResource BluetoothStyleBtn}"
+                Tag="&#xe667;"
+                Visibility="{Binding ComIconClose}" />
+          
+            <ComboBox  MaxHeight="30" 
+                ItemsSource="{Binding SerialPortSetting.AvailablePorts}"
+                SelectedItem="{Binding SerialPortSetting.SelectedPort, Mode=TwoWay}"
+                Style="{StaticResource cmbstyle}"
+                IsEnabled="{Binding IsEnableComboBox}"></ComboBox>
+
+            <TextBlock Text="{DynamicResource 机型}" Margin=" 15,20,0,0" FontSize="15" FontFamily="楷体"></TextBlock>
             <ComboBox
                 MaxHeight="30"
-                Margin="30,0"
+                Margin="5,0,15,0"
                 ItemsSource="{Binding MachineItems}"
                 SelectedItem="{Binding SelectedMachineItem}"
                 Style="{StaticResource cmbstyle}">
@@ -204,13 +247,13 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </ComboBox>
-
-            <TextBlock Text="{DynamicResource 选择串口：}" Margin=" 0,20" FontSize="15" FontFamily="楷体"></TextBlock>
+            <TextBlock Text="{DynamicResource 选择串口：}" Margin=" 10,20" FontSize="15" FontFamily="楷体"></TextBlock>
             <ComboBox  MaxHeight="30"
                 ItemsSource="{Binding SerialPortSetting.AvailablePorts}"
                 SelectedItem="{Binding SerialPortSetting.SelectedPort, Mode=TwoWay}"
                 Style="{StaticResource cmbstyle}"
                 IsEnabled="{Binding IsEnableComboBox}"></ComboBox>
+
         </StackPanel>
 
         <!--  下拉菜单弹出层  -->
@@ -294,6 +337,23 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Text="{DynamicResource 串口状态}" />
+                <TextBlock
+                    Margin="5,0,0,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Foreground="{Binding ComStatus}"
+                    Text="{Binding Status}"
+                    ToolTip="{Binding Status}" />
+                <Border
+                    Width="20"
+                    Height="20"
+                    Margin="80,0,5,0"
+                    Background="{Binding ComStatus}"
+                    CornerRadius="10" />
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Text="{DynamicResource 蓝牙状态}" />
                 <TextBlock
                     Margin="5,0,0,0"
                     HorizontalAlignment="Center"

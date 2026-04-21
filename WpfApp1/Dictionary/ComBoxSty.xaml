@@ -15,7 +15,7 @@
 
                     <Setter Property="MinHeight" Value="22" />
 
-                    <Setter Property="MinWidth" Value="60" />
+                    <Setter Property="MinWidth" Value="80" />
 
                     <Setter Property="Template">
 
@@ -337,6 +337,8 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    
 
     <!--  主色  -->
     <SolidColorBrush x:Key="PrimaryBlue" Color="#1677FF" />

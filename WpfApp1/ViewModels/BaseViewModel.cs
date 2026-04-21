@@ -21,5 +21,20 @@ namespace WpfApp1.ViewModels
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+        /// <summary>
+        /// 设置属性值并通知 UI 更新
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="storage"></param>
+        /// <param name="value"></param>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (Equals(storage, value)) return false;// 如果新值与旧值相同，则不更新
+            storage = value;// 更新属性值
+            OnPropertyChanged(propertyName);
+            return true;
+        }
     }
 }

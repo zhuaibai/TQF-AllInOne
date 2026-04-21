@@ -24,4 +24,29 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style TargetType="Button" x:Key="BluetoothStyleBtn">
+        <Setter Property="FontFamily" Value="../Resource/BlueFonts/#iconfont"/>
+        <Setter Property="Width" Value="80"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="Transparent" x:Name="border" CornerRadius="5">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock x:Name="textImg" Text="{TemplateBinding Tag}"  Foreground="{TemplateBinding Background}" FontSize="30" TextAlignment="Center"></TextBlock>
+                            <TextBlock x:Name="text" Text="{TemplateBinding Content}" Foreground="#FF333333" TextAlignment="Center"></TextBlock>
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#FF9479FA"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Setter TargetName="textImg" Property="Foreground" Value="#FFFFFFFF"></Setter>
+                            <Setter TargetName="text" Property="Foreground" Value="#FFFFFFFF"></Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

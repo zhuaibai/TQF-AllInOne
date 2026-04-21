@@ -1775,7 +1775,7 @@ namespace WpfApp1.ViewModels
         #endregion
 
         #region 蓝牙地址
-
+        
         private string _BuleTooth;
         public string BuleTooth
         {
@@ -1856,7 +1856,7 @@ namespace WpfApp1.ViewModels
                 {
                     // 解析失败，弹出提示框
                     MessageBox.Show(
-                        "蓝牙地址格式不正确\n例如：00:1A:7D:DA:71:13",
+                        "蓝牙地址格式不正确\n",
                         "输入错误",
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
