@@ -60,6 +60,8 @@ namespace WpfApp1.ViewModels
             //初始化串口信息
             IniCom();
             OpenCom = new RelayCommand(openCom);
+            OpenBluetoothScan = new RelayCommand(openBluetoothScan);
+            OpenBluetooth = new RelayCommand(openBluetooth);
 
             //发送帧，接收帧
             _SerialCountVM = new SerialCountVM();
@@ -191,6 +193,230 @@ namespace WpfApp1.ViewModels
         {
             IsEnableComboBox = !SerialCommunicationService.IsOpen();
         }
+
+        #region 蓝牙工具
+
+        #region 蓝牙图标
+        //蓝牙连接打开图标
+        private Visibility _BluetoothIconOpen = Visibility.Visible;
+
+        public Visibility BluetoothIconOpen
+        {
+            get { return _BluetoothIconOpen; }
+            set
+            {
+                _BluetoothIconOpen = value;
+                this.RaiseProperChanged(nameof(BluetoothIconOpen));
+            }
+        }
+
+        //蓝牙连接关闭图标
+        private Visibility _BluetoothIconClose = Visibility.Collapsed;
+
+        public Visibility BluetoothIconClose
+        {
+            get { return _BluetoothIconClose; }
+            set
+            {
+                _BluetoothIconClose = value;
+                this.RaiseProperChanged(nameof(BluetoothIconClose));
+            }
+        }
+
+        //蓝牙扫描打开图标
+        private Visibility _BluetoothScanIconOpen = Visibility.Visible;
+
+        public Visibility BluetoothScanIconOpen
+        {
+            get { return _BluetoothScanIconOpen; }
+            set
+            {
+                _BluetoothScanIconOpen = value;
+                this.RaiseProperChanged(nameof(BluetoothScanIconOpen));
+            }
+        }
+
+        //蓝牙扫描关闭图标
+        private Visibility _BluetoothScanIconClose = Visibility.Collapsed;
+
+        public Visibility BluetoothScanIconClose
+        {
+            get { return _BluetoothScanIconClose; }
+            set
+            {
+                _BluetoothScanIconClose = value;
+                this.RaiseProperChanged(nameof(BluetoothScanIconClose));
+            }
+        }
+
+        /// <summary>
+        /// 改变蓝牙连接打开图标
+        /// </summary>
+        /// <param name="flag"></param>
+        private void ChangeBluetoothIcon(bool flag)
+        {
+            if (flag)
+            {
+                //蓝牙连接打开
+                BluetoothIconClose = Visibility.Visible;
+                BluetoothIconOpen = Visibility.Collapsed;
+            }
+            else
+            {
+                //蓝牙连接关闭
+                BluetoothIconClose = Visibility.Collapsed;
+                BluetoothIconOpen = Visibility.Visible;
+            }
+        }
+        /// <summary>
+        /// 改变蓝牙扫描图标
+        /// </summary>
+        /// <param name="flag"></param>
+        private void ChangeBluetoothScanIcon(bool flag)
+        {
+            if (flag)
+            {
+                //蓝牙扫描打开
+                BluetoothScanIconClose = Visibility.Visible;
+                BluetoothScanIconOpen = Visibility.Collapsed;
+            }
+            else
+            {
+                //蓝牙扫描关闭
+                BluetoothScanIconClose = Visibility.Collapsed;
+                BluetoothScanIconOpen = Visibility.Visible;
+            }
+        }
+        #endregion
+
+        /// <summary>
+        /// 打开蓝牙扫描(已打开则关闭蓝牙扫描)
+        /// </summary>
+        public async void openBluetoothScan()
+        {
+            if (BlueToothSettings.IsScanningOpen())//判断蓝牙扫描是否已打开
+            {
+                try
+                {
+                    AddLog("准备关闭蓝牙扫描");
+                    BlueToothSettings.StopScan();
+                    BlueToothSettings.StatusMessage = "扫描停止";
+                    ChangeBluetoothScanIcon(false);
+                    bluetoothStateColor(false);
+                    AddLog($"关闭蓝牙扫描成功");
+                }
+                catch (Exception)
+                {
+
+                }
+                finally
+                {
+                    ChangeBluetoothScanIcon(false);
+                    bluetoothStateColor(false);
+                }
+
+            }
+            else
+            {
+                BlueToothSettings.IsBusy = true;
+                BlueToothSettings.Devices.Clear();
+                try
+                {
+                    BlueToothSettings.StatusMessage = "正在扫描...";
+                    await BlueToothSettings.StartScanAsync();
+                    ChangeBluetoothScanIcon(true);
+                    bluetoothStateColor(true);
+                    AddLog($"打开蓝牙扫描成功");
+                }
+                catch (Exception ex)
+                {
+                    BlueToothSettings.StatusMessage = $"扫描异常:{ex.Message}";
+                }
+                finally {                     BlueToothSettings.IsBusy = false; }
+                
+            }
+        }
+
+        /// <summary>
+        /// 打开蓝牙(已打开则关闭蓝牙)
+        /// </summary>
+        public async void openBluetooth()
+        {
+            if (BlueToothSettings.IsConnected())//判断蓝牙连接是否已打开
+            {
+                BlueToothSettings.IsBusy = true;
+                try
+                {
+                    AddLog("准备关闭蓝牙通信");
+                    await BlueToothSettings.DisconnectAsync();
+                    AddLog("蓝牙已关闭");
+                    ChangeBluetoothIcon(false);
+                    bluetoothStateColor(false);
+                    BlueToothSettings.StatusMessage = "蓝牙已断开";
+                    AddLog($"关闭蓝牙{BlueToothSettings.getBluetoothName()}成功");
+                }
+                catch (Exception ex)
+                {
+                    BlueToothSettings.StatusMessage = $"断开失败:{ex.Message}";
+                }
+                finally
+                {
+                    ChangeBluetoothIcon(false);
+                    bluetoothStateColor(false);
+                    BlueToothSettings.IsBusy = false;
+                }
+
+            }
+            else
+            {
+                if (BlueToothSettings.IsScanningOpen())
+                {
+                    AddLog("关闭蓝牙扫描");
+                    BlueToothSettings.StopScan();
+                    ChangeBluetoothScanIcon(false);      
+                    await Task.Delay(200); // 等待扫描停止,释放资源
+                }
+                if (BlueToothSettings.SelectedDevice == null)
+                {
+                    BlueToothSettings.StatusMessage = "请先选择设备";
+                    return;
+                }
+                BlueToothSettings.IsBusy = true;
+                try
+                {
+                    AddLog("准备打开蓝牙");
+                    ChangeBluetoothIcon(true);
+                    BlueToothSettings.StatusMessage = "正在连接蓝牙...";
+                    bool success = await BlueToothSettings.ConnextAsync();
+                    if (success)
+                    {
+                        BlueToothSettings.StatusMessage = "蓝牙已连接";
+                        bluetoothStateColor(true);
+                        AddLog($"打开蓝牙{BlueToothSettings.getBluetoothName()}成功");
+                    }
+                    else
+                    {
+                        BlueToothSettings.StatusMessage = "蓝牙连接失败";
+                        ChangeBluetoothIcon(false);
+                        bluetoothStateColor(false);
+                        AddLog($"打开蓝牙{BlueToothSettings.getBluetoothName()}失败");
+                    }
+
+                }
+                catch (Exception)
+                {
+
+                }
+                finally
+                {
+                    BlueToothSettings.IsBusy = false;
+                }
+            }
+
+        }
+        #endregion
+
+    
 
         #region 小标题选项
         public enum BatteryMode
@@ -1682,12 +1908,43 @@ namespace WpfApp1.ViewModels
             }
         }
 
+        private Brush bluetoothStatus = Brushes.Red;
+        public Brush BluetoothStatus
+        {
+            get
+            {
+                return bluetoothStatus;
+            }
+            set
+            {
+                bluetoothStatus = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// 设置状态灯颜色
+        /// </summary>
+        /// <param name="flag"></param>
+        public void bluetoothStateColor(bool flag)
+        {
+            if (flag)
+            {
+                BluetoothStatus = Brushes.Green;
+            }
+            else
+            {
+                BluetoothStatus = Brushes.Red;
+            }
+        }
+
         // 命令定义
         public ICommand StartCommand { get; }
         public ICommand StopCommand { get; }
         //public ICommand ExecuteSpecialCommand { get; }
         public ICommand OpenCom { get; }
-
+        public ICommand OpenBluetoothScan { get; }
+        public ICommand OpenBluetooth { get; }
         /// <summary>
         /// 启动后台通信线程
         /// </summary>

@@ -199,39 +199,39 @@
                 BorderThickness="2,0,0,0" />
             <Button
                 Background="#FF1677FF"
-                Command="{Binding OpenCom}"
+                Command="{Binding OpenBluetoothScan}"
                 Content="{DynamicResource 开始扫描}"
                 Style="{StaticResource BluetoothStyleBtn}"
                 Tag="&#xe65d;"
-                Visibility="{Binding ComIconOpen}" />
+                Visibility="{Binding BluetoothScanIconOpen}" />
             <Button
                 Background="#FFF75231"
-                Command="{Binding OpenCom}"
+                Command="{Binding OpenBluetoothScan}"
                 Content="{DynamicResource 停止扫描}"
                 Style="{StaticResource MenuStyleBtn}"
                 Tag="&#xe800;"
-                Visibility="{Binding ComIconClose}" />
+                Visibility="{Binding BluetoothScanIconClose}" />
            
             <Button
                 Background="#FF1677FF"
-                Command="{Binding OpenCom}"
+                Command="{Binding OpenBluetooth}"
                 Content="{DynamicResource 连接蓝牙}"
                 Style="{StaticResource BluetoothStyleBtn}"
                 Tag="&#xe639;"
-                Visibility="{Binding ComIconOpen}" />
+                Visibility="{Binding BluetoothIconOpen}" />
             <Button
                 Background="#FFF75231"
-                Command="{Binding OpenCom}"
+                Command="{Binding OpenBluetooth}"
                 Content="{DynamicResource 断开蓝牙}"
                 Style="{StaticResource BluetoothStyleBtn}"
                 Tag="&#xe667;"
-                Visibility="{Binding ComIconClose}" />
+                Visibility="{Binding BluetoothIconClose}" />
           
             <ComboBox  MaxHeight="30" 
-                ItemsSource="{Binding SerialPortSetting.AvailablePorts}"
-                SelectedItem="{Binding SerialPortSetting.SelectedPort, Mode=TwoWay}"
+                ItemsSource="{Binding BlueToothSettings.Devices}"
+                SelectedItem="{Binding BlueToothSettings.SelectedDevice, Mode=TwoWay}"
                 Style="{StaticResource cmbstyle}"
-                IsEnabled="{Binding IsEnableComboBox}"></ComboBox>
+                ></ComboBox>
 
             <TextBlock Text="{DynamicResource 机型}" Margin=" 15,20,0,0" FontSize="15" FontFamily="楷体"></TextBlock>
             <ComboBox
@@ -359,8 +359,8 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Foreground="{Binding ComStatus}"
-                    Text="{Binding Status}"
-                    ToolTip="{Binding Status}" />
+                    Text="{Binding BlueToothSettings.StatusMessage}"
+                     />
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <TextBlock

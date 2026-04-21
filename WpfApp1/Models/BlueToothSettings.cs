@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace WpfApp1.Models
     {
         private readonly IBluetoothService _bluetoothService;
         private BluetoothDeviceInfo? _selectedDevice;
-        private string _statusMessage = "准备就绪";
+        private string _statusMessage = "等待开启扫描";
         private string _SendData = string.Empty;
         private bool _isBusy;
         public BlueToothSettings(IBluetoothService bluetoothService) {
@@ -26,16 +27,10 @@ namespace WpfApp1.Models
             _bluetoothService.StatusChanged += OnStatusChanged;
             _bluetoothService.DataReceived += OnDataReceived;
             _bluetoothService.ConnectionStatusChanged += OnConnectionStatusChanged;
-
-            StartScanCommand = new RelayCommand(async _ => await StartScanAsync(), _ => !IsBusy && !_bluetoothService.IsScanning);
-            StopScanCommand = new RelayCommand(_ => StopScan(), _ => _bluetoothService.IsScanning);
-            ConnectCommand = new RelayCommand(async _ => await ConnextAsync(), _ => SelectedDevice != null && !_bluetoothService.IsConnected);
-            DisconnectCommand = new RelayCommand(async _ => await DisconnectAsync(), _ => _bluetoothService.IsConnected);
             SendDataCommand = new RelayCommand(async _ => await SendDataAsync(), _ => _bluetoothService.IsConnected && !string.IsNullOrWhiteSpace(SendData));
-            ClearMessageCommand = new RelayCommand(_ => Messages.Clear());
         }
 
-        #region 绑定属性和命令
+        #region 属性和命令
         public ObservableCollection<BluetoothDeviceInfo> Devices { get; } = new();// 设备列表
         public ObservableCollection<string> Messages { get; } = new();// 消息列表
 
@@ -63,12 +58,9 @@ namespace WpfApp1.Models
             set => SetProperty(ref _isBusy, value);
         }
 
-        public ICommand StartScanCommand { get; }
-        public ICommand StopScanCommand { get; }
+
         public ICommand SendDataCommand { get; }
-        public ICommand ConnectCommand { get; }
-        public ICommand DisconnectCommand { get; }
-        public ICommand ClearMessageCommand { get; }
+
 
         #endregion
 
@@ -112,7 +104,7 @@ namespace WpfApp1.Models
         #endregion
 
         #region 命令执行方法
-        private async Task StartScanAsync()
+        public async Task StartScanAsync()
         {
             IsBusy = true;
             Devices.Clear();
@@ -120,34 +112,18 @@ namespace WpfApp1.Models
             IsBusy = false;
         }
 
-        private void StopScan()
+        public void StopScan()
         {
             _bluetoothService.StopScanning();
             IsBusy = false;
         }
-
-        private async Task ConnextAsync()
+        public async Task<bool> ConnextAsync()
         {
-            if (SelectedDevice == null) return;
-            IsBusy = true;
-            if (_bluetoothService.IsScanning)
-            {
-                _bluetoothService.StopScanning();
-                await Task.Delay(300); // 等待扫描停止,释放资源
-            }
-            bool success = await _bluetoothService.ConnectAsync(SelectedDevice);
-            if (!success)
-            {
-                StatusMessage = "连接失败";
-            }
-            else
-            {
-                StatusMessage = "连接成功";
-            }
-            IsBusy = !_bluetoothService.IsConnected;
+            bool success = await _bluetoothService.ConnectAsync(SelectedDevice!);
+            return success;
         }
 
-        private async Task DisconnectAsync()
+        public async Task DisconnectAsync()
         {
             await _bluetoothService.DisconnectAsync();
         }
@@ -165,6 +141,28 @@ namespace WpfApp1.Models
             {
                 StatusMessage = "发送失败";
             }
+        }
+
+        /// <summary>
+        /// 判断蓝牙扫描是否打开
+        /// </summary>
+        /// <returns></returns>
+        public bool IsScanningOpen()
+        {
+            return _bluetoothService.IsScanning;
+        }
+        /// <summary>
+        /// 判断蓝牙连接是否打开
+        /// </summary>
+        /// <returns></returns>
+        public bool IsConnected()
+        {
+            return _bluetoothService.IsConnected;
+        }
+
+        public string getBluetoothName()
+        {
+            return _selectedDevice?.Name ?? string.Empty;
         }
         #endregion
 
