@@ -15,7 +15,7 @@ namespace WpfApp1.Models
 {
     public class BlueToothSettings: BaseViewModel
     {
-        private readonly IBluetoothService _bluetoothService;
+        public readonly IBluetoothService _bluetoothService;
         private BluetoothDeviceInfo? _selectedDevice;
         private string _statusMessage = "等待开启扫描";
         private string _SendData = string.Empty;
@@ -57,7 +57,12 @@ namespace WpfApp1.Models
             get => _isBusy;
             set => SetProperty(ref _isBusy, value);
         }
-
+        private bool _canConnect = true;
+        public bool CanConnect
+        {
+            get => _canConnect;
+            set => SetProperty(ref _canConnect, value);
+        }
 
         public ICommand SendDataCommand { get; }
 
@@ -95,9 +100,11 @@ namespace WpfApp1.Models
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                if (!Devices.Any(d => d.BluetoothAddress == device.BluetoothAddress))
+
+                if (device.Name.StartsWith("tb", StringComparison.OrdinalIgnoreCase))
                 {
-                    Devices.Add(device);
+                    if (!Devices.Any(d => d.BluetoothAddress == device.BluetoothAddress))
+                        Devices.Add(device);
                 }
             });
         }
@@ -106,7 +113,10 @@ namespace WpfApp1.Models
         #region 命令执行方法
         public async Task StartScanAsync()
         {
+            IsBusy = true;
+            Devices.Clear();
             await _bluetoothService.StartScanningAsync();
+            IsBusy = false;
         }
 
         public void StopScan()
@@ -114,15 +124,32 @@ namespace WpfApp1.Models
             _bluetoothService.StopScanning();
             IsBusy = false;
         }
-        public async Task<bool> ConnextAsync()
+        private async void StartCooldown(int milliseconds = 1500)
         {
-            bool success = await _bluetoothService.ConnectAsync(SelectedDevice!);
+            CanConnect = false;
+            await Task.Delay(milliseconds);
+            CanConnect = true;
+            CommandManager.InvalidateRequerySuggested();
+        }
+        public async Task<bool> ConnectAsync()
+        {
+            if (SelectedDevice == null) return false;
+            IsBusy = true;
+            if (_bluetoothService.IsScanning)
+            {
+                _bluetoothService.StopScanning();
+                await Task.Delay(300); // 等待扫描停止,释放资源
+            }
+            bool success = await _bluetoothService.ConnectAsync(SelectedDevice);
             return success;
         }
 
         public async Task DisconnectAsync()
         {
             await _bluetoothService.DisconnectAsync();
+            StatusMessage = "正在断开连接...";
+            StartCooldown();
+            StatusMessage = "已断开连接";
         }
 
         private async Task SendDataAsync()

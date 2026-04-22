@@ -302,30 +302,22 @@ namespace WpfApp1.ViewModels
                     BlueToothSettings.StopScan();
                     BlueToothSettings.StatusMessage = "扫描停止";
                     ChangeBluetoothScanIcon(false);
-                    bluetoothStateColor(false);
                     AddLog($"关闭蓝牙扫描成功");
                 }
                 catch (Exception)
                 {
 
                 }
-                finally
-                {
-                    ChangeBluetoothScanIcon(false);
-                    bluetoothStateColor(false);
-                }
 
             }
-            else
+            else if(!BlueToothSettings.IsScanningOpen() && !BlueToothSettings.IsBusy)
             {
-                BlueToothSettings.IsBusy = true;
-                BlueToothSettings.Devices.Clear();
+
                 try
                 {
                     BlueToothSettings.StatusMessage = "正在扫描...";
                     await BlueToothSettings.StartScanAsync();
                     ChangeBluetoothScanIcon(true);
-                    bluetoothStateColor(true);
                     AddLog($"打开蓝牙扫描成功");
                 }
                 catch (Exception ex)
@@ -346,7 +338,6 @@ namespace WpfApp1.ViewModels
         {
             if (BlueToothSettings.IsConnected())//判断蓝牙连接是否已打开
             {
-                BlueToothSettings.IsBusy = true;
                 try
                 {
                     AddLog("准备关闭蓝牙通信");
@@ -354,53 +345,47 @@ namespace WpfApp1.ViewModels
                     AddLog("蓝牙已关闭");
                     ChangeBluetoothIcon(false);
                     bluetoothStateColor(false);
-                    BlueToothSettings.StatusMessage = "蓝牙已断开";
                     AddLog($"关闭蓝牙{BlueToothSettings.getBluetoothName()}成功");
                 }
                 catch (Exception ex)
                 {
                     BlueToothSettings.StatusMessage = $"断开失败:{ex.Message}";
                 }
-                finally
-                {
-                    ChangeBluetoothIcon(false);
-                    bluetoothStateColor(false);
-                    BlueToothSettings.IsBusy = false;
-                }
 
             }
-            else
+            else if(!BlueToothSettings.IsConnected() && !BlueToothSettings.IsBusy && BlueToothSettings.CanConnect)
             {
-                if (BlueToothSettings.IsScanningOpen())
-                {
-                    AddLog("关闭蓝牙扫描");
-                    BlueToothSettings.StopScan();
-                    ChangeBluetoothScanIcon(false);      
-                    await Task.Delay(200); // 等待扫描停止,释放资源
-                }
                 if (BlueToothSettings.SelectedDevice == null)
                 {
                     BlueToothSettings.StatusMessage = "请先选择设备";
                     return;
                 }
-                BlueToothSettings.IsBusy = true;
+                if (BlueToothSettings.IsScanningOpen())
+                {
+                    AddLog("关闭蓝牙扫描");
+                    BlueToothSettings.StopScan();
+                    ChangeBluetoothScanIcon(false);      
+                    await Task.Delay(300); // 等待扫描停止,释放资源
+                }
                 try
                 {
                     AddLog("准备打开蓝牙");
                     ChangeBluetoothIcon(true);
                     BlueToothSettings.StatusMessage = "正在连接蓝牙...";
-                    bool success = await BlueToothSettings.ConnextAsync();
+                    bool success =  await BlueToothSettings.ConnectAsync();
                     if (success)
                     {
-                        BlueToothSettings.StatusMessage = "蓝牙已连接";
                         bluetoothStateColor(true);
+                        BlueToothSettings.StatusMessage = "蓝牙已连接";
+                        BlueToothSettings.IsBusy = false;
                         AddLog($"打开蓝牙{BlueToothSettings.getBluetoothName()}成功");
                     }
                     else
                     {
-                        BlueToothSettings.StatusMessage = "蓝牙连接失败";
+                        await BlueToothSettings.DisconnectAsync();
                         ChangeBluetoothIcon(false);
                         bluetoothStateColor(false);
+                        BlueToothSettings.IsBusy = false;
                         AddLog($"打开蓝牙{BlueToothSettings.getBluetoothName()}失败");
                     }
 
@@ -408,10 +393,6 @@ namespace WpfApp1.ViewModels
                 catch (Exception)
                 {
 
-                }
-                finally
-                {
-                    BlueToothSettings.IsBusy = false;
                 }
             }
 

@@ -28,7 +28,9 @@ namespace WpfApp1.Services
         public event Action<byte[]>? RawDataReceived;
 
         public bool IsScanning => _watcher?.Status == BluetoothLEAdvertisementWatcherStatus.Started;// 扫描状态
-        public bool IsConnected => _device?.ConnectionStatus == BluetoothConnectionStatus.Connected;// 连接状态
+       // public bool IsConnected => _device?.ConnectionStatus == BluetoothConnectionStatus.Connected;// 连接状态
+        private bool _isConnected = false;
+        public bool IsConnected => _isConnected;
         public BluetoothDeviceInfo? ConnectedDevice { get; private set; }// 当前连接的设备信息
 
         //配置蓝牙服务和特征的UUID
@@ -114,16 +116,13 @@ namespace WpfApp1.Services
                 _device = await BluetoothLEDevice.FromIdAsync(deviceInfo.Id);
                 if (_device == null)
                 {
-                    StatusChanged?.Invoke("连接失败: 无法从 ID 创建设备对象");
                     return false;
                 }
-
 
                 //获取所有GATT服务
                 var serivcesResult = await _device.GetGattServicesAsync();
                 if (serivcesResult.Status != GattCommunicationStatus.Success)
                 {
-                    StatusChanged?.Invoke("连接失败: 无法获取GATT服务");
                     return false;
                 }
 
@@ -133,9 +132,8 @@ namespace WpfApp1.Services
 
                 // 获取 UART 服务的特征
                 var charResult = await uartService.GetCharacteristicsAsync(BluetoothCacheMode.Uncached);
-                if (charResult.Status != GattCommunicationStatus.Success)
+                if (charResult!.Status != GattCommunicationStatus.Success)
                 {
-                    StatusChanged?.Invoke("连接失败: 无法获取UART服务");
                     return false;
                 }
 
@@ -145,7 +143,6 @@ namespace WpfApp1.Services
                 if (_txCharacteristic == null || _rxCharacteristic == null)
                 {
                     var foundChars = string.Join(", ", charResult.Characteristics.Select(c => c.Uuid));
-                    StatusChanged?.Invoke($"未找到 TX/RX 特征。实际特征: {foundChars}");
                     return false;
                 }
 
@@ -153,7 +150,7 @@ namespace WpfApp1.Services
                 await _rxCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(
                     GattClientCharacteristicConfigurationDescriptorValue.Notify);
                 _rxCharacteristic.ValueChanged += OnValueChanged;
-
+                _isConnected = true;
                 ConnectedDevice = deviceInfo;
                 ConnectionStatusChanged?.Invoke(true);
                 StatusChanged?.Invoke("连接成功");
@@ -187,13 +184,18 @@ namespace WpfApp1.Services
         /// <returns></returns>
         public async Task DisconnectAsync()
         {
-            _rxCharacteristic?.Service?.Device?.Dispose();
+            if (_rxCharacteristic != null)
+            {
+                _rxCharacteristic.ValueChanged -= OnValueChanged;
+                _rxCharacteristic = null;
+            }
+            _txCharacteristic = null;
             _device?.Dispose();
             _device = null;
-            ConnectedDevice = null;
 
+            ConnectedDevice = null;
+            _isConnected = false;
             ConnectionStatusChanged?.Invoke(false);
-            StatusChanged?.Invoke("已断开连接");
             await Task.CompletedTask;
         }
 
