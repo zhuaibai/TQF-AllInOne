@@ -265,51 +265,6 @@ namespace WpfApp1.Services
                 Thread.Sleep(100);
                 //添加发送帧数
                 AddSendFrame(Command.Length);
-                 
-                // 需要读取的字节数
-                //int bytesToRead =  returnCount;
-                ////读取输入缓冲区
-                //byte[] buffer = new byte[bytesToRead];
-                //totalBytesRead = 0;
-                ////设置读取超时，1s内达不到所需字节就触发超时异常
-                //while (totalBytesRead < bytesToRead)
-                //{
-                //    int bytesRead = SerialPort.Read(buffer, totalBytesRead, bytesToRead - totalBytesRead);
-                //    totalBytesRead += bytesRead;
-                //}
-
-
-                //第二种方法
-                // 设置读取超时时间（200ms）
-                //SerialPort.ReadTimeout = 100;
-                //byte[] buffer;
-                //// 使用MemoryStream动态存储所有接收到的字节
-                //using (MemoryStream memoryStream = new MemoryStream())
-                //{
-                //    byte[] chunkBuffer = new byte[128]; // 每次读取的块缓冲区
-
-                //    // 循环读取直到超时或数据读完
-                //    while (true)
-                //    {
-                //        try
-                //        {
-                //            int bytesRead = SerialPort.Read(chunkBuffer, 0, chunkBuffer.Length);//每次读取32字节
-                //            if (bytesRead > 0)
-                //            {
-                //                memoryStream.Write(chunkBuffer, 0, bytesRead);
-                //            }
-
-                //        }
-                //        catch (TimeoutException)
-                //        {
-                //            break; // 超时表示无更多数据
-                //        }
-                //    }
-
-                //    // 获取最终数据
-                //    buffer= memoryStream.ToArray();
-                //    totalBytesRead = buffer.Length; // 实际读取的总字节数
-                //}
 
                 // 设置读取超时时间
                 SerialPort.ReadTimeout = 1000;

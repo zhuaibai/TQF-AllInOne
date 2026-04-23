@@ -60,6 +60,8 @@ namespace WpfApp1.ViewModels
             //初始化串口信息
             IniCom();
             OpenCom = new RelayCommand(openCom);
+            //蓝牙
+            _blueToothSettings = new BlueToothSettings(new WindowsBluetoothService(_pauseEvent, _semaphore, AddLog, UpdateState));
             OpenBluetoothScan = new RelayCommand(openBluetoothScan);
             OpenBluetooth = new RelayCommand(openBluetooth);
 
@@ -69,8 +71,7 @@ namespace WpfApp1.ViewModels
             SerialCommunicationService.AddReceiveFrame = SerialCountVM.AddReceiveFrame;
             SerialCommunicationService.AddSendFrame = SerialCountVM.AddSendFrame;
 
-            _blueToothSettings = new BlueToothSettings(new WindowsBluetoothService(_pauseEvent, _semaphore, AddLog, UpdateState));
-
+            
             //BMS
             BMS_Command_Setting = new SendingCommandSettingsViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
 
@@ -399,10 +400,39 @@ namespace WpfApp1.ViewModels
         }
         #endregion
 
+        #region 蓝牙状态颜色
+        private Brush bluetoothStatus = Brushes.Red;
+        public Brush BluetoothStatus
+        {
+            get
+            {
+                return bluetoothStatus;
+            }
+            set
+            {
+                bluetoothStatus = value;
+                OnPropertyChanged();
+            }
+        }
 
+        /// <summary>
+        /// 设置状态灯颜色
+        /// </summary>
+        /// <param name="flag"></param>
+        public void bluetoothStateColor(bool flag)
+        {
+            if (flag)
+            {
+                BluetoothStatus = Brushes.Green;
+            }
+            else
+            {
+                BluetoothStatus = Brushes.Red;
+            }
+        }
         #endregion
 
-    
+        #endregion
 
         #region 小标题选项
         public enum BatteryMode
@@ -1894,35 +1924,7 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        private Brush bluetoothStatus = Brushes.Red;
-        public Brush BluetoothStatus
-        {
-            get
-            {
-                return bluetoothStatus;
-            }
-            set
-            {
-                bluetoothStatus = value;
-                OnPropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// 设置状态灯颜色
-        /// </summary>
-        /// <param name="flag"></param>
-        public void bluetoothStateColor(bool flag)
-        {
-            if (flag)
-            {
-                BluetoothStatus = Brushes.Green;
-            }
-            else
-            {
-                BluetoothStatus = Brushes.Red;
-            }
-        }
+       
 
         // 命令定义
         public ICommand StartCommand { get; }
