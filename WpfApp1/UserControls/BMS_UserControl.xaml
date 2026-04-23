@@ -2888,7 +2888,7 @@
                             Grid.Row="1"
                             Margin="10"
                             Background="AntiqueWhite"
-                            Command="{Binding BMS_Setting.HistoryReadCommand}"
+                            Command="{Binding BMS_Setting.HistoryReadCommandBMS02}"
                             Content="{DynamicResource 读取}"
                             FontSize="30"
                             Style="{StaticResource BtnStyle5}"
