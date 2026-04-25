@@ -52,16 +52,20 @@ namespace WpfApp1.ViewModels
             #endregion
 
             #region 后台线程
+            //串口后台
             StartCommand = new RelayCommand(StartBackgroundThread);
             StopCommand = new RelayCommand(StopBackgroundThread);
+            //蓝牙后台
+            StartBluetoothBackgroundCommand = new RelayCommand(StartBluetoothBackgroundThread);
 
             // 创建串口实例
             _serialPortSetting = new SerialPortSettingViewModel();
             //初始化串口信息
             IniCom();
             OpenCom = new RelayCommand(openCom);
-            //蓝牙
-            _blueToothSettings = new BlueToothSettings(new WindowsBluetoothService(_pauseEvent, _semaphore, AddLog, UpdateState));
+            //
+            //蓝牙通讯实例
+            _blueToothSettings = new BlueToothSettings(new WindowsBluetoothService(_pauseEvent, AddLog, UpdateBluetoothState));
             OpenBluetoothScan = new RelayCommand(openBluetoothScan);
             OpenBluetooth = new RelayCommand(openBluetooth);
 
@@ -74,6 +78,9 @@ namespace WpfApp1.ViewModels
             
             //BMS
             BMS_Command_Setting = new SendingCommandSettingsViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            BMS02 = new BMS_UserControl();
+            BMS01 = new BMS01_UserControl();
+            BMS03 = new BMS03_UserControl();
 
             //初始化  GB   ViewModel
             hopVm = new HOPViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
@@ -125,9 +132,6 @@ namespace WpfApp1.ViewModels
             //消息框初始化
             _messageService = messageService;
             ShowMessageCommand = new RelayCommand(OnShowMessage);
-            BMS02 = new BMS_UserControl();
-            BMS01 = new BMS01_UserControl();
-            BMS03 = new BMS03_UserControl();
             ModbusRTU.showStatue = UpdateState;
             //// 模拟电量变化
             //var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3)};
@@ -149,7 +153,7 @@ namespace WpfApp1.ViewModels
 
             App.ChangeLanguageWithSetting = RefleshSettingParamToLanguage;
         }
-
+        //蓝牙实例属性
         private BlueToothSettings _blueToothSettings;
         public BlueToothSettings BlueToothSettings
         {
@@ -160,7 +164,7 @@ namespace WpfApp1.ViewModels
                 OnPropertyChanged(nameof(BlueToothSettings));
             }
         }
-
+        //串口实例属性
         private SerialPortSettingViewModel _serialPortSetting;
 
         public SerialPortSettingViewModel SerialPortSetting
@@ -175,7 +179,7 @@ namespace WpfApp1.ViewModels
                 OnPropertyChanged(nameof(SerialPortSetting));
             }
         }
-
+        //串口ComboBox可用状态属性
         private bool _isEnableComboBox = true;
         public bool IsEnableComboBox
         {
@@ -189,7 +193,7 @@ namespace WpfApp1.ViewModels
                 OnPropertyChanged(nameof(IsEnableComboBox));
             }
         }
-
+        //更新串口ComboBox的可用状态
         private void UpdateComboBoxEnabledState()
         {
             IsEnableComboBox = !SerialCommunicationService.IsOpen();
@@ -288,8 +292,11 @@ namespace WpfApp1.ViewModels
                 BluetoothScanIconOpen = Visibility.Visible;
             }
         }
-       
 
+
+        #endregion
+
+        #region 蓝牙扫描和连接
         /// <summary>
         /// 打开蓝牙扫描(已打开则关闭蓝牙扫描)
         /// </summary>
@@ -301,7 +308,7 @@ namespace WpfApp1.ViewModels
                 {
                     AddLog("准备关闭蓝牙扫描");
                     BlueToothSettings.StopScan();
-                    BlueToothSettings.StatusMessage = "扫描停止";
+                    UpdateBluetoothState("扫描停止");
                     ChangeBluetoothScanIcon(false);
                     AddLog($"关闭蓝牙扫描成功");
                 }
@@ -311,24 +318,22 @@ namespace WpfApp1.ViewModels
                 }
 
             }
-            else if(!BlueToothSettings.IsScanningOpen() && !BlueToothSettings.IsBusy)
+            else
             {
 
                 try
                 {
-                    BlueToothSettings.StatusMessage = "正在扫描...";
+                    UpdateBluetoothState("正在扫描...");
                     await BlueToothSettings.StartScanAsync();
                     ChangeBluetoothScanIcon(true);
                     AddLog($"打开蓝牙扫描成功");
                 }
-                catch (Exception ex)
+
+                finally
                 {
-                    BlueToothSettings.StatusMessage = $"扫描异常:{ex.Message}";
+                    BlueToothSettings.IsBusy = false;
                 }
-                finally {            
-                    BlueToothSettings.IsBusy = false; 
-                }
-                
+
             }
         }
 
@@ -341,45 +346,80 @@ namespace WpfApp1.ViewModels
             {
                 try
                 {
+                    StopBackgroundThread();
+                    var WaitFinish = Task.Run(() =>
+                    {
+                        while (IsRunning)
+                        {
+                            // 可以添加短暂延迟避免CPU占用过高
+                            Task.Delay(30).Wait();
+                        }
+                    });
+                    //等待后台通讯停止（1s）
+                    await Task.WhenAny(WaitFinish, Task.Delay(1000));
                     AddLog("准备关闭蓝牙通信");
                     await BlueToothSettings.DisconnectAsync();
-                    AddLog("蓝牙已关闭");
                     ChangeBluetoothIcon(false);
+                    AddLog("蓝牙已关闭");
                     bluetoothStateColor(false);
                     AddLog($"关闭蓝牙{BlueToothSettings.getBluetoothName()}成功");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    BlueToothSettings.StatusMessage = $"断开失败:{ex.Message}";
+                }
+                finally
+                {
+                    ChangeBluetoothIcon(false);
+                    bluetoothStateColor(false);
+                    IsRunning = false;
+                    BlueToothSettings.IsBusy = false;
                 }
 
             }
-            else if(!BlueToothSettings.IsConnected() && !BlueToothSettings.IsBusy && BlueToothSettings.CanConnect)
+            else if (BlueToothSettings.IsBusy == false && BlueToothSettings.CanConnect)
             {
                 if (BlueToothSettings.SelectedDevice == null)
                 {
-                    BlueToothSettings.StatusMessage = "请先选择设备";
+                    UpdateBluetoothState("请先选择设备");
                     return;
                 }
                 if (BlueToothSettings.IsScanningOpen())
                 {
                     AddLog("关闭蓝牙扫描");
                     BlueToothSettings.StopScan();
-                    ChangeBluetoothScanIcon(false);      
+                    ChangeBluetoothScanIcon(false);
                     await Task.Delay(300); // 等待扫描停止,释放资源
                 }
                 try
                 {
                     AddLog("准备打开蓝牙");
                     ChangeBluetoothIcon(true);
-                    BlueToothSettings.StatusMessage = "正在连接蓝牙...";
-                    bool success =  await BlueToothSettings.ConnectAsync();
+                    UpdateBluetoothState("正在连接蓝牙");
+                    bool success = await BlueToothSettings.ConnectAsync();
                     if (success)
                     {
                         bluetoothStateColor(true);
-                        BlueToothSettings.StatusMessage = "蓝牙已连接";
+                        UpdateBluetoothState("蓝牙已连接");
+                        (bool success, string machine) result = (false, string.Empty);
+                        for (int i = 0; i < 3; i++)
+                        {
+                            result = await AutoBluetoothSelectedMachineType();
+                            if (result.success) break;
+                            await Task.Delay(500); // 等待设备稳定
+                        }
+                        //自动识别机器
+                        if (!result.success)
+                        {
+                            UpdateBluetoothState("自动识别机型失败");
+                            await BlueToothSettings.DisconnectAsync();
+                            ChangeBluetoothIcon(false);
+                            bluetoothStateColor(false);
+                            IsRunning = false;
+                            return;
+                        }
                         BlueToothSettings.IsBusy = false;
                         AddLog($"打开蓝牙{BlueToothSettings.getBluetoothName()}成功");
+                        StartBluetoothBackgroundThread();
                     }
                     else
                     {
@@ -398,6 +438,8 @@ namespace WpfApp1.ViewModels
             }
 
         }
+
+
         #endregion
 
         #region 蓝牙状态颜色
@@ -1826,7 +1868,7 @@ namespace WpfApp1.ViewModels
         }
         #endregion
 
-        #region 后台通讯线程
+        #region 串口后台通讯线程
         private CancellationTokenSource _cts = new CancellationTokenSource();//取消线程专用
         private ManualResetEventSlim _pauseEvent = new ManualResetEventSlim(true);//暂停线程专用
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1); // 异步竞争
@@ -1924,15 +1966,11 @@ namespace WpfApp1.ViewModels
             }
         }
 
-       
-
         // 命令定义
         public ICommand StartCommand { get; }
         public ICommand StopCommand { get; }
-        //public ICommand ExecuteSpecialCommand { get; }
         public ICommand OpenCom { get; }
-        public ICommand OpenBluetoothScan { get; }
-        public ICommand OpenBluetooth { get; }
+
         /// <summary>
         /// 启动后台通信线程
         /// </summary>
@@ -2103,7 +2141,7 @@ namespace WpfApp1.ViewModels
 
         #endregion
 
-        #region 通讯实现方法
+        #region 串口通讯实现方法
 
         /// <summary>
         /// 异常解析显示
@@ -4966,6 +5004,622 @@ namespace WpfApp1.ViewModels
             _cts.Cancel();
             AddLog("后台通信停止请求已发送");
         }
+        #endregion
+
+        #region 蓝牙后台通讯线程
+        //定义蓝牙命令
+        public ICommand StartBluetoothBackgroundCommand { get; }
+        public ICommand OpenBluetoothScan { get; }
+        public ICommand OpenBluetooth { get; }
+        //状态栏更新
+        public void UpdateBluetoothState(string state)
+        {
+            BlueToothSettings.StatusMessage = state;
+        }
+
+        /// <summary>
+        /// 自动获取机型(蓝牙)
+        /// </summary>
+        private async Task<(bool success, string machine)> AutoBluetoothSelectedMachineType()
+        {
+            string receive_MachineType = await BlueToothSettings.SendBluetoothData(SpecialCommand.QueryMachineType, 10);
+            if (receive_MachineType.Length >= 2 && receive_MachineType.StartsWith("-1"))
+            {
+                //判断抗干扰是否打开
+                if (IsChecked)
+                {
+                    IsChecked = false;
+                    OnceOpenCRC = false;
+                    SerialCommunicationService.OpenReceiveCRC(false);
+                    receive_MachineType = await BlueToothSettings.SendBluetoothData(SpecialCommand.QueryMachineType, 10);
+                }
+            }
+
+            SerialCommunicationService.MachineType = receive_MachineType;
+            if (receive_MachineType.Length >= 9 && (receive_MachineType.Substring(0, 9) == "(BMS00002"))
+            {
+                SwitchViewToVQorGB("BMS02");
+                //返回机器类型
+                return (true, receive_MachineType);
+            }
+            else
+            {
+                return (false, receive_MachineType);
+            }
+        }
+
+        /// <summary>
+        /// 启动蓝牙后台通信线程
+        /// </summary>
+        private void StartBluetoothBackgroundThread()
+        {
+
+            if (!BlueToothSettings.IsConnected())
+            {
+                MessageBox.Show(App.GetText("请先连接蓝牙设备!"), "提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            if (IsRunning) { return; }
+
+            IsRunning = true;
+            _cts = new CancellationTokenSource();
+            UpdateBluetoothState("正在通信");
+            Task.Run(() => BluetoothBackgroundWorker(_cts.Token), _cts.Token);
+            AddLog("后台通信线程已启动");
+        }
+
+        private async Task BluetoothBackgroundWorker(CancellationToken token)
+        {
+            flag = 0;//初始设置值
+            try
+            {
+                if (SelectedMachineItem == "BMS01")
+                {
+                    //补丁，BMS01时单位稍作修改
+                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings("default2.xml"));
+                }
+                else if (SelectedMachineItem == "BMS03")
+                {
+                    //补丁，BMS03时单位稍作修改
+                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings("default3.xml"));
+                }
+                else
+                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings("default.xml"));
+                //COM通讯
+                while (!token.IsCancellationRequested)//检查是否请求取消
+                {
+                    if (SelectedMachineItem == "BMS02")
+                    {
+                        //唤醒休眠
+                        if (BMS_Setting.isSleeping == 0 && BMS_Setting.SettingStatue[4] == 1)
+                        {
+                            await Task.Delay(1000, token);
+                            byte[] rec = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead20Frame(1, 10, 0), 8);
+                            if (rec.Length == 8)
+                            {
+                                BMS_Setting.SettingStatue[4] = 0;
+                            }
+                            continue;
+                        }
+                        //BMS02通讯
+                         await BlueToothCommunicationWithBMS02(token);
+                    }
+                    // 模拟常规通信
+                    await Task.Delay(100, token);
+                    AddLog($"[后台] 常规通信: {DateTime.Now:HH:mm:ss.fff}");
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("后台通信已终止");
+                UpdateBluetoothState("已停止通信!");
+                IsRunning = false;
+            }
+            catch (Exception ex)
+            {
+                string mes = ex.ToString();
+                AddLog($"后台通信异常{mes}");
+                UpdateBluetoothState("异常!");
+                //关闭蓝牙
+                await BlueToothSettings.DisconnectAsync();
+            }
+            finally
+            {
+                IsRunning = false;
+                ChangeBluetoothIcon(false);
+                bluetoothStateColor(false);
+                BlueToothSettings.IsBusy = false;
+            }
+
+        }
+        #endregion
+
+        #region 蓝牙通讯实现方法
+
+        #region BMS02通讯
+
+        /// <summary>
+        /// BMS02通讯
+        /// </summary>
+        /// <param name="token"></param>
+        private async Task BlueToothCommunicationWithBMS02(CancellationToken token)
+        {
+            byte[] receive; // 接收到的原始字节数据
+            short[] data; // 解析后的寄存器数据（16位整数数组）
+            // 模式1：读取BMS基本信息和状态
+            if (SelectedMode == BatteryMode.Mode1)
+            {
+                // 等待暂停或取消信号（支持暂停/恢复机制）
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                // 发送查询机器类型指令
+                try
+                {
+                    string receive_MachineType = await BlueToothSettings.SendBluetoothData(SpecialCommand.QueryMachineType, 10);
+                    if (receive_MachineType != null && receive_MachineType.Length == 10)
+                    {
+                        MachineType = receive_MachineType.Substring(1, 8);
+                        SerialCommunicationService.MachineType = receive_MachineType;
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+
+                //首界面设置状态显示
+                // 等待暂停或取消信号 
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                //读写入的参数设置值(充电MOS、放电MOS、关机、休眠)
+                try
+                {
+                    // 构建读取指令：从站地址=1, 读取寄存器120-121（强制开关和强制均衡）
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 120, 2), 9);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    if (data != null && data.Length >= 2)
+                    {
+                        // 将16位寄存器值转换为位数组（每个位代表一个状态标志）
+                        BMS_Setting.SettingStatue = ModbusRTU.GetBits(data[0]);// 设置状态
+                        BMS_Setting.JunHen = ModbusRTU.GetBits(data[1]); // 均衡状态
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                // 等待暂停或取消信号 
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                //读取电芯数量和温度传感器数量
+                try
+                {
+                    // 读取寄存器250-251（电芯数量和NTC数量）
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 250, 2), 9);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    if (data != null && data.Length == 2)
+                    {
+                        BMS_Setting.CellNum = data[0];// 电芯数量
+                        BMS_Setting.NtcNum = data[1];// 温度传感器数量
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+
+                // 等待暂停或取消信号 
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                //读取16个电芯的电压
+                try
+                {
+                    //读取寄存器2-17 查16个电芯的电压
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 2, 16), 37);
+                    //解析返回的报文
+                    BMS_VM.MOD_CELL1_VOL_1_16(ModbusRTU.ParseRead03Response(receive));
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                // 等待暂停或取消信号 
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                //读取状态码(83)
+                try
+                {
+                    // 读取寄存器80-84
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 80, 5), 15);
+                    //解析返回的报文
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    if (data != null)
+                    {
+                        // 第4个寄存器（索引3）为设备状态，转换为位数组
+                        BMS_VM.MOD_INST_STATE_Set(ModbusRTU.GetBits(data[3]));
+
+                        //查告警(80)、保护(81)、硬件错误(82)信息
+                        BMS_VM.MOD_WARN_STATE_Set(ModbusRTU.GetBits(data[0]));
+                        BMS_VM.MOD_PROT_STATE_Set(ModbusRTU.GetBits(data[1]));
+                        BMS_VM.MOD_ERROR_STATE_Set(ModbusRTU.GetBits(data[2]));
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await Task.Delay(200, token);
+                await _semaphore.WaitAsync(token);
+                //查电压，温度，电流
+                try
+                {
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 18, 18), 41);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    // 在 UI 线程更新
+                    BMS_VM.OverViewSet(data);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await Task.Delay(200, token);
+                await _semaphore.WaitAsync(token);
+                //读取寄存器283 - 296
+                try
+                {
+                    //读取版本号等信息
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 283, 14), 33);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    // 在 UI 线程更新
+                    BMS_VM.SystemInfoSet(data);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await Task.Delay(200, token);
+                await _semaphore.WaitAsync(token);
+                //AFE_Protect
+                try
+                {
+                    // 读取寄存器86（AFE保护状态）
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 86, 1), 7);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    // 在 UI 线程更新
+                    if (data != null)
+                    {
+                        BMS_VM.AFE_Protect = ModbusRTU.GetBits(data[0]);// AFE保护状态位
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await Task.Delay(200, token);
+                await _semaphore.WaitAsync(token);
+                try
+                {
+                    // 读取蓝牙地址（寄存器297，6个寄存器）
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 297, 6), 17);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    // 在 UI 线程更新
+                    BMS_Setting.ReadBuleTooth(data);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+            }
+            // 模式2：读取设置项并进行初始化设置
+            else if (SelectedMode == BatteryMode.Mode2)
+            {
+                // 等待暂停或取消信号（支持暂停/恢复机制）
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                //发送03功能码(查是91个设置项的电压)
+                try
+                {
+                    // 读取112个设置项（寄存器130-241）
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 130, 112), 229);
+                    ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+                // 首次运行时进行初始化设置
+                if (flag == 0)
+                {
+                    await Task.Delay(200, token);
+                    //发送03功能码(查是91个设置项的电压)
+                    try
+                    {
+                        //  再次读取设置项以确保数据准确
+                        receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 130, 112), 229);
+                        ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
+                        //初始化设置值
+                        ModbusRTU.FirstSetReceive(BMS_Setting.SendingCommands);
+                        flag = 1;// 标记已初始化
+                    }
+                    finally
+                    {
+                        _semaphore.Release();
+                    }
+                }
+            }
+            // 模式6：读取前端芯片监控数据
+            else if (SelectedMode == BatteryMode.Mode6)
+            {
+                // 等待暂停或取消信号（支持暂停/恢复机制）
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                //查前端芯片
+                try
+                {
+                    // 读取前端芯片数据（寄存器320-355，36个寄存器）
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 320, 36), 77);
+                    BMS_Setting.SetFrontMonitor(ModbusRTU.ParseRead03Response(receive));
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+            }
+            // 模式3：读取系统设置和概览信息
+            else if (SelectedMode == BatteryMode.Mode3)
+            {
+                await Task.Delay(200, token);
+                await _semaphore.WaitAsync(token);
+                //读写入的参数设置值
+                try
+                {
+                    // 读取系统设置（寄存器252-255，4个寄存器）
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 252, 4), 13);
+                    BMS_Setting.setSystem(ModbusRTU.ParseRead03Response(receive));
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                try
+                {
+                    //查电压  //查当前电流 //查温度
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 18, 18), 41);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    BMS_VM.OverViewSet(data);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                try
+                {
+                    // 读取蓝牙地址（寄存器297，6个寄存器）
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 297, 6), 17);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    BMS_Setting.ReadBuleTooth(data);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+            }
+            // 模式4：仅读取电芯和温度传感器数量
+            else if (SelectedMode == BatteryMode.Mode4)
+            {
+                await _semaphore.WaitAsync(token);
+                try
+                {
+                    //读取电芯和温度传感器数量
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 250, 2), 9);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    if (data != null && data.Length == 2)
+                    {
+                        BMS_Setting.CellNum = data[0];
+                        BMS_Setting.NtcNum = data[1];
+                    }
+                    await Task.Delay(200, token);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+            }
+            // 模式5：实时监控模式（读取数据并保存到列表和Excel）
+            else if (SelectedMode == BatteryMode.Mode5)     //实时监控
+            {
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                try
+                {
+                    //读写入的参数设置值(充电MOS、放电MOS、关机、休眠)
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 120, 2), 9);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    if (data != null && data.Length >= 2)
+                    {
+                        BMS_Setting.SettingStatue = ModbusRTU.GetBits(data[0]);
+                        BMS_Setting.JunHen = ModbusRTU.GetBits(data[1]);
+                    }
+
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                try
+                {
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 250, 2), 9);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    if (data != null && data.Length == 2)
+                    {
+                        BMS_Setting.CellNum = data[0];
+                        BMS_Setting.NtcNum = data[1];
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                try
+                {
+                    //发送03功能码(查是16个电芯的电压)
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 2, 16), 37);
+                    BMS_VM.MOD_CELL1_VOL_1_16(ModbusRTU.ParseRead03Response(receive));
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                try
+                {
+                    //查五个状态码(83)
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 80, 5), 15);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    if (data != null)
+                    {
+                        BMS_VM.MOD_INST_STATE_Set(ModbusRTU.GetBits(data[3]));
+
+                        //查告警(80)、保护(81)、硬件错误(82)信息
+                        BMS_VM.MOD_WARN_STATE_Set(ModbusRTU.GetBits(data[0]));
+                        BMS_VM.MOD_PROT_STATE_Set(ModbusRTU.GetBits(data[1]));
+                        BMS_VM.MOD_ERROR_STATE_Set(ModbusRTU.GetBits(data[2]));
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                try
+                {
+                    //查电压  //查当前电流 //查温度
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 18, 18), 41);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    BMS_VM.OverViewSet(data);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                try
+                {
+                    //查电压  //查当前电流 //查温度
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 283, 14), 33);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    BMS_VM.SystemInfoSet(data);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                try
+                {
+                    //AFE_Protect
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 86, 1), 7);
+                    if (receive != null && receive.Length > 1)
+                    {
+                        data = ModbusRTU.ParseRead03Response(receive);
+                        if (data != null)
+                        {
+                            BMS_VM.AFE_Protect = ModbusRTU.GetBits(data[0]);
+                        }
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                var polling = new PollingData
+                {
+                    Date = DateTime.Now,                                       //日期
+                    TotalVolt = BMS_VM.MOD_AFECOL_PACKVOL,                     //总电压
+                    Current = BMS_VM.MOD_AFECOL_CUR,                           //电流
+                    SOC = BMS_VM.MOD_SOC.ToString(),                           //SOC
+                    SOH = BMS_VM.MOD_SOH.ToString(),                           //SOH
+                    FullCap = (BMS_VM.MOD_FULL_CAP / 100.0).ToString("F2"),                             //满充容量
+                    FullRemainCap = (BMS_VM.MOD_RES_CAP / 100.0).ToString("F2"),                        //剩余容量
+                    CycleCount = BMS_VM.MOD_CYCLECNT,                          //循环次数
+                    Cell1 = BMS_VM.MOD_CELL1_VOL,                              //电芯1
+                    Cell2 = BMS_VM.MOD_CELL2_VOL,
+                    Cell3 = BMS_VM.MOD_CELL3_VOL,
+                    Cell4 = BMS_VM.MOD_CELL4_VOL,
+                    AvgVolt = BMS_VM.MOD_CELL_VOLDIFF,                         //最大电芯压差
+                    MaxVolt = BMS_VM.MOD_MAXCELL_VOL,                          //最高电压
+                    MinVolt = BMS_VM.MOD_MINCELL_VOL,                          //最低电压
+                    Temp1 = BMS_VM.MOD_GROUD1_TEMP,                            //电芯温度1
+                    Chg_MOS = BMS_VM.MOD_INST_STATE[0].ToString(),             //充电MOS
+                    Dis_MOS = BMS_VM.MOD_INST_STATE[1].ToString(),             //放电MOS
+                    Chg_Statues = BMS_VM.MOD_INST_STATE[4].ToString(),         //充电
+                    Dis_Statues = BMS_VM.MOD_INST_STATE[5].ToString(),         //放电
+                    AFE_OverChg_Pro = BMS_VM.AFE_Protect[3].ToString(),        //AFE过充保护
+                    AFE_OverDis_Pro = BMS_VM.AFE_Protect[4].ToString(),        //AFE过放保护
+                    Chg_Current_Pro = BMS_VM.AFE_Protect[5].ToString(),        //充电过流保护
+                    Dis_Current_Pro = BMS_VM.AFE_Protect[6].ToString(),        //放电过流保护
+                    AFE_Interrupt = BMS_VM.AFE_Protect[2].ToString(),          //前端芯片中断
+                    ShortProtect = BMS_VM.AFE_Protect[7].ToString(),           //短路保护
+                    AFE_TriggerProt = BMS_VM.AFE_Protect[0].ToString(),        //前端芯片触发保护
+                    AFE_AlertPull = BMS_VM.AFE_Protect[1].ToString(),          //前端芯片告警下拉
+                    BalanceStatus = BMS_Setting.JunHen[0].ToString()
+                    + ";" + BMS_Setting.JunHen[1].ToString() + ";"
+                    + BMS_Setting.JunHen[2].ToString() + ";"
+                    + BMS_Setting.JunHen[3].ToString(),                        //均衡状态
+                    AlarmStatus = BMS_VM.MOD_WARN_STATE,                      //告警信息
+                    ProtectStatus = BMS_VM.MOD_PROT_STATE,                     //保护信息
+                    ErrorStatus = BMS_VM.MOD_ERROR_STATE,                      //错误信息
+                };
+
+
+                // 最新在最前
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+
+                    // 添加到界面
+                    RT_Monitor.PollingList.Insert(0, polling);
+
+                    // 保证最多 100 条
+                    if (RT_Monitor.PollingList.Count > 100)
+                        RT_Monitor.PollingList.RemoveAt(RT_Monitor.PollingList.Count - 1);
+
+                    // 保存
+                    if (RT_Monitor._isSaving && RT_Monitor._savePath != null)
+                        RT_Monitor.SaveToExcel(polling);
+                });
+            }
+        }
+        #endregion
         #endregion
 
         #region 消息框

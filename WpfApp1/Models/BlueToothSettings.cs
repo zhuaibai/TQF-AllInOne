@@ -24,10 +24,8 @@ namespace WpfApp1.Models
             _bluetoothService = bluetoothService;
             // 订阅蓝牙服务的事件
             _bluetoothService.DeviceDiscovered += OnDeviceDiscovered;
-            _bluetoothService.StatusChanged += OnStatusChanged;
             _bluetoothService.DataReceived += OnDataReceived;
             _bluetoothService.ConnectionStatusChanged += OnConnectionStatusChanged;
-            SendDataCommand = new RelayCommand(async _ => await SendDataAsync(), _ => _bluetoothService.IsConnected && !string.IsNullOrWhiteSpace(SendData));
         }
 
         #region 属性和命令
@@ -63,10 +61,6 @@ namespace WpfApp1.Models
             get => _canConnect;
             set => SetProperty(ref _canConnect, value);
         }
-
-        public ICommand SendDataCommand { get; }
-
-
         #endregion
 
         #region 事件处理器（将服务层事件调度到 UI 线程）
@@ -84,12 +78,6 @@ namespace WpfApp1.Models
         {
             Application.Current.Dispatcher.Invoke(() =>
                 Messages.Insert(0, $"[{DateTime.Now:HH:mm:ss}] 收到: {data}"));
-        }
-
-        private void OnStatusChanged(string status)
-        {
-            Application.Current.Dispatcher.Invoke(() => StatusMessage = status);
-
         }
 
         /// <summary>
@@ -133,13 +121,7 @@ namespace WpfApp1.Models
         }
         public async Task<bool> ConnectAsync()
         {
-            if (SelectedDevice == null) return false;
             IsBusy = true;
-            if (_bluetoothService.IsScanning)
-            {
-                _bluetoothService.StopScanning();
-                await Task.Delay(300); // 等待扫描停止,释放资源
-            }
             bool success = await _bluetoothService.ConnectAsync(SelectedDevice);
             return success;
         }
@@ -150,21 +132,6 @@ namespace WpfApp1.Models
             StatusMessage = "正在断开连接...";
             StartCooldown();
             StatusMessage = "已断开连接";
-        }
-
-        private async Task SendDataAsync()
-        {
-            if (string.IsNullOrEmpty(SendData)) return;
-            bool success = await _bluetoothService.SendDataAsync(SendData);
-            if (success)
-            {
-                Messages.Insert(0, $"[{DateTime.Now:HH:mm:ss}] 发送: {SendData}");
-                SendData = string.Empty;
-            }
-            else
-            {
-                StatusMessage = "发送失败";
-            }
         }
 
         /// <summary>
@@ -187,6 +154,28 @@ namespace WpfApp1.Models
         public string getBluetoothName()
         {
             return _selectedDevice?.Name ?? string.Empty;
+        }
+
+        /// <summary>
+        /// ASCLL指令数据发送
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public async Task<string> SendBluetoothData(string command, int count)
+        {
+            return await _bluetoothService.SendBluetoothAscllcmd(command, count);
+        }
+
+        /// <summary>
+        /// BMS指令数据发送
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public async Task<byte[]> SendBluetoothBMS(byte[] command, int count)
+        {
+            return await _bluetoothService.SendBluetoothToBMS(command, count);
         }
         #endregion
 

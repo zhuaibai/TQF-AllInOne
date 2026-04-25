@@ -4534,7 +4534,6 @@ namespace WpfApp1.ViewModels
                 // 更新按钮状态为"写入中"且不可点击
                 ButtonText = "ing...";
                 IsButtonEnabled = false;
-                //Debug.WriteLine($"ButtonText 设置为: {ButtonText}");
 
                 // 通知命令状态已更改
                 WriteCommand.RaiseCanExecuteChanged();
@@ -4561,7 +4560,6 @@ namespace WpfApp1.ViewModels
                 });
 
                 ButtonText = receive.Length == 8 ? "成功" : "失败";
-                //ShowBoubleWithTime($"{ButtonText}", 1500);
 
                 await Task.Delay(500); // 短暂显示"完成"状态
                 ButtonText = "写入";
@@ -4576,8 +4574,6 @@ namespace WpfApp1.ViewModels
                 // 恢复按钮可点击状态
                 IsButtonEnabled = true;
                 WriteCommand.RaiseCanExecuteChanged();
-                //关闭串口
-                //SerialCommunicationService.CloseCom();
             }
         }
 
