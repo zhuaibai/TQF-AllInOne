@@ -1141,7 +1141,7 @@
             Grid.RowSpan="2"
             Grid.ColumnSpan="4"
             Background="White"
-            Visibility="Visible">
+            Visibility="Collapsed">
 
             <Grid>
                 <Grid.ColumnDefinitions>

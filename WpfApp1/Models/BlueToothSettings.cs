@@ -24,7 +24,7 @@ namespace WpfApp1.Models
             _bluetoothService = bluetoothService;
             // 订阅蓝牙服务的事件
             _bluetoothService.DeviceDiscovered += OnDeviceDiscovered;
-            _bluetoothService.DataReceived += OnDataReceived;
+           // _bluetoothService.DataReceived += OnDataReceived;
             _bluetoothService.ConnectionStatusChanged += OnConnectionStatusChanged;
         }
 
@@ -74,11 +74,11 @@ namespace WpfApp1.Models
             });
         }
 
-        private void OnDataReceived(string data)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-                Messages.Insert(0, $"[{DateTime.Now:HH:mm:ss}] 收到: {data}"));
-        }
+        //private void OnDataReceived(string data)
+        //{
+        //    Application.Current.Dispatcher.Invoke(() =>
+        //        Messages.Insert(0, $"[{DateTime.Now:HH:mm:ss}] 收到: {data}"));
+        //}
 
         /// <summary>
         /// 调度UI线程并实现蓝牙地址去重
@@ -128,6 +128,7 @@ namespace WpfApp1.Models
 
         public async Task DisconnectAsync()
         {
+
             await _bluetoothService.DisconnectAsync();
             StatusMessage = "正在断开连接...";
             StartCooldown();

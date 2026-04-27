@@ -66,6 +66,7 @@ namespace WpfApp1.ViewModels
             //
             //蓝牙通讯实例
             _blueToothSettings = new BlueToothSettings(new WindowsBluetoothService(_pauseEvent, AddLog, UpdateBluetoothState));
+            AppServices.CurrentBlueTooth = _blueToothSettings;
             OpenBluetoothScan = new RelayCommand(openBluetoothScan);
             OpenBluetooth = new RelayCommand(openBluetooth);
 
@@ -74,10 +75,9 @@ namespace WpfApp1.ViewModels
             //绑定发送接收帧计数委托
             SerialCommunicationService.AddReceiveFrame = SerialCountVM.AddReceiveFrame;
             SerialCommunicationService.AddSendFrame = SerialCountVM.AddSendFrame;
-
             
             //BMS
-            BMS_Command_Setting = new SendingCommandSettingsViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            BMS_Command_Setting = new SendingCommandSettingsViewModel(_pauseEvent, _semaphore, AddLog, UpdateState, UpdateBluetoothState);
             BMS02 = new BMS_UserControl();
             BMS01 = new BMS01_UserControl();
             BMS03 = new BMS03_UserControl();
@@ -152,6 +152,11 @@ namespace WpfApp1.ViewModels
             UpdateComboBoxEnabledState();
 
             App.ChangeLanguageWithSetting = RefleshSettingParamToLanguage;
+        }
+        //静态实例
+        public static class AppServices
+        {
+            public static BlueToothSettings CurrentBlueTooth { get; set; }
         }
         //蓝牙实例属性
         private BlueToothSettings _blueToothSettings;
@@ -5329,7 +5334,7 @@ namespace WpfApp1.ViewModels
                 try
                 {
                     // 读取112个设置项（寄存器130-241）
-                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 130, 112), 229);
+                    receive = await ReadMultipleRegistersAsync(1, 130, 112, maxPerBatch: 25);
                     ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
                 }
                 finally
@@ -5339,21 +5344,17 @@ namespace WpfApp1.ViewModels
                 // 首次运行时进行初始化设置
                 if (flag == 0)
                 {
+                    await _semaphore.WaitAsync(token);
                     await Task.Delay(200, token);
                     //发送03功能码(查是91个设置项的电压)
-                    try
-                    {
-                        //  再次读取设置项以确保数据准确
-                        receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 130, 112), 229);
-                        ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
-                        //初始化设置值
-                        ModbusRTU.FirstSetReceive(BMS_Setting.SendingCommands);
-                        flag = 1;// 标记已初始化
-                    }
-                    finally
-                    {
-                        _semaphore.Release();
-                    }
+                    //  再次读取设置项以确保数据准确
+                    //ReadMultipleRegistersAsync(1, 130, 112, maxPerBatch: 25)
+                    receive = await ReadMultipleRegistersAsync(1, 130, 112, maxPerBatch: 25);
+                    ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
+                   //初始化设置值
+                   ModbusRTU.FirstSetReceive(BMS_Setting.SendingCommands);
+                   flag = 1;// 标记已初始化
+                    _semaphore.Release();
                 }
             }
             // 模式6：读取前端芯片监控数据
@@ -5466,6 +5467,7 @@ namespace WpfApp1.ViewModels
                 await Task.Delay(200, token);
                 try
                 {
+
                     receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 250, 2), 9);
                     data = ModbusRTU.ParseRead03Response(receive);
                     if (data != null && data.Length == 2)
@@ -5619,6 +5621,57 @@ namespace WpfApp1.ViewModels
                 });
             }
         }
+
+        #region 分批读取
+        /// <summary>
+        /// 分批读取保持寄存器（03功能码），自动处理超过设备限制的情况
+        /// </summary>
+        /// <param name="slaveAddr">从站地址</param>
+        /// <param name="startAddr">起始寄存器地址</param>
+        /// <param name="totalRegs">要读取的寄存器总数</param>
+        /// <param name="maxPerBatch">每次最多读取的寄存器数（默认25）</param>
+        /// <returns>合并后的完整响应数据（格式同单次03响应）</returns>
+        private async Task<byte[]> ReadMultipleRegistersAsync(byte slaveAddr, ushort startAddr, ushort totalRegs, ushort maxPerBatch = 25)
+        {
+            var allData = new List<byte>();
+
+            for (int offset = 0; offset < totalRegs; offset += maxPerBatch)
+            {
+                ushort currentCount = (ushort)Math.Min(maxPerBatch, (ushort)(totalRegs - offset));
+                ushort currentAddr = (ushort)(startAddr + offset);
+
+                // 期望响应长度 = 地址(1) + 功能码(1) + 字节数(1) + 数据(currentCount*2) + CRC(2)
+                int expectedLen = 3 + currentCount * 2 + 2;
+
+                byte[] cmd = ModbusRTU.BuildRead03Frame(slaveAddr, currentAddr, currentCount);
+                byte[] chunk = await BlueToothSettings.SendBluetoothBMS(cmd, expectedLen);
+
+                // 提取数据部分（跳过地址、功能码、字节计数器）
+                if (chunk.Length >= expectedLen)
+                {
+                    byte[] dataPart = new byte[currentCount * 2];
+                    Array.Copy(chunk, 3, dataPart, 0, dataPart.Length);
+                    allData.AddRange(dataPart);
+                }
+                else
+                {
+                    // 某批次失败，返回空数组或抛出异常
+                    return Array.Empty<byte>();
+                }
+            }
+
+            // 组装成完整的03响应格式：地址 + 功能码 + 字节数 + 数据 + CRC
+            var result = new List<byte>();
+            result.Add(slaveAddr);
+            result.Add(0x03);
+            result.Add((byte)(allData.Count)); // 字节数
+            result.AddRange(allData);
+            byte[] crcBytes = BitConverter.GetBytes(ModbusRTU.CRC16(result.ToArray(), result.Count));
+            result.AddRange(crcBytes);
+
+            return result.ToArray();
+        }
+        #endregion
         #endregion
         #endregion
 

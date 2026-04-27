@@ -268,7 +268,7 @@ namespace WpfApp1.Convert
         /// <summary>
         /// Modbus CRC16 计算（多项式 0xA001）
         /// </summary>
-        private static ushort CRC16(byte[] data, int length)
+        public static ushort CRC16(byte[] data, int length)
         {
             ushort crc = 0xFFFF;
 

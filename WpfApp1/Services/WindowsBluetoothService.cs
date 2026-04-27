@@ -24,7 +24,7 @@ namespace WpfApp1.Services
 
         // ---------- 线程控制与资源锁 ----------
         ManualResetEventSlim _pauseEvent;//线程的开启、暂停
-        private static readonly SemaphoreSlim _sendLock = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim _sendLock = new SemaphoreSlim(1, 1);
 
         // ---------- 日志委托 ----------
         Action<string> AddLog;           //添加日志委托
@@ -32,7 +32,6 @@ namespace WpfApp1.Services
 
         // ---------- 事件 ----------
         public event Action<BluetoothDeviceInfo>? DeviceDiscovered;
-        // public event Action<string>? StatusChanged;
         public event Action<string>? DataReceived;
         public event Action<bool>? ConnectionStatusChanged;
         public event Action<byte[]>? RawDataReceived;
@@ -223,6 +222,7 @@ namespace WpfApp1.Services
         public async Task DisconnectAsync()
         {
             await _sendLock.WaitAsync();
+           // System.Diagnostics.Debug.WriteLine($"[{DateTime.Now:HH:mm:ss}] DisconnectAsync 被调用，堆栈：\n{Environment.StackTrace}");
             try
             {
                 if (_rxCharacteristic != null)
@@ -368,85 +368,74 @@ namespace WpfApp1.Services
         public async Task<byte[]> SendBluetoothToBMS(byte[] command, int returnCount)
         {
             byte[] receive_timeOut = new byte[] { 0xff };
-            _pauseEvent.Wait();
             await _sendLock.WaitAsync();
             try
             {
-                //计算期望接收的总字节数
                 int expectedTotal = returnCount + (Receive_CRC_Check ? 2 : 0);
-                byte[] cmdBytes = command;
-
-                //将基于事件的响应转换为可等待的 Task
-                var responseTcs = new TaskCompletionSource<byte[]>();
-                //数据累积缓冲区
                 var receivedData = new List<byte>();
-                //超时取消
-                using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMilliseconds(1000));
-                //原始数据接收事件的处理委托
-                Action<byte[]> onDataReceived = null;
-                onDataReceived = (data) =>
+                using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMilliseconds(5000));
+
+                // 清空缓冲区
+                receivedData.Clear();
+
+                // 发送命令
+                bool sent = await SendByteAsync(command);
+                if (!sent) return receive_timeOut;
+
+                // 循环接收，直到凑满期望字节数或超时
+                while (receivedData.Count < expectedTotal && !timeoutCts.Token.IsCancellationRequested)
                 {
-                    lock (receivedData)// 加锁保护缓冲区
+                    // 每次等待一帧数据
+                    var frameTcs = new TaskCompletionSource<byte[]>();
+                    Action<byte[]> onDataReceived = null;
+                    onDataReceived = (data) =>
                     {
-                        receivedData.AddRange(data);
-                        if (receivedData.Count >= expectedTotal)
+                        
+                        frameTcs.TrySetResult(data);
+                    };
+
+                    RawDataReceived += onDataReceived;
+                    try
+                    {
+                        var completed = await Task.WhenAny(frameTcs.Task,
+                            Task.Delay(Timeout.Infinite, timeoutCts.Token));
+                        if (completed != frameTcs.Task)
+                            return receive_timeOut; // 总超时
+
+                        byte[] chunk = await frameTcs.Task;
+                        lock (receivedData)
                         {
-                            byte[] result = receivedData.Take(expectedTotal).ToArray();
-                            responseTcs.TrySetResult(result);
+                            receivedData.AddRange(chunk);
                         }
                     }
-                };
-                // 订阅原始数据接收事件
-                RawDataReceived += onDataReceived;
-                try
-                {
-                    // 发送命令
-                    bool sent = await SendByteAsync(cmdBytes);
-                    if (!sent) return receive_timeOut;
-
-                    await Task.Delay(100); // 等待设备处理命令
-                    var completed = await Task.WhenAny(responseTcs.Task,
-                        Task.Delay(Timeout.Infinite, timeoutCts.Token));
-
-                    if (completed != responseTcs.Task)
+                    finally
                     {
-                        return receive_timeOut; // 超时
+                        RawDataReceived -= onDataReceived;
                     }
-
-
-                    // 获取接收到的字节数据
-                    byte[] buffer = await responseTcs.Task;
-                    if (buffer.Length == 0) return receive_timeOut;
-
-                    //CRC 校验（如果启用）
-                    if (Receive_CRC_Check)
-                    {
-                        byte[] origin = buffer;
-                        byte[] crcori;
-                        byte[] build;
-                        bool CRC_Pass = CheckReceive_ModBus_CRC(buffer, out crcori, out build);
-                        if (!CRC_Pass)
-                        {
-                            //CRC校验不通过
-                            return buffer;
-
-                        }
-                    }
-                    return buffer;
                 }
-                catch { return receive_timeOut; }
-                finally
+
+                if (receivedData.Count < expectedTotal)
+                    return receive_timeOut;
+
+                byte[] buffer = receivedData.ToArray();
+                if (Receive_CRC_Check)
                 {
-                    // 无论成功或异常，都要取消事件订阅，避免内存泄漏和干扰下次调用
-                    RawDataReceived -= onDataReceived;
+                    byte[] origin = buffer;
+                    byte[] crcori;
+                    byte[] build;
+                    bool CRC_Pass = CheckReceive_ModBus_CRC(buffer, out crcori, out build);
+                    if (!CRC_Pass)
+                    {
+                        return buffer;
+                    }
                 }
+                return buffer;
             }
             finally
             {
                 _sendLock.Release();
             }
         }
-
 
         #endregion
 
