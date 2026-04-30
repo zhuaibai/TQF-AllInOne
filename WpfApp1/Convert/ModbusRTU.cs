@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WpfApp1.Models;
 using WpfApp1.Services;
+using static WpfApp1.ViewModels.MainWindowVM;
 
 namespace WpfApp1.Convert
 {
@@ -14,6 +15,18 @@ namespace WpfApp1.Convert
     {
 
         public static Action<string>? showStatue;
+        public static Action<string>? showBLStatue;
+
+        public static void GetStatue(string text)
+        { 
+            if (AppServices.CurrentBlueTooth.IsConnected())
+            {
+                showBLStatue?.Invoke(text); return;
+            }else if(SerialCommunicationService.IsOpen())
+            {
+                showStatue?.Invoke(text); return;
+            }
+        }
 
         /// <summary>
         /// 生成 Modbus RTU 0x10 写多个寄存器帧
@@ -166,7 +179,7 @@ namespace WpfApp1.Convert
             if (response.Length != 133)
             {
 
-                showStatue("响应异常!");
+                GetStatue("响应异常!");
                 return new short[] { 1 };
 
             }
@@ -211,14 +224,14 @@ namespace WpfApp1.Convert
         {
             if(response == null)
             {
-                showStatue("响应帧长度不足");
+                GetStatue("响应帧长度不足");
                 return null;
             }
             
 
             if (response.Length < 5)
             {
-                showStatue("响应帧长度不足");
+                GetStatue("响应帧长度不足");
                 return null;
             }
                 
@@ -229,12 +242,12 @@ namespace WpfApp1.Convert
 
             if (funcCode != 0x03)
             {
-                showStatue("功能码错误，非 0x03 响应");
+                GetStatue("功能码错误，非 0x03 响应");
                 return null;             
             }
             if (response.Length < 3 + byteCount + 2)
             {
-                showStatue("响应帧长度不足");
+                GetStatue("响应帧长度不足");
                 return null;
             }
 
@@ -246,7 +259,7 @@ namespace WpfApp1.Convert
             short calcCrc = (short)CRC16(response, response.Length - 2);
             if (recvCrc != calcCrc)
             {
-                showStatue("CRC 校验错误");
+                GetStatue("CRC 校验错误");
                 return null;
             }
                
@@ -261,7 +274,7 @@ namespace WpfApp1.Convert
                 short value = (short)((response[dataIndex + 1] << 8) | response[dataIndex]);
                 registers[i] = value;
             }
-            showStatue("通讯正常");
+            GetStatue("通讯正常");
             return registers;
         }
 

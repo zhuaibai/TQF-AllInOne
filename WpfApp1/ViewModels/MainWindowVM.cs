@@ -133,6 +133,8 @@ namespace WpfApp1.ViewModels
             _messageService = messageService;
             ShowMessageCommand = new RelayCommand(OnShowMessage);
             ModbusRTU.showStatue = UpdateState;
+            ModbusRTU.showBLStatue = UpdateBluetoothState;
+
             //// 模拟电量变化
             //var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3)};
             //timer.Tick += (s, e) =>
@@ -153,7 +155,8 @@ namespace WpfApp1.ViewModels
 
             App.ChangeLanguageWithSetting = RefleshSettingParamToLanguage;
         }
-        //静态实例
+
+        //蓝牙静态实例
         public static class AppServices
         {
             public static BlueToothSettings CurrentBlueTooth { get; set; }
@@ -356,12 +359,13 @@ namespace WpfApp1.ViewModels
                     {
                         while (IsRunning)
                         {
-                            // 可以添加短暂延迟避免CPU占用过高
+                            // 添加短暂延迟避免CPU占用过高
                             Task.Delay(30).Wait();
                         }
                     });
                     //等待后台通讯停止（1s）
                     await Task.WhenAny(WaitFinish, Task.Delay(1000));
+                    Administration = false;
                     AddLog("准备关闭蓝牙通信");
                     await BlueToothSettings.DisconnectAsync();
                     ChangeBluetoothIcon(false);
@@ -378,6 +382,7 @@ namespace WpfApp1.ViewModels
                     bluetoothStateColor(false);
                     IsRunning = false;
                     BlueToothSettings.IsBusy = false;
+                    Administration = false;
                 }
 
             }
@@ -385,7 +390,12 @@ namespace WpfApp1.ViewModels
             {
                 if (BlueToothSettings.SelectedDevice == null)
                 {
-                    UpdateBluetoothState("请先选择设备");
+                    MessageBox.Show("请先选择设备！");
+                    return;
+                }
+                if (SerialCommunicationService.IsOpen())
+                {
+                    MessageBox.Show("请先关闭串口通信！");
                     return;
                 }
                 if (BlueToothSettings.IsScanningOpen())
@@ -1646,7 +1656,11 @@ namespace WpfApp1.ViewModels
             {
                 // 先重新配置串口参数（确保使用最新的设置）
                 ReconfigureSerialPort();
-
+                if(BlueToothSettings.IsConnected())
+                {
+                    MessageBox.Show("请先断开蓝牙！");
+                    return;
+                }
                 // 尝试打开串口
                 if (!SerialCommunicationService.OpenCom())
                 {
@@ -5434,7 +5448,7 @@ namespace WpfApp1.ViewModels
                         BMS_Setting.CellNum = data[0];
                         BMS_Setting.NtcNum = data[1];
                     }
-                    await Task.Delay(200, token);
+                    await Task.Delay(3000, token);
                 }
                 finally
                 {
@@ -5622,6 +5636,9 @@ namespace WpfApp1.ViewModels
             }
         }
 
+
+        #endregion
+
         #region 分批读取
         /// <summary>
         /// 分批读取保持寄存器（03功能码），自动处理超过设备限制的情况
@@ -5631,7 +5648,7 @@ namespace WpfApp1.ViewModels
         /// <param name="totalRegs">要读取的寄存器总数</param>
         /// <param name="maxPerBatch">每次最多读取的寄存器数（默认25）</param>
         /// <returns>合并后的完整响应数据（格式同单次03响应）</returns>
-        private async Task<byte[]> ReadMultipleRegistersAsync(byte slaveAddr, ushort startAddr, ushort totalRegs, ushort maxPerBatch = 25)
+        public async Task<byte[]> ReadMultipleRegistersAsync(byte slaveAddr, ushort startAddr, ushort totalRegs, ushort maxPerBatch = 25)
         {
             var allData = new List<byte>();
 
@@ -5671,7 +5688,6 @@ namespace WpfApp1.ViewModels
 
             return result.ToArray();
         }
-        #endregion
         #endregion
         #endregion
 

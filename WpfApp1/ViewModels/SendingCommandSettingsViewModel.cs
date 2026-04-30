@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.Win32;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using System;
@@ -543,19 +544,6 @@ namespace WpfApp1.ViewModels
             #endregion
 
         }
-
-        private async void ExecuteWriteALLAsync()
-        {
-            if (AppServices.CurrentBlueTooth.IsConnected())
-            {
-                await ExecuteWriteBlueToothAsync();   // 蓝牙写入逻辑
-            }
-            else if (SerialCommunicationService.IsOpen())
-            {
-                //await ExecuteWriteAsync();      // 串口写入逻辑
-            }
-        }
-
         public void setSystem(short[] data)
         {
             if (data == null || data.Length < 4)
@@ -865,7 +853,7 @@ namespace WpfApp1.ViewModels
         public RelayCommand HistoryReadCommandBMS03 { get; }
         private bool stopReadFlag;
         private bool stopReadFlag_isWorking;
-
+        private CancellationTokenSource? _historyCts;
         /// <summary>
         /// BMS02点击设置
         /// </summary>
@@ -873,6 +861,7 @@ namespace WpfApp1.ViewModels
         {
             try
             {
+                //System.Diagnostics.Debug.WriteLine($"进入历史读取，ReadCounts = {ReadCounts}");
                 HistoryRead_IsWorking = true;
                 stopReadFlag = false;
                 // 禁用按钮
@@ -889,19 +878,56 @@ namespace WpfApp1.ViewModels
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(async () =>
-                {
-                        short[] data = [];
+
                     if (AppServices.CurrentBlueTooth.IsConnected())
+                    {
+                    _historyCts = new CancellationTokenSource();
+                    UpdateBLState("正在读取历史记录");
+                    AddLog("正在读取历史记录");
+                    for (int i = ReadCounts;; i++)
+                    {
+                        if (stopReadFlag)
+                        {
+                            UpdateBLState("停止读取历史记录");
+                            AddLog("停止读取历史记录");
+                            _historyCts.Cancel();
+                            break;
+                        }
+
+                        await Task.Delay(100);
+
+                        byte[] receive = await AppServices.CurrentBlueTooth.SendBluetoothBMS(
+                            ModbusRTU.BuildRead20Frame(1, 4, (ushort)i), 133,_historyCts.Token);
+
+                        short[] data = ModbusRTU.ParseRead20Response(receive);
+
+                        if (data.Length != 64)
+                            break;
+
+                        var model = new HistoryLodModel(data, cellNum);
+
+                        await Application.Current.Dispatcher.BeginInvoke(() =>
+                        {
+                            HistoryLods.Add(model);
+                        });
+
+                        UpdateBLState("历史记录读取完成");
+                    }
+                }
+
+                    if (SerialCommunicationService.IsOpen())
+                    {
+                    UpdateState("正在读取历史记录");
+                    await Task.Run(new Action(() =>
                     {
                         for (int i = ReadCounts; ; i++)
                         {
+                            //读取指令
                             Thread.Sleep(100);//没有这个延时会报错
-                             byte[] receive = await ReadRegistersAsync(1, 4, (ushort)i);
-                            data = ModbusRTU.ParseRead20Response(receive);
+                            short[] data = ModbusRTU.ParseRead20Response(SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 4, (ushort)i), 133));
                             if (data.Length == 64)
                             {
-                                var model = new HistoryLodModel(data, cellNum);
+                                var model = new HistoryLodModel(data, cellNum, 1);
                                 Application.Current.Dispatcher.Invoke(() =>
                                 {
                                     HistoryLods.Add(model);
@@ -915,38 +941,13 @@ namespace WpfApp1.ViewModels
                             {
                                 break;
                             }
-                            UpdateBLState("历史记录读取完成");
+                            UpdateState("历史记录读取完成");
                         }
-                    }
-                    else if (SerialCommunicationService.IsOpen())
-                    {
-                        Thread.Sleep(100);//没有这个延时会报错
-                        for (int i = ReadCounts; ; i++)
-                        {
-                            data = ModbusRTU.ParseRead20Response(SerialCommunicationService.SendCommandToBMS(
-                            ModbusRTU.BuildRead20Frame(1, 4, (ushort)i), 133));
-                        if (data.Length == 64)
-                        {
-                            var model = new HistoryLodModel(data, cellNum);
-                            Application.Current.Dispatcher.Invoke(() =>
-                            {
-                                HistoryLods.Add(model);
-                            });
-                        }
-                        else
-                        {
-                            break;
-                        }
-                        if (stopReadFlag)
-                        {
-                            break;
-                        }
-                        UpdateState("历史记录读取完成");
-                    }
-                    }
 
-                })
-                , timeoutCts.Token);
+                    }), timeoutCts.Token);
+                }
+
+
             }
             catch (OperationCanceledException)
             {
@@ -1113,57 +1114,6 @@ namespace WpfApp1.ViewModels
             }
         }
 
-        #region 分批读取
-        /// <summary>
-        /// 分批读取保持寄存器（功能码），自动处理超过设备限制的情况
-        /// </summary>
-        /// <param name="slaveAddr">从站地址</param>
-        /// <param name="startAddr">起始寄存器地址</param>
-        /// <param name="totalRegs">要读取的寄存器总数</param>
-        /// <param name="maxPerBatch">每次最多读取的寄存器数（默认25）</param>
-        /// <returns>合并后的完整响应数据（格式同单次03响应）</returns>
-        private async Task<byte[]> ReadRegistersAsync(byte slaveAddr, ushort startAddr, ushort totalRegs, ushort maxPerBatch = 25)
-        {
-            var allData = new List<byte>();
-
-            for (int offset = 0; offset < totalRegs; offset += maxPerBatch)
-            {
-                ushort currentCount = (ushort)Math.Min(maxPerBatch, (ushort)(totalRegs - offset));
-                ushort currentAddr = (ushort)(startAddr + offset);
-
-                // 期望响应长度 = 地址(1) + 功能码(1) + 字节数(1) + 数据(currentCount*2) + CRC(2)
-                int expectedLen = 3 + currentCount * 2 + 2;
-
-                byte[] cmd = ModbusRTU.BuildRead03Frame(slaveAddr, currentAddr, currentCount);
-                byte[] chunk = await AppServices.CurrentBlueTooth.SendBluetoothBMS(cmd, expectedLen);
-
-                // 提取数据部分（跳过地址、功能码、字节计数器）
-                if (chunk.Length >= expectedLen)
-                {
-                    byte[] dataPart = new byte[currentCount * 2];
-                    Array.Copy(chunk, 3, dataPart, 0, dataPart.Length);
-                    allData.AddRange(dataPart);
-                }
-                else
-                {
-                    // 某批次失败，返回空数组或抛出异常
-                    return Array.Empty<byte>();
-                }
-            }
-
-            // 组装成完整的20响应格式：地址 + 功能码 + 字节数 + 数据 + CRC
-            var result = new List<byte>();
-            result.Add(slaveAddr);
-            result.Add(0x20);
-            result.Add((byte)(allData.Count)); // 字节数
-            result.AddRange(allData);
-            byte[] crcBytes = BitConverter.GetBytes(ModbusRTU.CRC16(result.ToArray(), result.Count));
-            result.AddRange(crcBytes);
-
-            return result.ToArray();
-        }
-        #endregion
-
         /// <summary>
         /// 停止读取历史记录
         /// </summary>
@@ -1181,7 +1131,7 @@ namespace WpfApp1.ViewModels
                 await Task.Run(new Action(() =>
                 {
                     stopReadFlag = true;
-
+                    _historyCts?.Cancel();
                 })
                 , timeoutCts.Token);
             }
@@ -1196,7 +1146,6 @@ namespace WpfApp1.ViewModels
                 //Status = "就绪";
                 // 重新启用按钮
                 StopReadComamnd.RaiseCanExecuteChanged();
-
 
             }
         }

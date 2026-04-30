@@ -11,6 +11,7 @@ using Windows.Devices.Bluetooth.Advertisement;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Storage.Streams;
 using WpfApp1.Models;
+using Windows.Devices.Bluetooth;
 
 namespace WpfApp1.Services
 {
@@ -24,7 +25,8 @@ namespace WpfApp1.Services
 
         // ---------- 线程控制与资源锁 ----------
         ManualResetEventSlim _pauseEvent;//线程的开启、暂停
-        private readonly SemaphoreSlim _sendLock = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim _sendLock = new SemaphoreSlim(1, 1);//互斥锁
+        private readonly SemaphoreSlim dataSignal = new SemaphoreSlim(0);//等待数据
 
         // ---------- 日志委托 ----------
         Action<string> AddLog;           //添加日志委托
@@ -57,6 +59,8 @@ namespace WpfApp1.Services
             _pauseEvent = pauseEvent;
             AddLog = addLog;
             UpdateState = _updateState;
+            _recentAddresses = new HashSet<ulong>();
+            _lastCleanup = DateTime.Now;
         }
 
         #region 事件处理方法
@@ -65,26 +69,45 @@ namespace WpfApp1.Services
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="args"></param>
+        private HashSet<ulong> _recentAddresses = new HashSet<ulong>();
+        private DateTime _lastCleanup = DateTime.Now;
+
         private void OnAdvertisementReceived(BluetoothLEAdvertisementWatcher sender, BluetoothLEAdvertisementReceivedEventArgs args)
         {
-            // 暂停时不再处理新设备
             if (!_pauseEvent.IsSet) return;
-            // 广播回调在非 UI 线程，使用 Task.Run 避免阻塞扫描器内部线程
-            _ = Task.Run(async () =>
+
+            // 每 2 秒清理一次去重记录，防止内存膨胀
+            if ((DateTime.Now - _lastCleanup).TotalSeconds > 2)
             {
-                try
+                _recentAddresses.Clear();
+                _lastCleanup = DateTime.Now;
+            }
+
+            // 同一设备 2 秒内只处理一次
+            if (!_recentAddresses.Add(args.BluetoothAddress)) return;
+
+            // 先检查广播名称，不符合的直接丢弃，不开 Task
+            string broadcastName = args.Advertisement.LocalName;
+            if (!string.IsNullOrEmpty(broadcastName) &&
+                broadcastName.StartsWith("tb", StringComparison.OrdinalIgnoreCase))
+            {
+                // 只有名称符合的设备才开 Task 获取详细信息
+                _ = Task.Run(async () =>
                 {
-                    var device = await BluetoothLEDevice.FromBluetoothAddressAsync(args.BluetoothAddress);// 获取设备对象
-                    if (device == null) return;
-                    var info = new BluetoothDeviceInfo
+                    try
                     {
-                        Name = string.IsNullOrEmpty(device.Name) ? "未知设备" : device.Name,
-                        BluetoothAddress = args.BluetoothAddress,
-                    };
-                    DeviceDiscovered?.Invoke(info);// 通过事件通知 UI 层有新设备被发现
-                }
-                catch { }
-            });
+                        var device = await BluetoothLEDevice.FromBluetoothAddressAsync(args.BluetoothAddress);
+                        if (device == null) return;
+                        var info = new BluetoothDeviceInfo
+                        {
+                            Name = string.IsNullOrEmpty(device.Name) ? "未知设备" : device.Name,
+                            BluetoothAddress = args.BluetoothAddress,
+                        };
+                        DeviceDiscovered?.Invoke(info);
+                    }
+                    catch { }
+                });
+            }
         }
         /// <summary>
         /// RX 特征的值变化回调
@@ -98,7 +121,6 @@ namespace WpfApp1.Services
             RawDataReceived?.Invoke(data);
             string receivedData = Encoding.UTF8.GetString(data);
             DataReceived?.Invoke(receivedData);
-
         }
         #endregion
 
@@ -109,18 +131,22 @@ namespace WpfApp1.Services
         /// </summary>
         public async Task StartScanningAsync()
         {
-            // 检查暂停标志
             _pauseEvent.Wait();
 
             if (_watcher != null) return;
+
+            // StartScanningAsync 开头确保非空
+            _recentAddresses ??= new HashSet<ulong>();
+            _recentAddresses.Clear();
+            _lastCleanup = DateTime.Now;
+
             _watcher = new BluetoothLEAdvertisementWatcher
             {
-                ScanningMode = BluetoothLEScanningMode.Active// 主动扫描模式，可以获取更多设备信息
+                ScanningMode = BluetoothLEScanningMode.Active
             };
-            // 订阅事件
-            _watcher.Received += OnAdvertisementReceived;// 订阅设备发现事件
-            _watcher.Stopped += (s, e) => UpdateState("未发现设备,扫描停止");// 订阅扫描停止事件
-            _watcher.Start();// 开始扫描
+            _watcher.Received += OnAdvertisementReceived;
+            _watcher.Stopped += (s, e) => UpdateState("扫描已停止");
+            _watcher.Start();
             UpdateState("正在扫描设备...");
             AddLog("开始扫描 BLE 设备");
             await Task.CompletedTask;
@@ -133,6 +159,7 @@ namespace WpfApp1.Services
         {
             _watcher?.Stop();
             _watcher = null;
+            _recentAddresses?.Clear();  // 清理去重集合
             UpdateState("扫描已停止");
             AddLog("停止扫描");
         }
@@ -144,8 +171,6 @@ namespace WpfApp1.Services
         /// <returns></returns>
         public async Task<bool> ConnectAsync(BluetoothDeviceInfo deviceInfo)
         {
-            _pauseEvent.Wait();
-            await _sendLock.WaitAsync();
             try
             {
                 UpdateState("正在连接...");
@@ -156,6 +181,7 @@ namespace WpfApp1.Services
                 {
                     return false;
                 }
+                
 
                 //获取所有GATT服务
                 var serivcesResult = await _device.GetGattServicesAsync();
@@ -169,15 +195,8 @@ namespace WpfApp1.Services
                 if (uartService == null) return false;
 
                 // 获取 UART 服务的特征
-                GattCharacteristicsResult charResult = null;
-                for (int retry = 0; retry < 3; retry++)
-                {
-                    charResult = await uartService.GetCharacteristicsAsync(BluetoothCacheMode.Uncached);
-                    if (charResult.Status == GattCommunicationStatus.Success)
-                        break;
-                    await Task.Delay(200);
-                }
-                if (charResult!.Status != GattCommunicationStatus.Success)
+                GattCharacteristicsResult charResult = await uartService.GetCharacteristicsAsync(BluetoothCacheMode.Uncached); 
+                if (charResult.Status != GattCommunicationStatus.Success)
                     return false;
 
                 // 查找 Tx 和 Rx 特征
@@ -210,10 +229,9 @@ namespace WpfApp1.Services
             }
             finally
             {
-                _sendLock.Release();
+                _isConnected = true;
             }
         }
-
 
         /// <summary>
         /// 断开连接并释放资源
@@ -221,27 +239,34 @@ namespace WpfApp1.Services
         /// <returns></returns>
         public async Task DisconnectAsync()
         {
-            await _sendLock.WaitAsync();
-           // System.Diagnostics.Debug.WriteLine($"[{DateTime.Now:HH:mm:ss}] DisconnectAsync 被调用，堆栈：\n{Environment.StackTrace}");
             try
             {
                 if (_rxCharacteristic != null)
                 {
                     _rxCharacteristic.ValueChanged -= OnValueChanged;
+                    try
+                    {
+                        await _rxCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(
+                            GattClientCharacteristicConfigurationDescriptorValue.None);
+                    }
+                    catch { }
                     _rxCharacteristic = null;
                 }
+                if (_device != null)
+                {
+                    _device.Dispose();
+                    _device = null;
+                }
                 _txCharacteristic = null;
-                _device?.Dispose();
-                _device = null;
-                ConnectedDevice = null;
                 _isConnected = false;
+                ConnectedDevice = null;
                 ConnectionStatusChanged?.Invoke(false);
             }
             finally
             {
                 _sendLock.Release();
+                _isConnected = false;
             }
-            await Task.CompletedTask;
         }
         #endregion
 
@@ -364,84 +389,131 @@ namespace WpfApp1.Services
         /// </summary>
         /// <param name="command">要发送的命令</param>
         /// <param name="returnCount">期望接收的字节数</param>
-        /// <returns>返回接收到的响应字符串</returns>
-        public async Task<byte[]> SendBluetoothToBMS(byte[] command, int returnCount)
+        /// <param name="cancellationToken">取消令牌</param>
+        /// <returns>返回接收到的响应字节数组</returns>
+        public async Task<byte[]> SendBluetoothToBMS(byte[] command, int returnCount, CancellationToken cancellationToken = default)
         {
-            byte[] receive_timeOut = new byte[] { 0xff };
-            await _sendLock.WaitAsync();
+            byte[] timeoutFlag = new byte[] { 0xFF };
+            await _sendLock.WaitAsync(cancellationToken);// 等待发送锁，确保同一时间只有一个发送操作
+
             try
             {
                 int expectedTotal = returnCount + (Receive_CRC_Check ? 2 : 0);
                 var receivedData = new List<byte>();
-                using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMilliseconds(5000));
+                var dataQueue = new Queue<byte[]>();
+                // 设置超时
+                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                linkedCts.CancelAfter(TimeSpan.FromSeconds(5));
+                var token = linkedCts.Token;
 
-                // 清空缓冲区
-                receivedData.Clear();
-
-                // 发送命令
-                bool sent = await SendByteAsync(command);
-                if (!sent) return receive_timeOut;
-
-                // 循环接收，直到凑满期望字节数或超时
-                while (receivedData.Count < expectedTotal && !timeoutCts.Token.IsCancellationRequested)
+                void Handler(byte[] chunk)// 原始数据接收事件的处理委托
                 {
-                    // 每次等待一帧数据
-                    var frameTcs = new TaskCompletionSource<byte[]>();
-                    Action<byte[]> onDataReceived = null;
-                    onDataReceived = (data) =>
-                    {
-                        
-                        frameTcs.TrySetResult(data);
-                    };
 
-                    RawDataReceived += onDataReceived;
-                    try
+                    if (chunk == null || chunk.Length == 0) return;
+                    lock (dataQueue)
                     {
-                        var completed = await Task.WhenAny(frameTcs.Task,
-                            Task.Delay(Timeout.Infinite, timeoutCts.Token));
-                        if (completed != frameTcs.Task)
-                            return receive_timeOut; // 总超时
+                        dataQueue.Enqueue(chunk);// 将接收到的数据块加入队列
+                    }
 
-                        byte[] chunk = await frameTcs.Task;
-                        lock (receivedData)
+                    dataSignal.Release();
+                }
+
+                RawDataReceived += Handler;// 订阅原始数据接收事件
+
+                try
+                {
+                    bool sent = await SendByteAsync(command);// 发送数据
+                    if (!sent)
+                    {
+                        AddLog("发送失败");
+                        return timeoutFlag;
+                    }
+                    int frameLength = 0;
+                    // 等待接收数据直到超时或接收到完整帧
+                    while (!token.IsCancellationRequested)
+                    {
+                        try
                         {
-                            receivedData.AddRange(chunk);
+                            await dataSignal.WaitAsync(token);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            return timeoutFlag;
+                        }
+
+                        byte[] chunk = null;
+
+                        lock (dataQueue)
+                        {
+                            if (dataQueue.Count > 0)
+                                chunk = dataQueue.Dequeue();// 从队列中取出数据块
+                        }
+
+                        if (chunk != null)
+                        {
+                            receivedData.AddRange(chunk);// 将数据块添加到接收缓冲区
+
+                            if (TryGetFullFrame(receivedData, out frameLength))
+                            {
+                                break;
+                            }
                         }
                     }
-                    finally
+
+                    byte[] buffer = receivedData.ToArray();
+                    if (Receive_CRC_Check)
                     {
-                        RawDataReceived -= onDataReceived;
+                        byte[] origin = buffer;
+                        byte[] crcori;
+                        byte[] build;
+                        bool CRC_Pass = CheckReceive_ModBus_CRC(buffer, out crcori, out build);
+                        if (!CRC_Pass)
+                        {
+                            return buffer;
+                        }
                     }
+                    return buffer;
+
                 }
-
-                if (receivedData.Count < expectedTotal)
-                    return receive_timeOut;
-
-                byte[] buffer = receivedData.ToArray();
-                if (Receive_CRC_Check)
+                finally
                 {
-                    byte[] origin = buffer;
-                    byte[] crcori;
-                    byte[] build;
-                    bool CRC_Pass = CheckReceive_ModBus_CRC(buffer, out crcori, out build);
-                    if (!CRC_Pass)
-                    {
-                        return buffer;
-                    }
+                    RawDataReceived -= Handler;
                 }
-                return buffer;
+            }
+            catch (Exception ex)
+            {
+                AddLog($"整体异常: {ex.Message}");
+                return timeoutFlag;
             }
             finally
             {
                 _sendLock.Release();
             }
         }
+        /// <summary>
+        /// 验证接收到的数据是否包含完整的帧
+        /// </summary>
+        /// <param name="buffer">接收到的数据缓冲区</param>
+        /// <param name="frameLength">完整帧的长度</param>
+        /// <returns>如果包含完整帧则返回 true，否则返回 false</returns>
+        private bool TryGetFullFrame(List<byte> buffer, out int frameLength)
+        {
+            frameLength = 0;
 
+            if (buffer.Count < 5) // 最小长度
+                return false;
+
+            int byteCount = buffer[2];
+
+            frameLength = 3 + byteCount + 2; // addr + func + len + data + CRC
+
+            return buffer.Count >= frameLength;
+        }
         #endregion
 
+        #region 校验方法
+
         #region CRC 校验方法
-
-
         /// <summary>
         /// 检验接收到的CRC是否正确
         /// </summary>
@@ -676,6 +748,10 @@ namespace WpfApp1.Services
             0x41, 0x81, 0x80, 0x40
         };
         #endregion
+
+        #endregion
+
+
     }
 }
 

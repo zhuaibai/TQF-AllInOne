@@ -24,7 +24,6 @@ namespace WpfApp1.Models
             _bluetoothService = bluetoothService;
             // 订阅蓝牙服务的事件
             _bluetoothService.DeviceDiscovered += OnDeviceDiscovered;
-           // _bluetoothService.DataReceived += OnDataReceived;
             _bluetoothService.ConnectionStatusChanged += OnConnectionStatusChanged;
         }
 
@@ -64,6 +63,10 @@ namespace WpfApp1.Models
         #endregion
 
         #region 事件处理器（将服务层事件调度到 UI 线程）
+        /// <summary>
+        /// 设备连接事件处理器
+        /// </summary>
+        /// <param name="connected"></param>
         private void OnConnectionStatusChanged(bool connected)
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -74,31 +77,32 @@ namespace WpfApp1.Models
             });
         }
 
-        //private void OnDataReceived(string data)
-        //{
-        //    Application.Current.Dispatcher.Invoke(() =>
-        //        Messages.Insert(0, $"[{DateTime.Now:HH:mm:ss}] 收到: {data}"));
-        //}
-
         /// <summary>
-        /// 调度UI线程并实现蓝牙地址去重
+        /// 设备发现事件处理器
         /// </summary>
         /// <param name="info"></param>
         private void OnDeviceDiscovered(BluetoothDeviceInfo device)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-
-                if (device.Name.StartsWith("tb", StringComparison.OrdinalIgnoreCase))
+                if (!Devices.Any(d => d.BluetoothAddress == device.BluetoothAddress))
                 {
-                    if (!Devices.Any(d => d.BluetoothAddress == device.BluetoothAddress))
-                        Devices.Add(device);
+                    Devices.Add(device);
+                    // 如果是第一个设备，自动选中
+                    if (Devices.Count == 1)
+                    {
+                        SelectedDevice = device;
+                    }
                 }
             });
         }
         #endregion
 
         #region 命令执行方法
+        /// <summary>
+        /// 开始扫描
+        /// </summary>
+        /// <returns></returns>
         public async Task StartScanAsync()
         {
             IsBusy = true;
@@ -106,26 +110,39 @@ namespace WpfApp1.Models
             await _bluetoothService.StartScanningAsync();
             IsBusy = false;
         }
-
+        /// <summary>
+        /// 停止扫描
+        /// </summary>
         public void StopScan()
         {
             _bluetoothService.StopScanning();
             IsBusy = false;
         }
-        private async void StartCooldown(int milliseconds = 1500)
+        /// <summary>
+        /// 延时，防止重复点击连接按钮
+        /// </summary>
+        /// <param name="milliseconds"></param>
+        private async void StartCooldown(int milliseconds = 2000)
         {
             CanConnect = false;
             await Task.Delay(milliseconds);
             CanConnect = true;
             CommandManager.InvalidateRequerySuggested();
         }
+        /// <summary>
+        /// 连接蓝牙
+        /// </summary>
+        /// <returns></returns>
         public async Task<bool> ConnectAsync()
         {
             IsBusy = true;
             bool success = await _bluetoothService.ConnectAsync(SelectedDevice);
             return success;
         }
-
+        /// <summary>
+        /// 断开蓝牙
+        /// </summary>
+        /// <returns></returns>
         public async Task DisconnectAsync()
         {
 
@@ -151,7 +168,10 @@ namespace WpfApp1.Models
         {
             return _bluetoothService.IsConnected;
         }
-
+        /// <summary>
+        /// 获取蓝牙名称
+        /// </summary>
+        /// <returns></returns>
         public string getBluetoothName()
         {
             return _selectedDevice?.Name ?? string.Empty;
@@ -174,9 +194,9 @@ namespace WpfApp1.Models
         /// <param name="command"></param>
         /// <param name="count"></param>
         /// <returns></returns>
-        public async Task<byte[]> SendBluetoothBMS(byte[] command, int count)
+        public async Task<byte[]> SendBluetoothBMS(byte[] command, int count, CancellationToken cancellationToken = default)
         {
-            return await _bluetoothService.SendBluetoothToBMS(command, count);
+            return await _bluetoothService.SendBluetoothToBMS(command, count, default);
         }
         #endregion
 

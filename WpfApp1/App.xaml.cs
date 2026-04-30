@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.Data;
 using System.Windows;
+using static WpfApp1.ViewModels.MainWindowVM;
 
 namespace WpfApp1
 {
@@ -10,7 +11,7 @@ namespace WpfApp1
     /// </summary>
     public partial class App : Application
     {
-
+        private CancellationTokenSource _cts = new CancellationTokenSource();
         public static ResourceDictionary resourceDictionary;
 
         public static Action<string> ChangeLanguageWithSetting;
@@ -75,8 +76,23 @@ namespace WpfApp1
             return res;
         }
 
+        protected override async void OnExit(ExitEventArgs e)
+        {
+            _cts?.Cancel();
+            if (AppServices.CurrentBlueTooth?.IsConnected() == true)
+            {
+                try
+                {
+                    await AppServices.CurrentBlueTooth.DisconnectAsync();
+                    await Task.Delay(500);
+                }
+                catch { }
+            }
+            (AppServices.CurrentBlueTooth as IDisposable)?.Dispose();
+            base.OnExit(e);
+        }
     }
 
-       
+      
 
-}
+    }
