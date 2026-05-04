@@ -16,6 +16,7 @@ using WpfApp1.Command.BMS;
 using WpfApp1.Command.Comand_GB3024;
 using WpfApp1.Command.Command_CG;
 using WpfApp1.Command.Command_CYJ;
+using WpfApp1.Command.Command_HPVINV10;
 using WpfApp1.Command.Command_LB6;
 using WpfApp1.Command.Command_PDF302;
 using WpfApp1.Command.Command_PDF3024;
@@ -126,7 +127,11 @@ namespace WpfApp1.ViewModels
             _HBAT_CG = new HBAT_CG_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             _HEEP1_CG = new HEEP1_CG_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             _HOP_CG = new HOP_CG_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-
+            //初始化 HPVINV10 ViewModel
+            _HSTS2_HPVINV10 = new HSTS2_HPVINV10_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HPV_HPVINV10 = new HPV_HPVINV10_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HTEMP_HPVINV10 = new HTEMP_HPVINV10_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HBAT_HPVINV10 = new HBAT_HPVINV10_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             #endregion
 
             //消息框初始化
@@ -159,7 +164,7 @@ namespace WpfApp1.ViewModels
         //蓝牙静态实例
         public static class AppServices
         {
-            public static BlueToothSettings CurrentBlueTooth { get; set; }
+            public static BlueToothSettings? CurrentBlueTooth { get; set; }
         }
         //蓝牙实例属性
         private BlueToothSettings _blueToothSettings;
@@ -812,6 +817,7 @@ namespace WpfApp1.ViewModels
         "HPVINV06",
         "HPVINV07",
         "HPVINV08",
+        "HPVINV10",
         "LPVINV02",
         "UPSCYX01",
         "LB6",
@@ -873,6 +879,10 @@ namespace WpfApp1.ViewModels
                 case "HPVINV08":
                     ContentUC = new HPVINV08_MonitorUC();
                     SelectedMachineItem = "HPVINV08";
+                    break;
+                case "HPVINV10":
+                    ContentUC = new HPVINV10_MonitorUC();
+                    SelectedMachineItem = "HPVINV10";
                     break;
                 case "UPSCYX01":
                     ContentUC = new CYJ_MonitorUC();
@@ -981,6 +991,17 @@ namespace WpfApp1.ViewModels
                 else if (receive_MachineType.Substring(0, 9) == "(HPVINV08")
                 {
                     SwitchViewToVQorGB("HPVINV08");
+                    //默认设置抗干扰模式
+                    IsChecked = true;
+                    OnceOpenCRC = true;
+                    SerialCommunicationService.OpenReceiveCRC(true);
+                    //返回机器类型
+                    machine = receive_MachineType;
+                    return true;
+                }
+                else if (receive_MachineType.Substring(0, 9) == "(HPVINV10")
+                {
+                    SwitchViewToVQorGB("HPVINV10");
                     //默认设置抗干扰模式
                     IsChecked = true;
                     OnceOpenCRC = true;
@@ -1516,7 +1537,52 @@ namespace WpfApp1.ViewModels
                 this.RaiseProperChanged(nameof(HOP_CG));
             }
         }
-        #endregion     
+        #endregion
+
+        #region HPVINV10指令ViewModel
+        private HSTS2_HPVINV10_ViewModel _HSTS2_HPVINV10;
+
+        public HSTS2_HPVINV10_ViewModel HSTS2_HPVINV10
+        {
+            get { return _HSTS2_HPVINV10; }
+            set
+            {
+                _HSTS2_HPVINV10 = value;
+                this.RaiseProperChanged(nameof(HSTS2_HPVINV10));
+            }
+        }
+        private HPV_HPVINV10_ViewModel _HPV_HPVINV10;
+
+        public HPV_HPVINV10_ViewModel HPV_HPVINV10
+        {
+            get { return _HPV_HPVINV10; }
+            set
+            {
+                _HPV_HPVINV10 = value;
+                this.RaiseProperChanged(nameof(HPV_HPVINV10));
+            }
+        }
+        private HTEMP_HPVINV10_ViewModel _HTEMP_HPVINV10;
+        public HTEMP_HPVINV10_ViewModel HTEMP_HPVINV10
+        {
+            get { return _HTEMP_HPVINV10; }
+            set
+            {
+                _HTEMP_HPVINV10 = value;
+                this.RaiseProperChanged(nameof(HTEMP_HPVINV10));
+            }
+        }
+        private HBAT_HPVINV10_ViewModel _HBAT_HPVINV10;
+        public HBAT_HPVINV10_ViewModel HBAT_HPVINV10
+        {
+            get { return _HBAT_HPVINV10; }
+            set
+            {
+                _HBAT_HPVINV10 = value;
+                this.RaiseProperChanged(nameof(HBAT_HPVINV10));
+            }
+        }
+        #endregion
 
         #region 串口工具
 
@@ -1703,7 +1769,7 @@ namespace WpfApp1.ViewModels
         /// <summary>
         /// 内容窗口
         /// </summary>
-        private UserControl contentUC;
+        private UserControl? contentUC;
         public UserControl ContentUC
         {
             get
@@ -2068,6 +2134,12 @@ namespace WpfApp1.ViewModels
                     {
                         //HPVINV08通讯
                         CommunicationWithGB_HPVINV08(token);
+                    }
+                    //CommunicationWithGB_HPVINV10
+                    else if (SelectedMachineItem == "HPVINV10")
+                    {
+                        //HPVINV10通讯
+                        CommunicationWithGB_HPVINV10(token);
                     }
                     else if (SelectedMachineItem == "UPSCYX01")
                     {
@@ -3267,6 +3339,272 @@ namespace WpfApp1.ViewModels
         }
         #endregion
 
+        #region HPVINV10通讯
+        /// <summary>
+        /// HPVINV10通讯
+        /// </summary>
+        /// <param name="token"></param>
+        private void CommunicationWithGB_HPVINV10(CancellationToken token)
+        {
+
+            string receive = "";
+
+            Thread.Sleep(100);
+            //判断是否开启CRC接收校验（抗干扰 默认开启
+            if (IsChecked)
+            {
+                //发送HOSTCRCEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "EN");
+                ShowError(receive, "HOSTCRC");
+            }
+            else if (OnceOpenCRC)
+            {
+                //发送HOSTCRDEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "DN");
+                OnceOpenCRC = false;
+                IsChecked = false;
+                SerialCommunicationService.OpenReceiveCRC(false);
+            }
+
+            //获取机器型号
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
+            MachineType = receive_MachineType.Substring(1, 8);
+            SerialCommunicationService.MachineType = receive_MachineType;
+
+            //发送HSTS2指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token); // 等待暂停或取消信号
+            receive = SerialCommunicationService.SendCommand(HSTS2_HPVINV10.Command, 39);
+            HSTS2_HPVINV10.AnalyseStringToElement(receive);
+
+
+            //发送HBMS1指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token); // 等待暂停或取消信号
+            receive = SerialCommunicationService.SendCommand(HBMS1_VQ.Command, 70);
+            HBMS1_VQ.AnalysisStringToElement(receive);
+
+
+            //发送HEEP1指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token); // 等待暂停或取消信号
+            receive = SerialCommunicationService.SendCommand(HEEP1_HPVINV02.Command, 80);
+            HEEP1_HPVINV02.AnalyseStringToElement(receive);
+
+
+            //发送HEEP2指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token); // 等待暂停或取消信号
+            receive = SerialCommunicationService.SendCommand(HEEP2.Command, 80);
+            HEEP2.AnalyseStringToElement(receive);
+
+
+            //发送HEEP3_PDF指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token); // 等待暂停或取消信号
+            receive = SerialCommunicationService.SendCommand(HEEP3_PDF.Command, 80);
+            HEEP3_PDF.AnalysisStringToElement(receive);
+
+            //发送HOP指令
+            Thread.Sleep(100);
+            // 等待暂停或取消信号
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HOP_PDF.Command, 50);
+            //解析返回命令
+            HOP_PDF.AnalysisStringToElement(receive);
+            //逆变百分比
+            InvTotalPwr = StringToIntConversion(HOP_PDF.LoadPercent);
+
+            //发送HPV指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HPV_HPVINV10.Command, 50);
+            HPV_HPVINV10.AnalysisStringToElement(receive);
+            //MPPTA百分比
+            MPPTTotalPwr = CountPercent(HPV_HPVINV10.PVAPwr, HIGSG2_PDF.MPPTTotalPwr);
+
+            //发送HGRID指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HGRID_GB.Command, 50);
+            //解析返回命令
+            HGRID_GB.AnalyseStringToElement(receive);
+            //显示
+            ACPowerVM = StringToIntConversion(HGRID_GB.ACPower);
+            //市电百分比
+            ACTotalPwr = CountPercent(HGRID_GB.ACPower, HIGSG2_PDF.ACTotalPwr);
+
+
+            //发送HTEMP指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HTEMP_HPVINV10.Command, 50);
+            HTEMP_HPVINV10.AnalysisStringToElement(receive);
+
+
+            //发送HBAT指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HBAT_HPVINV10.Command, 50);
+            HBAT_HPVINV10.AnalysisStringToElement(receive);
+            BattPercent = StringToIntConversion(HBAT_HPVINV10.BattCapacity);
+
+
+            //发送HIMSG1指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HIMSG1.Command, 21);
+            HIMSG1.AnalysisStringToElement(receive);
+
+
+            //发送HGEN指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HGEN.Command, 60);
+            HGEN.AnalyseStringToElement(receive);
+
+
+            //发送HSTS指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HSTS_GB.Command, 40);
+            HSTS_GB.AnalyseStringToElement(receive);
+
+
+            //发送HPV指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HPV_HPVINV10.Command, 50);
+            HPV_HPVINV10.AnalysisStringToElement(receive);
+
+
+            //发送HCTMSG1指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HCTMSG1_PDF.Command, 80);
+            HCTMSG1_PDF.AnalysisStringToElement(receive);
+            ShowError(receive, "HCTMSG1");
+
+
+            //机器型号
+            MachineModel = StringToIntConversion(HOP_PDF.RatedPwr) + StringToIntConversion(HBAT_HPVINV10.BattCells) * 12;
+
+            //数据
+            var Common_Data = new Common_Data
+            {
+                DataNow = DateTime.Now,//日期
+
+                MainsVoltage = HGRID_GB.MainsVoltage,//市电电压
+                MainsFrequency = HGRID_GB.MainsFrequency,//市电频率
+                ACPower = HGRID_GB.ACPower,//市电功率
+
+                OutVolt = HOP_PDF.OutVolt,//输出电压
+                OutFreq = HOP_PDF.OutFreq,//输出频率
+                ApparentPwr = HOP_PDF.ApparentPwr,//视在功率
+                ActivePwr = HOP_PDF.ActivePwr,//有功功率
+                LoadPercent = HOP_PDF.LoadPercent,//负载百分比
+                ZeroAdjPwr = HEEP3_PDF.ZeroAdjPwr,//调零功率
+                CTCurr = HCTMSG1_PDF.CTCurr,//CT电流
+                CTPwr = HCTMSG1_PDF.CTPwr,//CT功率
+
+                PVVolt = HPV_HPVINV10.PVAVolt,//PVA路电压
+                PVPwr = HPV_HPVINV10.PVAPwr,//PVA路功率
+                PVCurr = HPV_HPVINV10.PVACurr,//PVA路电流
+                PVVolt2 = HPV_HPVINV10.PVBVolt,//PVB路电压
+                PVPwr2 = HPV_HPVINV10.PVBPwr,//PVB路功率
+                PVCurr2 = HPV_HPVINV10.PVBCurr,//PVB路电流
+                TotalGen = HGEN.TotalGen,//总发电量
+                DailyGen = HGEN.DailyGen,//日发电量
+                MonthlyGen = HGEN.MonthlyGen,//月发电量
+                AnnualGen = HGEN.AnnualGen,//年发电量
+
+                BattVolt = HBAT_HPVINV10.BattVolt,//电池电压
+                BatCurr = HBAT_HPVINV10.BatCurr, //电池电流
+                BattCells = HBAT_HPVINV10.BattCells,//电池节数
+                BattCapacity = HBAT_HPVINV10.BattCapacity,//电池容量
+                BatPwr = HBAT_HPVINV10.BatPwr,//电池功率
+                BusVolt = HBAT_HPVINV10.BusVolt, //母线电压
+
+                ProtocolType = HBMS1_VQ.ProtocolType,//协议类型
+                BMS_ComOK = HBMS1_VQ.BMS_ComOK,//BMS通信正常
+                BMS_LowBattAlarm = HBMS1_VQ.BMS_LowBattAlarm,//BMS低电报警
+                BMS_LowBattFault = HBMS1_VQ.BMS_LowBattFault,//BMS低电故障
+                BMS_ChgEnable = HBMS1_VQ.BMS_ChgEnable,//BMS允许充电
+                BMS_DisEnable = HBMS1_VQ.BMS_DisEnable,//BMS允许放电
+                BMS_ChgOC = HBMS1_VQ.BMS_ChgOC,//BMS充电过流
+                BMS_DisOC = HBMS1_VQ.BMS_DisOC,//BMS放电过流
+                BMS_UnderTemp = HBMS1_VQ.BMS_UnderTemp,//BMS温度过低
+                BMS_OverTemp = HBMS1_VQ.BMS_OverTemp,//BMS温度过高
+                BMS_AvgTemp = HBMS1_VQ.BMS_AvgTemp,//BMS平均温度
+                BMS_ChgCurrLimit = HBMS1_VQ.BMS_ChgCurrLimit,//BMS充电电流限制
+                BMS_SOC = HBMS1_VQ.BMS_SOC,//BMS当前SOC
+                BMS_ChgVoltLimit = HBMS1_VQ.BMS_ChgVoltLimit,//BMS充电电压限制
+                BMS_DisVoltLimit = HBMS1_VQ.BMS_DisVoltLimit,//BMS放电电压限制
+
+                FaultCode = HSTS_GB.FaultCode,//故障代码
+                PVTemp = HTEMP_HPVINV10.PVTemp,//PV温度
+                InvTemp = HTEMP_HPVINV10.InvTemp,//逆变温度
+                BoostTemp = HTEMP_HPVINV10.BoostTemp,//升压温度
+                RectificationTemp = HTEMP_HPVINV10.RectificationTemp,//整流温度
+                XfmrTemp = HTEMP_HPVINV10.XfmrTemp,//变压器温度
+                MaxTemp = HTEMP_HPVINV10.MaxTemp,//当前最高温度
+                FanSpeed = HTEMP_HPVINV10.FanSpeed,//风扇转速
+                FanEnable = HTEMP_HPVINV10.Fan1Enable,//风扇1使能
+                Fan2Enable = HTEMP_HPVINV10.Fan2Enable,//风扇2使能
+                Mode = HSTS_GB.Mode,//模式
+                PVToLoadAC = HSTS_GB.PVToLoadAC,//AC状态下PV馈能到负载
+                OutputStatus = HSTS_GB.OutputStatus,//机器是否有输出
+                BattLowAlarm = HSTS_GB.BattLowAlarm,//电池低电报警
+                BattDisconnected = HSTS_GB.BattDisconnected,//电池未接
+                OutputOverload = HSTS_GB.OutputOverload,//输出过载
+                OverTemp = HSTS_GB.OverTemp,//机器过温
+                PVLowPwrFault = HSTS_GB.PVLowPwrFault,//PV功率过低异常
+                InputOV = HSTS_GB.InputOV,//输入电压过高
+                BattOV = HSTS_GB.BattOV,//电池电压过高
+                FanSpeedFault = HSTS_GB.FanSpeedFault,//风扇转速异常
+                ParallelUnits = HSTS_GB.ParallelUnits,//并机系统里机器的总数
+                GridTieFlag = HSTS_GB.GridTieFlag,//并网标志
+                ParallelRole = HSTS_GB.ParallelRole,//并机系统中角色
+                MainRelayStat = HSTS_GB.MainRelayStat,//主输出继电器状态
+                SecOutStat = HSTS_GB.SecOutStat,//第二输出当前状态
+                BMS_ComFault = HSTS_GB.BMS_ComFault,//BMS通讯异常
+                TempSensorFault = HSTS_GB.TempSensorFault,//温度传感器异常
+                ACLED = HSTS_GB.ACLED,//市电灯状态
+                InvLED = HSTS_GB.InvLED,//逆变灯状态
+                ChgLED = HSTS_GB.ChgLED,//充电灯状态
+                AlarmLED = HSTS_GB.AlarmLED,//报警灯状态
+                InvStatus = HSTS2_HPVINV10.InvStatus,//逆变器工作状态
+                PVVoltStatus = HSTS2_HPVINV10.PVVoltStatus,//A路PV电压状态
+                InvBridgeStatus = HSTS2_HPVINV10.InvBridgeStatus,//逆变桥状态
+                MPPTStatus = HSTS2_HPVINV10.MPPTStatus,//A路MPPT状态
+                PLLStatus = HSTS2_HPVINV10.PLLStatus,//锁相环状态
+                ChargeCurrentLimitFlag = HSTS2_HPVINV10.ChargeCurrentLimitFlag,//充电电流限制标志
+                ACCouplingCurrentLimitFlag = HSTS2_HPVINV10.ACCouplingCurrentLimitFlag,//市电耦合电流限制标志
+                MPPTCurrentLimitFlag = HSTS2_HPVINV10.MPPTCurrentLimitFlag,//MPPT限制标志
+                BatteryDischargeCurrentLimitFlag = HSTS2_HPVINV10.BatteryDischargeCurrentLimitFlag,//电池放电限流标志
+                BPhotovoltaicVoltageStatus = HSTS2_HPVINV10.BPhotovoltaicVoltageStatus,//B路PV电压状态
+                BMPPTStatus = HSTS2_HPVINV10.BMPPTStatus,//B路MPPT状态
+                CurrentSecondOutputRemoteControlStatus = HSTS2_HPVINV10.CurrentSecondOutputRemoteControlStatus,//当前第二输出远程控制状态
+                CurrentALLOutputRemoteControlStatus = HSTS2_HPVINV10.CurrentALLOutputRemoteControlStatus,//当前所有输出远程控制状态
+            };
+
+            // 最新在最前
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+
+                if (DR_Monitor.IsSaving && DR_Monitor._savePath != null)
+                {
+                    DR_Monitor.SaveToExcel(Common_Data);
+                }
+
+            });
+        }
+        #endregion
+
         #region GB6042通讯(HPVINV06)
         /// <summary>
         /// GB6042通讯(HPVINV06)
@@ -4295,9 +4633,12 @@ namespace WpfApp1.ViewModels
                 //发送查询机器指令
                 string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
                 if (receive_MachineType != null && receive_MachineType.Length == 10)
+                {
                     MachineType = receive_MachineType.Substring(1, 8);
-                //解析指令
-                SerialCommunicationService.MachineType = receive_MachineType;
+                    //解析指令
+                    SerialCommunicationService.MachineType = receive_MachineType;
+                }
+
 
                 //首界面设置状态显示
                 // 等待暂停或取消信号
@@ -4628,7 +4969,7 @@ namespace WpfApp1.ViewModels
 
         #region BMS03通讯
         /// <summary>
-        /// BMS01通讯
+        /// BMS03通讯
         /// </summary>
         /// <param name="token"></param>
         private void CommunicationWithBMS03(CancellationToken token)
@@ -4645,9 +4986,12 @@ namespace WpfApp1.ViewModels
                 //发送查询机器指令
                 string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
                 if (receive_MachineType != null && receive_MachineType.Length == 10)
+                {
                     MachineType = receive_MachineType.Substring(1, 8);
-                //解析指令
-                SerialCommunicationService.MachineType = receive_MachineType;
+                    //解析指令
+                    SerialCommunicationService.MachineType = receive_MachineType;
+                }
+
 
                 //首界面设置状态显示
                 // 等待暂停或取消信号

@@ -74,6 +74,7 @@ namespace WpfApp1.ViewModels
             public int ColumnWidth { get; set; }       // 列宽
             public string Format { get; set; }         // 数据格式
 
+            // 构造函数
             public ColumnInfo(string headerName, string dataProperty, int columnWidth = 15, string format = null)
             {
                 HeaderName = headerName;
@@ -653,6 +654,180 @@ namespace WpfApp1.ViewModels
                     new ColumnInfo("逆变桥状态", "InvBridgeStatus", 15),
                     new ColumnInfo("MPPT状态", "MPPTStatus", 15),
                     new ColumnInfo("锁相环状态", "PLLStatus", 15)
+                }
+
+            }
+        }
+            };
+
+            return config;
+        }
+        #endregion
+
+        #region HPVINV10的保存命令和配置
+        private ICommand _HPVINV10SaveCommand;
+        public ICommand HPVINV10SaveCommand
+        {
+            get
+            {
+                return _HPVINV10SaveCommand ?? (_HPVINV10SaveCommand = new RelayCommand(() => StartSavingWithConfig(GetHPVINV10Config())));
+            }
+        }
+
+        /// <summary>
+        /// HPVINV08的Excel配置
+        /// </summary>
+        /// <returns></returns>
+        private static DeviceExcelConfig GetHPVINV10Config()
+        {
+            var config = new DeviceExcelConfig
+            {
+                DeviceName = "HPVINV10",
+                ColumnGroups = new List<ColumnGroup>
+        {
+            new ColumnGroup
+            {
+                GroupName = "基本信息",
+                GroupColor = System.Drawing.Color.LightGray,
+                Columns = new List<ColumnInfo>
+                {
+                    new ColumnInfo("日期", "DataNow", 12),
+                    new ColumnInfo("时间", "Time", 10)
+                }
+            },
+            new ColumnGroup
+            {
+                GroupName = "市电",
+                GroupColor = System.Drawing.Color.LightBlue,
+                Columns = new List<ColumnInfo>
+                {
+                    new ColumnInfo("市电电压(V)", "MainsVoltage", 15, "0.0"),
+                    new ColumnInfo("市电频率(Hz)", "MainsFrequency", 15, "0.0"),
+                    new ColumnInfo("市电功率(W)", "ACPower", 15, "0")
+                }
+            },
+            new ColumnGroup
+            {
+                GroupName = "输出",
+                GroupColor = System.Drawing.Color.LightGreen,
+                Columns = new List<ColumnInfo>
+                {
+                    new ColumnInfo("输出电压(V)", "OutVolt", 15, "0.0"),
+                    new ColumnInfo("输出频率(Hz)", "OutFreq", 15, "0.0"),
+                    new ColumnInfo("视在功率(W)", "ApparentPwr", 15, "0"),
+                    new ColumnInfo("有功功率(W)", "ActivePwr", 15, "0"),
+                    new ColumnInfo("负载百分比(%)", "LoadPercent", 15, "0%"),
+                    new ColumnInfo("调零功率(W)", "ZeroAdjPwr", 15, "0"),
+                    new ColumnInfo("CT电流(A)", "CTCurr", 15, "0.0"),
+                    new ColumnInfo("CT功率(W)", "CTPwr", 15, "0"),
+                }
+            },
+            new ColumnGroup
+            {
+                GroupName = "PV",
+                GroupColor = System.Drawing.Color.LightYellow,
+                Columns = new List<ColumnInfo>
+                {
+                    new ColumnInfo("A路PV电压(V)", "PVVolt", 15, "0.0"),
+                    new ColumnInfo("A路PV功率(W)", "PVPwr", 15, "0"),
+                    new ColumnInfo("A路PV电流(A)", "PVCurr", 15, "0.0"),
+                    new ColumnInfo("B路PV电压(V)", "PVVolt2", 15, "0.0"),
+                    new ColumnInfo("B路PV功率(W)", "PVPwr2", 15, "0"),
+                    new ColumnInfo("B路PV电流(A)", "PVCurr2", 15, "0.0"),
+                    new ColumnInfo("日发电量(kW·h)", "DailyGen", 15, "0.00"),
+                    new ColumnInfo("月发电量(kW·h)", "MonthlyGen", 15, "0.00"),
+                    new ColumnInfo("年发电量(kW·h)", "AnnualGen", 15, "0.00"),
+                    new ColumnInfo("总发电量(kW·h)", "TotalGen", 15, "0.00")
+                }
+            },
+            new ColumnGroup
+            {
+                GroupName = "BMS",
+                GroupColor = System.Drawing.Color.LightSeaGreen,
+                Columns = new List<ColumnInfo>
+                {
+                    new ColumnInfo("协议类型", "ProtocolType", 15),
+                    new ColumnInfo("BMS通信正常", "BMS_ComOK", 15),
+                    new ColumnInfo("BMS低电报警", "BMS_LowBattAlarm", 15),
+                    new ColumnInfo("BMS低电故障", "BMS_LowBattFault", 15),
+                    new ColumnInfo("BMS允许充电", "BMS_ChgEnable", 15),
+                    new ColumnInfo("BMS允许放电", "BMS_DisEnable", 15),
+                    new ColumnInfo("BMS充电过流", "BMS_ChgOC", 15),
+                    new ColumnInfo("BMS放电过流", "BMS_DisOC", 15),
+                    new ColumnInfo("BMS温度过低", "BMS_UnderTemp", 15),
+                    new ColumnInfo("BMS温度过高", "BMS_OverTemp", 15),
+                    new ColumnInfo("BMS平均温度", "BMS_AvgTemp", 15),
+                    new ColumnInfo("BMS充电电流限制", "BMS_ChgCurrLimit", 15),
+                    new ColumnInfo("BMS当前SOC", "BMS_SOC", 15),
+                    new ColumnInfo("BMS充电电压限制", "BMS_ChgVoltLimit", 15),
+                    new ColumnInfo("BMS放电电压限制", "BMS_DisVoltLimit", 15)
+                }
+            },
+            new ColumnGroup
+            {
+                GroupName = "电池",
+                GroupColor = System.Drawing.Color.LightPink,
+                Columns = new List<ColumnInfo>
+                {
+                    new ColumnInfo("电池节数", "BattCells", 15, "0"),
+                    new ColumnInfo("电池电压(V)", "BattVolt", 15, "0.0"),
+                    new ColumnInfo("电池容量(%)", "BattCapacity", 15, "0%"),
+                    new ColumnInfo("电池电流(A)", "BatCurr", 15, "0.0"),
+                    new ColumnInfo("电池功率(W)", "BatPwr", 15, "0"),
+                    new ColumnInfo("母线电压(V)", "BusVolt", 15, "0.0")
+                }
+            },
+            new ColumnGroup
+            {
+                GroupName = "机器状态",
+                GroupColor = System.Drawing.Color.LightGray,
+                Columns = new List<ColumnInfo>
+                {
+                    new ColumnInfo("PV温度(℃)", "PVTemp", 15, "0.0"),
+                    new ColumnInfo("故障代码", "FaultCode", 15),
+                    new ColumnInfo("逆变温度(℃)", "InvTemp", 15, "0.0"),
+                    new ColumnInfo("升压温度(℃)", "BoostTemp", 15, "0.0"),
+                    new ColumnInfo("整流温度(℃)", "RectificationTemp", 15, "0.0"),
+                    new ColumnInfo("变压器温度(℃)", "XfmrTemp", 15, "0.0"),
+                    new ColumnInfo("当前最高温度(℃)", "MaxTemp", 15, "0.0"),
+                    new ColumnInfo("风扇转速", "FanSpeed", 15, "0"),
+                    new ColumnInfo("风扇1使能", "FanEnable", 15),
+                    new ColumnInfo("风扇2使能", "Fan2Enable", 15),
+                    new ColumnInfo("模式", "Mode", 15),
+                    new ColumnInfo("AC状态下PV馈能到负载", "PVToLoadAC", 15),
+                    new ColumnInfo("机器是否有输出", "OutputStatus", 15),
+                    new ColumnInfo("电池低电报警", "BattLowAlarm", 15),
+                    new ColumnInfo("电池未接", "BattDisconnected", 15),
+                    new ColumnInfo("输出过载", "OutputOverload", 15),
+                    new ColumnInfo("机器过温(℃)", "OverTemp", 15,"0.0"),
+                    new ColumnInfo("PV功率过低异常", "PVLowPwrFault", 15),
+                    new ColumnInfo("输入电压过高", "InputOV", 15),
+                    new ColumnInfo("电池电压过高", "BattOV", 15),
+                    new ColumnInfo("风扇转速异常", "FanSpeedFault", 15),
+                    new ColumnInfo("并机系统里机器的总数", "ParallelUnits", 15),
+                    new ColumnInfo("并网标志", "GridTieFlag", 15),
+                    new ColumnInfo("并机系统中角色", "ParallelRole", 15),
+                    new ColumnInfo("主输出继电器状态", "MainRelayStat", 15),
+                    new ColumnInfo("第二输出当前状态", "SecOutStat", 15),
+                    new ColumnInfo("BMS通讯异常", "BMS_ComFault", 15),
+                    new ColumnInfo("温度传感器异常", "TempSensorFault", 15),
+                    new ColumnInfo("市电灯状态", "ACLED", 15),
+                    new ColumnInfo("逆变灯状态", "InvLED", 15),
+                    new ColumnInfo("充电灯状态", "ChgLED", 15),
+                    new ColumnInfo("报警灯状态", "AlarmLED", 15),
+                    new ColumnInfo("逆变器工作状态", "InvStatus", 15),
+                    new ColumnInfo("A路PV电压状态", "PVVoltStatus", 15),
+                    new ColumnInfo("逆变桥状态", "InvBridgeStatus", 15),
+                    new ColumnInfo("A路MPPT状态", "MPPTStatus", 15),
+                    new ColumnInfo("锁相环状态", "PLLStatus", 15),
+                    new ColumnInfo("充电电流限制标志", "ChargeCurrentLimitFlag", 15),
+                    new ColumnInfo("市电耦合电流限制标志", "ACCouplingCurrentLimitFlag", 15),
+                    new ColumnInfo("MPPT限制标志", "MPPTCurrentLimitFlag", 15),
+                    new ColumnInfo("电池放电限流标志", "BatteryDischargeCurrentLimitFlag", 15),
+                    new ColumnInfo("B路PV电压状态", "BPhotovoltaicVoltageStatus", 15),
+                    new ColumnInfo("B路MPPT状态", "BMPPTStatus", 15),
+                    new ColumnInfo("当前第二输出远程控制状态", "CurrentSecondOutputRemoteControlStatus", 15),
+                    new ColumnInfo("当前所有输出远程控制状态", "CurrentALLOutputRemoteControlStatus", 15)
                 }
 
             }
