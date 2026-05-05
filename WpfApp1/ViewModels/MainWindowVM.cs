@@ -3378,7 +3378,7 @@ namespace WpfApp1.ViewModels
             //发送HSTS2指令
             Thread.Sleep(100);
             _pauseEvent.Wait(token); // 等待暂停或取消信号
-            receive = SerialCommunicationService.SendCommand(HSTS2_HPVINV10.Command, 39);
+            receive = SerialCommunicationService.SendCommand(HSTS2_HPVINV10.Command, 40);
             HSTS2_HPVINV10.AnalyseStringToElement(receive);
 
 

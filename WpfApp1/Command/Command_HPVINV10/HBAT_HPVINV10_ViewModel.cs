@@ -279,7 +279,6 @@ namespace WpfApp1.Command.Command_HPVINV10
 
         #endregion
 
-
         #region 通用方法
 
         private bool Validate(string value)
