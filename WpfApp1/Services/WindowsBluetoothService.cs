@@ -6,12 +6,14 @@ using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.Advertisement;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
+using Windows.Devices.Radios;
 using Windows.Storage.Streams;
 using WpfApp1.Models;
-using Windows.Devices.Bluetooth;
+using WpfApp1.ViewModels;
 
 namespace WpfApp1.Services
 {
@@ -125,6 +127,27 @@ namespace WpfApp1.Services
         #endregion
 
         #region 扫描和连接
+        public async Task<bool> IsBluetoothOnAsync()
+        {
+            try
+            {
+                var radios = await Radio.GetRadiosAsync();
+
+                foreach (var radio in radios)
+                {
+                    if (radio.Kind == RadioKind.Bluetooth)
+                    {
+                        return radio.State == RadioState.On;
+                    }
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
         /// <summary>
         /// 开始扫描附近的 BLE 设备
         /// 扫描结果通过 DeviceDiscovered 事件异步返回
@@ -135,21 +158,29 @@ namespace WpfApp1.Services
 
             if (_watcher != null) return;
 
-            // StartScanningAsync 开头确保非空
-            _recentAddresses ??= new HashSet<ulong>();
-            _recentAddresses.Clear();
-            _lastCleanup = DateTime.Now;
-
-            _watcher = new BluetoothLEAdvertisementWatcher
+            try
             {
-                ScanningMode = BluetoothLEScanningMode.Active
-            };
-            _watcher.Received += OnAdvertisementReceived;
-            _watcher.Stopped += (s, e) => UpdateState("扫描已停止");
-            _watcher.Start();
-            UpdateState("正在扫描设备...");
-            AddLog("开始扫描 BLE 设备");
-            await Task.CompletedTask;
+                _recentAddresses ??= new HashSet<ulong>();
+                _recentAddresses.Clear();
+                _lastCleanup = DateTime.Now;
+
+                _watcher = new BluetoothLEAdvertisementWatcher
+                {
+                    ScanningMode = BluetoothLEScanningMode.Active
+                };
+
+                _watcher.Received += OnAdvertisementReceived;
+                _watcher.Stopped += (s, e) => UpdateState("扫描已停止");
+
+                _watcher.Start();
+
+                UpdateState("正在扫描设备...");
+                AddLog("开始扫描 BLE 设备");
+            }
+            catch (Exception ex)
+            {
+                AddLog($"启动扫描失败: {ex.Message}");
+            }
         }
 
         /// <summary>

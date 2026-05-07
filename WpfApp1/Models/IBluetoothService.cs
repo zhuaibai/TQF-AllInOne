@@ -15,6 +15,7 @@ namespace WpfApp1.Models
         event Action<byte[]> RawDataReceived;
         Task StartScanningAsync();// 开始扫描设备
         void StopScanning();// 停止扫描设备
+        Task<bool> IsBluetoothOnAsync();// 检查蓝牙是否开启
         Task<bool> ConnectAsync(BluetoothDeviceInfo deviceInfo);// 连接设备
         Task DisconnectAsync();// 断开连接
         Task<bool> SendDataAsync(string data);// 发送数据

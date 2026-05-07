@@ -13,7 +13,7 @@ using WpfApp1.ViewModels;
 
 namespace WpfApp1.Models
 {
-    public class BlueToothSettings: BaseViewModel
+    public class BlueToothSettings : BaseViewModel
     {
         public readonly IBluetoothService _bluetoothService;
         private BluetoothDeviceInfo? _selectedDevice;
@@ -99,12 +99,29 @@ namespace WpfApp1.Models
         #endregion
 
         #region 命令执行方法
+        public async Task<bool> IsOpenBL()
+        {
+            // ⭐ 用 Radio 判断蓝牙状态
+            bool isOn = await _bluetoothService.IsBluetoothOnAsync();
+
+            if (!isOn)
+            {
+                MessageBox.Show("请先打开系统蓝牙!", "提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
         /// <summary>
         /// 开始扫描
         /// </summary>
         /// <returns></returns>
         public async Task StartScanAsync()
         {
+
             IsBusy = true;
             Devices.Clear();
             await _bluetoothService.StartScanningAsync();

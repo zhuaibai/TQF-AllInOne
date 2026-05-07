@@ -193,46 +193,7 @@
                     Text="{DynamicResource 抗干扰模式}" />
                 
             </StackPanel>
-            <Border
-                Margin="10,20,5,20"
-                BorderBrush="White"
-                BorderThickness="2,0,0,0" />
-            <Button
-                Background="#FF1677FF"
-                Command="{Binding OpenBluetoothScan}"
-                Content="{DynamicResource 开始扫描}"
-                Style="{StaticResource BluetoothStyleBtn}"
-                Tag="&#xe65d;"
-                Visibility="{Binding BluetoothScanIconOpen}" />
-            <Button
-                Background="#FFF75231"
-                Command="{Binding OpenBluetoothScan}"
-                Content="{DynamicResource 停止扫描}"
-                Style="{StaticResource MenuStyleBtn}"
-                Tag="&#xe800;"
-                Visibility="{Binding BluetoothScanIconClose}" />
-           
-            <Button
-                Background="#FF1677FF"
-                Command="{Binding OpenBluetooth}"
-                Content="{DynamicResource 连接蓝牙}"
-                Style="{StaticResource BluetoothStyleBtn}"
-                Tag="&#xe639;"
-                Visibility="{Binding BluetoothIconOpen}" />
-            <Button
-                Background="#FFF75231"
-                Command="{Binding OpenBluetooth}"
-                Content="{DynamicResource 断开蓝牙}"
-                Style="{StaticResource BluetoothStyleBtn}"
-                Tag="&#xe667;"
-                Visibility="{Binding BluetoothIconClose}" />
           
-            <ComboBox  MaxHeight="30" 
-                ItemsSource="{Binding BlueToothSettings.Devices}"
-                SelectedItem="{Binding BlueToothSettings.SelectedDevice, Mode=TwoWay}"
-                Style="{StaticResource cmbstyle}"
-                ></ComboBox>
-
             <TextBlock Text="{DynamicResource 机型}" Margin=" 15,20,0,0" FontSize="15" FontFamily="楷体"></TextBlock>
             <ComboBox
                 MaxHeight="30"
@@ -253,6 +214,47 @@
                 SelectedItem="{Binding SerialPortSetting.SelectedPort, Mode=TwoWay}"
                 Style="{StaticResource cmbstyle}"
                 IsEnabled="{Binding IsEnableComboBox}"></ComboBox>
+
+            <Border
+      Margin="10,20,5,20"
+      BorderBrush="White"
+      BorderThickness="2,0,0,0" />
+            <Button
+      Background="#FF1677FF"
+      Command="{Binding OpenBluetoothScan}"
+      Content="{DynamicResource 开始扫描}"
+      Style="{StaticResource BluetoothStyleBtn}"
+      Tag="&#xe65d;"
+      Visibility="{Binding BluetoothScanIconOpen}" />
+            <Button
+      Background="#FFF75231"
+      Command="{Binding OpenBluetoothScan}"
+      Content="{DynamicResource 停止扫描}"
+      Style="{StaticResource MenuStyleBtn}"
+      Tag="&#xe800;"
+      Visibility="{Binding BluetoothScanIconClose}" />
+
+            <Button
+      Background="#FF1677FF"
+      Command="{Binding OpenBluetooth}"
+      Content="{DynamicResource 连接蓝牙}"
+      Style="{StaticResource BluetoothStyleBtn}"
+      Tag="&#xe639;"
+      Visibility="{Binding BluetoothIconOpen}" />
+            <Button
+      Background="#FFF75231"
+      Command="{Binding OpenBluetooth}"
+      Content="{DynamicResource 断开蓝牙}"
+      Style="{StaticResource BluetoothStyleBtn}"
+      Tag="&#xe667;"
+      Visibility="{Binding BluetoothIconClose}" />
+
+            <ComboBox  MaxHeight="30" 
+      ItemsSource="{Binding BlueToothSettings.Devices}"
+      SelectedItem="{Binding BlueToothSettings.SelectedDevice, Mode=TwoWay}"
+      Style="{StaticResource cmbstyle}"
+      ></ComboBox>
+
 
         </StackPanel>
 
