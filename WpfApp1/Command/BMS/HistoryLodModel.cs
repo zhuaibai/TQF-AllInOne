@@ -107,10 +107,10 @@ namespace WpfApp1.Command.BMS
             //累计充电容量
             TotalChgCap = (data[26] / 100.0).ToString("F2");
             //NTC温度传感器值
-            _NTCTemp1 = (data[27] / 10.0).ToString("F1");
-            _NTCTemp2 = (data[28] / 10.0).ToString("F1");
-            _NTCTemp3 = (data[29] / 10.0).ToString("F1");
-            _NTCTemp4 = (data[30] / 10.0).ToString("F1");
+            NTCTemp1 = (data[27] / 10.0).ToString("F1");
+            NTCTemp2 = (data[28] / 10.0).ToString("F1");
+            NTCTemp3 = (data[29] / 10.0).ToString("F1");
+            NTCTemp4 = (data[30] / 10.0).ToString("F1");
             //当前电量SOC
             SOC = (data[31] / 100.0).ToString("F2");
             //电池健康SOH
@@ -176,10 +176,10 @@ namespace WpfApp1.Command.BMS
             //累计充电容量
             _TotalChgCap = (data[26] / 100.0).ToString("F2");
             //NTC温度传感器值
-            _NTCTemp1 = (data[27] / 10.0).ToString("F1");
-            _NTCTemp2 = (data[28] / 10.0).ToString("F1");
-            _NTCTemp3 = (data[29] / 10.0).ToString("F1");
-            _NTCTemp4 = (data[30] / 10.0).ToString("F1");
+            NTCTemp1 = (data[27] / 10.0).ToString("F1");
+            NTCTemp2 = (data[28] / 10.0).ToString("F1");
+            NTCTemp3 = (data[29] / 10.0).ToString("F1");
+            NTCTemp4 = (data[30] / 10.0).ToString("F1");
             //当前电量SOC
             _SOC = (data[31] / 100.0).ToString("F2");
             //电池健康SOH

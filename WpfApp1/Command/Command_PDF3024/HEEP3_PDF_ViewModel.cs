@@ -288,6 +288,19 @@ namespace WpfApp1.Command.Command_PDF3024
 
         #endregion
 
+        #region RGB颜色灯
+        private string _RGBColor;
+        public string RGBColor
+        {
+            get { return _RGBColor; }
+            set
+            {
+                _RGBColor = value;
+                this.RaiseProperChanged(nameof(RGBColor));
+            }
+        }
+        #endregion
+
         #region 通用方法
 
         private bool Validate(string value)

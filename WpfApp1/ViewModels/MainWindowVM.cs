@@ -10,11 +10,13 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml.Serialization;
+using Windows.Devices.Bluetooth;
 using WpfApp1.Command;
 using WpfApp1.Command.BMS;
 using WpfApp1.Command.Comand_GB3024;
 using WpfApp1.Command.Command_CG;
 using WpfApp1.Command.Command_CYJ;
+using WpfApp1.Command.Command_HPVINV10;
 using WpfApp1.Command.Command_LB6;
 using WpfApp1.Command.Command_PDF302;
 using WpfApp1.Command.Command_PDF3024;
@@ -51,23 +53,35 @@ namespace WpfApp1.ViewModels
             #endregion
 
             #region 后台线程
+            //串口后台
             StartCommand = new RelayCommand(StartBackgroundThread);
             StopCommand = new RelayCommand(StopBackgroundThread);
+            //蓝牙后台
+            StartBluetoothBackgroundCommand = new RelayCommand(StartBluetoothBackgroundThread);
 
             // 创建串口实例
             _serialPortSetting = new SerialPortSettingViewModel();
             //初始化串口信息
             IniCom();
             OpenCom = new RelayCommand(openCom);
+            //
+            //蓝牙通讯实例
+            _blueToothSettings = new BlueToothSettings(new WindowsBluetoothService(_pauseEvent, AddLog, UpdateBluetoothState));
+            AppServices.CurrentBlueTooth = _blueToothSettings;
+            OpenBluetoothScan = new RelayCommand(openBluetoothScan);
+            OpenBluetooth = new RelayCommand(openBluetooth);
 
             //发送帧，接收帧
             _SerialCountVM = new SerialCountVM();
             //绑定发送接收帧计数委托
             SerialCommunicationService.AddReceiveFrame = SerialCountVM.AddReceiveFrame;
             SerialCommunicationService.AddSendFrame = SerialCountVM.AddSendFrame;
-
+            
             //BMS
-            BMS_Command_Setting = new SendingCommandSettingsViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            BMS_Command_Setting = new SendingCommandSettingsViewModel(_pauseEvent, _semaphore, AddLog, UpdateState, UpdateBluetoothState);
+            BMS02 = new BMS_UserControl();
+            BMS01 = new BMS01_UserControl();
+            BMS03 = new BMS03_UserControl();
 
             //初始化  GB   ViewModel
             hopVm = new HOPViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
@@ -113,16 +127,20 @@ namespace WpfApp1.ViewModels
             _HBAT_CG = new HBAT_CG_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             _HEEP1_CG = new HEEP1_CG_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             _HOP_CG = new HOP_CG_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            //初始化 HPVINV10 ViewModel
+            _HSTS2_HPVINV10 = new HSTS2_HPVINV10_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HPV_HPVINV10 = new HPV_HPVINV10_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HTEMP_HPVINV10 = new HTEMP_HPVINV10_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HBAT_HPVINV10 = new HBAT_HPVINV10_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
 
             #endregion
 
             //消息框初始化
             _messageService = messageService;
             ShowMessageCommand = new RelayCommand(OnShowMessage);
-            BMS02 = new BMS_UserControl();
-            BMS01 = new BMS01_UserControl();
-            BMS03 = new BMS03_UserControl();
             ModbusRTU.showStatue = UpdateState;
+            ModbusRTU.showBLStatue = UpdateBluetoothState;
+
             //// 模拟电量变化
             //var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3)};
             //timer.Tick += (s, e) =>
@@ -144,7 +162,23 @@ namespace WpfApp1.ViewModels
             App.ChangeLanguageWithSetting = RefleshSettingParamToLanguage;
         }
 
-
+        //蓝牙静态实例
+        public static class AppServices
+        {
+            public static BlueToothSettings? CurrentBlueTooth { get; set; }
+        }
+        //蓝牙实例属性
+        private BlueToothSettings _blueToothSettings;
+        public BlueToothSettings BlueToothSettings
+        {
+            get => _blueToothSettings;
+            set
+            {
+                _blueToothSettings = value;
+                OnPropertyChanged(nameof(BlueToothSettings));
+            }
+        }
+        //串口实例属性
         private SerialPortSettingViewModel _serialPortSetting;
 
         public SerialPortSettingViewModel SerialPortSetting
@@ -159,7 +193,7 @@ namespace WpfApp1.ViewModels
                 OnPropertyChanged(nameof(SerialPortSetting));
             }
         }
-
+        //串口ComboBox可用状态属性
         private bool _isEnableComboBox = true;
         public bool IsEnableComboBox
         {
@@ -173,11 +207,301 @@ namespace WpfApp1.ViewModels
                 OnPropertyChanged(nameof(IsEnableComboBox));
             }
         }
-
+        //更新串口ComboBox的可用状态
         private void UpdateComboBoxEnabledState()
         {
             IsEnableComboBox = !SerialCommunicationService.IsOpen();
         }
+
+        #region 蓝牙工具
+
+        #region 蓝牙图标
+        //蓝牙连接打开图标
+        private Visibility _BluetoothIconOpen = Visibility.Visible;
+
+        public Visibility BluetoothIconOpen
+        {
+            get { return _BluetoothIconOpen; }
+            set
+            {
+                _BluetoothIconOpen = value;
+                this.RaiseProperChanged(nameof(BluetoothIconOpen));
+            }
+        }
+
+        //蓝牙连接关闭图标
+        private Visibility _BluetoothIconClose = Visibility.Collapsed;
+
+        public Visibility BluetoothIconClose
+        {
+            get { return _BluetoothIconClose; }
+            set
+            {
+                _BluetoothIconClose = value;
+                this.RaiseProperChanged(nameof(BluetoothIconClose));
+            }
+        }
+
+        //蓝牙扫描打开图标
+        private Visibility _BluetoothScanIconOpen = Visibility.Visible;
+
+        public Visibility BluetoothScanIconOpen
+        {
+            get { return _BluetoothScanIconOpen; }
+            set
+            {
+                _BluetoothScanIconOpen = value;
+                this.RaiseProperChanged(nameof(BluetoothScanIconOpen));
+            }
+        }
+
+        //蓝牙扫描关闭图标
+        private Visibility _BluetoothScanIconClose = Visibility.Collapsed;
+
+        public Visibility BluetoothScanIconClose
+        {
+            get { return _BluetoothScanIconClose; }
+            set
+            {
+                _BluetoothScanIconClose = value;
+                this.RaiseProperChanged(nameof(BluetoothScanIconClose));
+            }
+        }
+
+        /// <summary>
+        /// 改变蓝牙连接打开图标
+        /// </summary>
+        /// <param name="flag"></param>
+        private void ChangeBluetoothIcon(bool flag)
+        {
+            if (flag)
+            {
+                //蓝牙连接打开
+                BluetoothIconClose = Visibility.Visible;
+                BluetoothIconOpen = Visibility.Collapsed;
+            }
+            else
+            {
+                //蓝牙连接关闭
+                BluetoothIconClose = Visibility.Collapsed;
+                BluetoothIconOpen = Visibility.Visible;
+            }
+        }
+        /// <summary>
+        /// 改变蓝牙扫描图标
+        /// </summary>
+        /// <param name="flag"></param>
+        public void ChangeBluetoothScanIcon(bool flag)
+        {
+            if (flag)
+            {
+                //蓝牙扫描打开
+                BluetoothScanIconClose = Visibility.Visible;
+                BluetoothScanIconOpen = Visibility.Collapsed;
+            }
+            else
+            {
+                //蓝牙扫描关闭
+                BluetoothScanIconClose = Visibility.Collapsed;
+                BluetoothScanIconOpen = Visibility.Visible;
+            }
+        }
+
+
+        #endregion
+
+        #region 蓝牙扫描和连接
+        /// <summary>
+        /// 打开蓝牙扫描(已打开则关闭蓝牙扫描)
+        /// </summary>
+        public async void openBluetoothScan()
+        {
+            if (BlueToothSettings.IsScanningOpen())//判断蓝牙扫描是否已打开
+            {
+                try
+                {
+                    AddLog("准备关闭蓝牙扫描");
+                    BlueToothSettings.StopScan();
+                    UpdateBluetoothState("扫描停止");
+                    ChangeBluetoothScanIcon(false);
+                    AddLog($"关闭蓝牙扫描成功");
+                }
+                catch (Exception)
+                {
+
+                }
+
+            }
+            else
+            {
+
+                try
+                {
+                    if (!await BlueToothSettings.IsOpenBL())
+                    {
+                        ChangeBluetoothScanIcon(false);
+                        BlueToothSettings.StopScan();
+                        return;
+                    }
+                    UpdateBluetoothState("正在扫描...");
+                    await BlueToothSettings.StartScanAsync();
+                    ChangeBluetoothScanIcon(true);
+                    AddLog($"打开蓝牙扫描成功");
+                }
+
+                finally
+                {
+                    BlueToothSettings.IsBusy = false;
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// 打开蓝牙(已打开则关闭蓝牙)
+        /// </summary>
+        public async void openBluetooth()
+        {
+            if (BlueToothSettings.IsConnected())//判断蓝牙连接是否已打开
+            {
+                try
+                {
+                    StopBackgroundThread();
+                    var WaitFinish = Task.Run(() =>
+                    {
+                        while (IsRunning)
+                        {
+                            // 添加短暂延迟避免CPU占用过高
+                            Task.Delay(30).Wait();
+                        }
+                    });
+                    //等待后台通讯停止（1s）
+                    await Task.WhenAny(WaitFinish, Task.Delay(1000));
+                    Administration = false;
+                    AddLog("准备关闭蓝牙通信");
+                    await BlueToothSettings.DisconnectAsync();
+                    ChangeBluetoothIcon(false);
+                    AddLog("蓝牙已关闭");
+                    bluetoothStateColor(false);
+                    AddLog($"关闭蓝牙{BlueToothSettings.getBluetoothName()}成功");
+                }
+                catch (Exception)
+                {
+                }
+                finally
+                {
+                    ChangeBluetoothIcon(false);
+                    bluetoothStateColor(false);
+                    IsRunning = false;
+                    BlueToothSettings.IsBusy = false;
+                    Administration = false;
+                }
+
+            }
+            else if (BlueToothSettings.IsBusy == false && BlueToothSettings.CanConnect)
+            {
+                if (BlueToothSettings.SelectedDevice == null)
+                {
+                    MessageBox.Show("请先选择设备！");
+                    return;
+                }
+                if (SerialCommunicationService.IsOpen())
+                {
+                    MessageBox.Show("请先关闭串口通信！");
+                    return;
+                }
+                if (BlueToothSettings.IsScanningOpen())
+                {
+                    AddLog("关闭蓝牙扫描");
+                    BlueToothSettings.StopScan();
+                    ChangeBluetoothScanIcon(false);
+                    await Task.Delay(300); // 等待扫描停止,释放资源
+                }
+                try
+                {
+                    AddLog("准备打开蓝牙");
+                    ChangeBluetoothIcon(true);
+                    UpdateBluetoothState("正在连接蓝牙");
+                    bool success = await BlueToothSettings.ConnectAsync();
+                    if (success)
+                    {
+                        bluetoothStateColor(true);
+                        UpdateBluetoothState("蓝牙已连接");
+                        (bool success, string machine) result = (false, string.Empty);
+                        for (int i = 0; i < 3; i++)
+                        {
+                            result = await AutoBluetoothSelectedMachineType();
+                            if (result.success) break;
+                            await Task.Delay(500); // 等待设备稳定
+                        }
+                        //自动识别机器
+                        if (!result.success)
+                        {
+                            UpdateBluetoothState("自动识别机型失败");
+                            await BlueToothSettings.DisconnectAsync();
+                            ChangeBluetoothIcon(false);
+                            bluetoothStateColor(false);
+                            IsRunning = false;
+                            return;
+                        }
+                        BlueToothSettings.IsBusy = false;
+                        AddLog($"打开蓝牙{BlueToothSettings.getBluetoothName()}成功");
+                        StartBluetoothBackgroundThread();
+                    }
+                    else
+                    {
+                        await BlueToothSettings.DisconnectAsync();
+                        ChangeBluetoothIcon(false);
+                        bluetoothStateColor(false);
+                        BlueToothSettings.IsBusy = false;
+                        AddLog($"打开蓝牙{BlueToothSettings.getBluetoothName()}失败");
+                    }
+
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+
+        }
+
+
+        #endregion
+
+        #region 蓝牙状态颜色
+        private Brush bluetoothStatus = Brushes.Red;
+        public Brush BluetoothStatus
+        {
+            get
+            {
+                return bluetoothStatus;
+            }
+            set
+            {
+                bluetoothStatus = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// 设置状态灯颜色
+        /// </summary>
+        /// <param name="flag"></param>
+        public void bluetoothStateColor(bool flag)
+        {
+            if (flag)
+            {
+                BluetoothStatus = Brushes.Green;
+            }
+            else
+            {
+                BluetoothStatus = Brushes.Red;
+            }
+        }
+        #endregion
+
+        #endregion
 
         #region 小标题选项
         public enum BatteryMode
@@ -500,6 +824,8 @@ namespace WpfApp1.ViewModels
         "HPVINV06",
         "HPVINV07",
         "HPVINV08",
+        "HPVINV09",
+        "HPVINV10",
         "LPVINV02",
         "UPSCYX01",
         "LB6",
@@ -561,6 +887,14 @@ namespace WpfApp1.ViewModels
                 case "HPVINV08":
                     ContentUC = new HPVINV08_MonitorUC();
                     SelectedMachineItem = "HPVINV08";
+                    break;
+                case "HPVINV09":
+                    ContentUC = new HPVINV09_MonitorUC();
+                    SelectedMachineItem = "HPVINV09";
+                    break;
+                case "HPVINV10":
+                    ContentUC = new HPVINV10_MonitorUC();
+                    SelectedMachineItem = "HPVINV10";
                     break;
                 case "UPSCYX01":
                     ContentUC = new CYJ_MonitorUC();
@@ -669,6 +1003,28 @@ namespace WpfApp1.ViewModels
                 else if (receive_MachineType.Substring(0, 9) == "(HPVINV08")
                 {
                     SwitchViewToVQorGB("HPVINV08");
+                    //默认设置抗干扰模式
+                    IsChecked = true;
+                    OnceOpenCRC = true;
+                    SerialCommunicationService.OpenReceiveCRC(true);
+                    //返回机器类型
+                    machine = receive_MachineType;
+                    return true;
+                }
+                else if (receive_MachineType.Substring(0, 9) == "(HPVINV09")
+                {
+                    SwitchViewToVQorGB("HPVINV09");
+                    //默认设置抗干扰模式
+                    IsChecked = true;
+                    OnceOpenCRC = true;
+                    SerialCommunicationService.OpenReceiveCRC(true);
+                    //返回机器类型
+                    machine = receive_MachineType;
+                    return true;
+                }
+                else if (receive_MachineType.Substring(0, 9) == "(HPVINV10")
+                {
+                    SwitchViewToVQorGB("HPVINV10");
                     //默认设置抗干扰模式
                     IsChecked = true;
                     OnceOpenCRC = true;
@@ -1204,7 +1560,52 @@ namespace WpfApp1.ViewModels
                 this.RaiseProperChanged(nameof(HOP_CG));
             }
         }
-        #endregion     
+        #endregion
+
+        #region HPVINV10指令ViewModel
+        private HSTS2_HPVINV10_ViewModel _HSTS2_HPVINV10;
+
+        public HSTS2_HPVINV10_ViewModel HSTS2_HPVINV10
+        {
+            get { return _HSTS2_HPVINV10; }
+            set
+            {
+                _HSTS2_HPVINV10 = value;
+                this.RaiseProperChanged(nameof(HSTS2_HPVINV10));
+            }
+        }
+        private HPV_HPVINV10_ViewModel _HPV_HPVINV10;
+
+        public HPV_HPVINV10_ViewModel HPV_HPVINV10
+        {
+            get { return _HPV_HPVINV10; }
+            set
+            {
+                _HPV_HPVINV10 = value;
+                this.RaiseProperChanged(nameof(HPV_HPVINV10));
+            }
+        }
+        private HTEMP_HPVINV10_ViewModel _HTEMP_HPVINV10;
+        public HTEMP_HPVINV10_ViewModel HTEMP_HPVINV10
+        {
+            get { return _HTEMP_HPVINV10; }
+            set
+            {
+                _HTEMP_HPVINV10 = value;
+                this.RaiseProperChanged(nameof(HTEMP_HPVINV10));
+            }
+        }
+        private HBAT_HPVINV10_ViewModel _HBAT_HPVINV10;
+        public HBAT_HPVINV10_ViewModel HBAT_HPVINV10
+        {
+            get { return _HBAT_HPVINV10; }
+            set
+            {
+                _HBAT_HPVINV10 = value;
+                this.RaiseProperChanged(nameof(HBAT_HPVINV10));
+            }
+        }
+        #endregion
 
         #region 串口工具
 
@@ -1344,7 +1745,11 @@ namespace WpfApp1.ViewModels
             {
                 // 先重新配置串口参数（确保使用最新的设置）
                 ReconfigureSerialPort();
-
+                if(BlueToothSettings.IsConnected())
+                {
+                    MessageBox.Show("请先断开蓝牙！");
+                    return;
+                }
                 // 尝试打开串口
                 if (!SerialCommunicationService.OpenCom())
                 {
@@ -1387,7 +1792,7 @@ namespace WpfApp1.ViewModels
         /// <summary>
         /// 内容窗口
         /// </summary>
-        private UserControl contentUC;
+        private UserControl? contentUC;
         public UserControl ContentUC
         {
             get
@@ -1571,7 +1976,7 @@ namespace WpfApp1.ViewModels
         }
         #endregion
 
-        #region 后台通讯线程
+        #region 串口后台通讯线程
         private CancellationTokenSource _cts = new CancellationTokenSource();//取消线程专用
         private ManualResetEventSlim _pauseEvent = new ManualResetEventSlim(true);//暂停线程专用
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1); // 异步竞争
@@ -1672,7 +2077,6 @@ namespace WpfApp1.ViewModels
         // 命令定义
         public ICommand StartCommand { get; }
         public ICommand StopCommand { get; }
-        //public ICommand ExecuteSpecialCommand { get; }
         public ICommand OpenCom { get; }
 
         /// <summary>
@@ -1753,6 +2157,16 @@ namespace WpfApp1.ViewModels
                     {
                         //HPVINV08通讯
                         CommunicationWithGB_HPVINV08(token);
+                    }
+                    else if (SelectedMachineItem == "HPVINV09")
+                    {
+                        //HPVINV09通讯
+                        CommunicationWithGB_HPVINV09(token);
+                    }
+                    else if (SelectedMachineItem == "HPVINV10")
+                    {
+                        //HPVINV10通讯
+                        CommunicationWithGB_HPVINV10(token);
                     }
                     else if (SelectedMachineItem == "UPSCYX01")
                     {
@@ -1845,7 +2259,7 @@ namespace WpfApp1.ViewModels
 
         #endregion
 
-        #region 通讯实现方法
+        #region 串口通讯实现方法
 
         /// <summary>
         /// 异常解析显示
@@ -2952,6 +3366,538 @@ namespace WpfApp1.ViewModels
         }
         #endregion
 
+        #region HPVINV09通讯
+        /// <summary>
+        /// HPVINV09通讯
+        /// </summary>
+        /// <param name="token"></param>
+        private void CommunicationWithGB_HPVINV09(CancellationToken token)
+        {
+
+            string receive = "";
+
+            Thread.Sleep(100);
+            //判断是否开启CRC接收校验（抗干扰 默认开启
+            if (IsChecked)
+            {
+                //发送HOSTCRCEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "EN");
+                ShowError(receive, "HOSTCRC");
+            }
+            else if (OnceOpenCRC)
+            {
+                //发送HOSTCRDEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "DN");
+                OnceOpenCRC = false;
+                IsChecked = false;
+                SerialCommunicationService.OpenReceiveCRC(false);
+            }
+
+            //获取机器型号
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
+            MachineType = receive_MachineType.Substring(1, 8);
+            SerialCommunicationService.MachineType = receive_MachineType;
+
+            //发送HSTS2指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token); // 等待暂停或取消信号
+            receive = SerialCommunicationService.SendCommand(HSTS2_HPVINV08.Command, 40);
+            HSTS2_HPVINV08.AnalyseStringToElement(receive);
+
+
+            //发送HBMS1指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token); // 等待暂停或取消信号
+            receive = SerialCommunicationService.SendCommand(HBMS1_VQ.Command, 70);
+            HBMS1_VQ.AnalysisStringToElement(receive);
+
+
+            //发送HEEP1指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token); // 等待暂停或取消信号
+            receive = SerialCommunicationService.SendCommand(HEEP1_HPVINV02.Command, 80);
+            HEEP1_HPVINV02.AnalyseStringToElement(receive);
+
+
+            //发送HEEP2指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token); // 等待暂停或取消信号
+            receive = SerialCommunicationService.SendCommand(HEEP2.Command, 80);
+            HEEP2.AnalyseStringToElement(receive);
+
+
+            //发送HEEP3_PDF指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token); // 等待暂停或取消信号
+            receive = SerialCommunicationService.SendCommand(HEEP3_PDF.Command, 80);
+            HEEP3_PDF.AnalysisStringToElement(receive);
+
+            //发送HOP指令
+            Thread.Sleep(100);
+            // 等待暂停或取消信号
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HOP_PDF.Command, 50);
+            //解析返回命令
+            HOP_PDF.AnalysisStringToElement(receive);
+            //逆变百分比
+            InvTotalPwr = StringToIntConversion(HOP_PDF.LoadPercent);
+
+            //发送HPV指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HPV_PDF.Command, 50);
+            HPV_PDF.AnalysisStringToElement(receive);
+            //MPPT百分比
+            MPPTTotalPwr = CountPercent(HPV_PDF.PVPwr, HIGSG2_PDF.MPPTTotalPwr);
+
+            //发送HIMSG2N指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HIGSG2_PDF.Command, 50);
+            HIGSG2_PDF.AnalysisStringToElement(receive);
+
+
+            //发送HGRID指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HGRID_GB.Command, 50);
+            //解析返回命令
+            HGRID_GB.AnalyseStringToElement(receive);
+            //显示
+            ACPowerVM = StringToIntConversion(HGRID_GB.ACPower);
+            //市电百分比
+            ACTotalPwr = CountPercent(HGRID_GB.ACPower, HIGSG2_PDF.ACTotalPwr);
+
+
+            //发送HTEMP指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HTEMP_PDF.Command, 50);
+            HTEMP_PDF.AnalysisStringToElement(receive);
+
+
+            //发送HBAT指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HBAT_VQ.Command, 50);
+            HBAT_VQ.AnalysisStringToElement(receive);
+            BattPercent = StringToIntConversion(HBAT_VQ.BattCapacity);
+
+
+            //发送HIMSG1指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HIMSG1.Command, 21);
+            HIMSG1.AnalysisStringToElement(receive);
+
+
+            //发送HGEN指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HGEN.Command, 60);
+            HGEN.AnalyseStringToElement(receive);
+
+
+            //发送HSTS指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HSTS_GB.Command, 40);
+            HSTS_GB.AnalyseStringToElement(receive);
+
+
+            //发送HPV指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HPV_PDF.Command, 50);
+            HPV_PDF.AnalysisStringToElement(receive);
+
+
+            //发送HPVB指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HPVB_GB.Command, 50);
+            HPVB_GB.AnalysisStringToElement(receive);
+
+            //发送HCTMSG1指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HCTMSG1_PDF.Command, 80);
+            HCTMSG1_PDF.AnalysisStringToElement(receive);
+            ShowError(receive, "HCTMSG1");
+
+
+            //机器型号
+            MachineModel = StringToIntConversion(HOP_PDF.RatedPwr) + StringToIntConversion(HBAT_VQ.BattCells) * 12;
+
+            //数据
+            var Common_Data = new Common_Data
+            {
+                DataNow = DateTime.Now,//日期
+
+                MainsVoltage = HGRID_GB.MainsVoltage,//市电电压
+                MainsFrequency = HGRID_GB.MainsFrequency,//市电频率
+                ACPower = HGRID_GB.ACPower,//市电功率
+
+                OutVolt = HOP_PDF.OutVolt,//输出电压
+                OutFreq = HOP_PDF.OutFreq,//输出频率
+                ApparentPwr = HOP_PDF.ApparentPwr,//视在功率
+                ActivePwr = HOP_PDF.ActivePwr,//有功功率
+                LoadPercent = HOP_PDF.LoadPercent,//负载百分比
+                ZeroAdjPwr = HEEP3_PDF.ZeroAdjPwr,//调零功率
+                CTCurr = HCTMSG1_PDF.CTCurr,//CT电流
+                CTPwr = HCTMSG1_PDF.CTPwr,//CT功率
+
+                PVVolt = HPV_PDF.PVVolt,//PV电压
+                PVPwr = HPV_PDF.PVPwr,//PV功率
+                PVCurr = HPV_PDF.PVCurr,//PV电流
+                TotalGen = HGEN.TotalGen,//总发电量
+                DailyGen = HGEN.DailyGen,//日发电量
+                MonthlyGen = HGEN.MonthlyGen,//月发电量
+                AnnualGen = HGEN.AnnualGen,//年发电量
+
+                BattVolt = HBAT_VQ.BattVolt,//电池电压
+                BatCurr = HBAT_VQ.BatCurr, //电池电流
+                BattCapacity = HBAT_VQ.BattCapacity,//电池容量
+                BusVolt = HBAT_VQ.BusVolt, //母线电压
+
+                ProtocolType = HBMS1_VQ.ProtocolType,//协议类型
+                BMS_ComOK = HBMS1_VQ.BMS_ComOK,//BMS通信正常
+                BMS_LowBattAlarm = HBMS1_VQ.BMS_LowBattAlarm,//BMS低电报警
+                BMS_LowBattFault = HBMS1_VQ.BMS_LowBattFault,//BMS低电故障
+                BMS_ChgEnable = HBMS1_VQ.BMS_ChgEnable,//BMS允许充电
+                BMS_DisEnable = HBMS1_VQ.BMS_DisEnable,//BMS允许放电
+                BMS_ChgOC = HBMS1_VQ.BMS_ChgOC,//BMS充电过流
+                BMS_DisOC = HBMS1_VQ.BMS_DisOC,//BMS放电过流
+                BMS_UnderTemp = HBMS1_VQ.BMS_UnderTemp,//BMS温度过低
+                BMS_OverTemp = HBMS1_VQ.BMS_OverTemp,//BMS温度过高
+                BMS_AvgTemp = HBMS1_VQ.BMS_AvgTemp,//BMS平均温度
+                BMS_ChgCurrLimit = HBMS1_VQ.BMS_ChgCurrLimit,//BMS充电电流限制
+                BMS_SOC = HBMS1_VQ.BMS_SOC,//BMS当前SOC
+                BMS_ChgVoltLimit = HBMS1_VQ.BMS_ChgVoltLimit,//BMS充电电压限制
+                BMS_DisVoltLimit = HBMS1_VQ.BMS_DisVoltLimit,//BMS放电电压限制
+
+                FaultCode = HSTS_GB.FaultCode,//故障代码
+                PVTemp = HTEMP_PDF.PVTemp,//PV温度
+                InvTemp = HTEMP_PDF.InvTemp,//逆变温度
+                BoostTemp = HTEMP_PDF.BoostTemp,//升压温度
+                XfmrTemp = HTEMP_PDF.XfmrTemp,//变压器温度
+                MaxTemp = HTEMP_PDF.MaxTemp,//当前最高温度
+                FanSpeed = HTEMP_PDF.FanSpeed,//风扇转速
+                FanEnable = HTEMP_PDF.FanEnable,//风扇使能
+                Mode = HSTS_GB.Mode,//模式
+                PVToLoadAC = HSTS_GB.PVToLoadAC,//AC状态下PV馈能到负载
+                OutputStatus = HSTS_GB.OutputStatus,//机器是否有输出
+                BattLowAlarm = HSTS_GB.BattLowAlarm,//电池低电报警
+                BattDisconnected = HSTS_GB.BattDisconnected,//电池未接
+                OutputOverload = HSTS_GB.OutputOverload,//输出过载
+                OverTemp = HSTS_GB.OverTemp,//机器过温
+                EEPROM_DataErr = HSTS_GB.EEPROM_DataErr,//EEPROM数据异常
+                EEPROM_IOErr = HSTS_GB.EEPROM_IOErr,//EEPROM读写异常
+                PVLowPwrFault = HSTS_GB.PVLowPwrFault,//PV功率过低异常
+                InputOV = HSTS_GB.InputOV,//输入电压过高
+                BattOV = HSTS_GB.BattOV,//电池电压过高
+                FanSpeedFault = HSTS_GB.FanSpeedFault,//风扇转速异常
+                ParallelUnits = HSTS_GB.ParallelUnits,//并机系统里机器的总数
+                GridTieFlag = HSTS_GB.GridTieFlag,//并网标志
+                ParallelRole = HSTS_GB.ParallelRole,//并机系统中角色
+                MainRelayStat = HSTS_GB.MainRelayStat,//主输出继电器状态
+                SecOutStat = HSTS_GB.SecOutStat,//第二输出当前状态
+                BMS_ComFault = HSTS_GB.BMS_ComFault,//BMS通讯异常
+                TempSensorFault = HSTS_GB.TempSensorFault,//温度传感器异常
+                ACLED = HSTS_GB.ACLED,//市电灯状态
+                InvLED = HSTS_GB.InvLED,//逆变灯状态
+                ChgLED = HSTS_GB.ChgLED,//充电灯状态
+                AlarmLED = HSTS_GB.AlarmLED,//报警灯状态
+                InvStatus = HSTS2_HPVINV08.InvStatus,//逆变器工作状态
+                PVVoltStatus = HSTS2_HPVINV08.PVVoltStatus,//PV电压状态
+                InvBridgeStatus = HSTS2_HPVINV08.InvBridgeStatus,//逆变桥状态
+                MPPTStatus = HSTS2_HPVINV08.MPPTStatus,//MPPT状态
+                PLLStatus = HSTS2_HPVINV08.PLLStatus//锁相环状态
+            };
+
+            // 最新在最前
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+
+                if (DR_Monitor.IsSaving && DR_Monitor._savePath != null)
+                {
+                    DR_Monitor.SaveToExcel(Common_Data);
+                }
+
+            });
+        }
+        #endregion
+
+        #region HPVINV10通讯
+        /// <summary>
+        /// HPVINV10通讯
+        /// </summary>
+        /// <param name="token"></param>
+        private void CommunicationWithGB_HPVINV10(CancellationToken token)
+        {
+
+            string receive = "";
+
+            Thread.Sleep(100);
+            //判断是否开启CRC接收校验（抗干扰 默认开启
+            if (IsChecked)
+            {
+                //发送HOSTCRCEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "EN");
+                ShowError(receive, "HOSTCRC");
+            }
+            else if (OnceOpenCRC)
+            {
+                //发送HOSTCRDEN指令
+                _pauseEvent.Wait(token);
+                receive = SerialCommunicationService.SendSettingCommand("HOSTCRC", "DN");
+                OnceOpenCRC = false;
+                IsChecked = false;
+                SerialCommunicationService.OpenReceiveCRC(false);
+            }
+
+            //获取机器型号
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
+            MachineType = receive_MachineType.Substring(1, 8);
+            SerialCommunicationService.MachineType = receive_MachineType;
+
+            //发送HSTS2指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token); // 等待暂停或取消信号
+            receive = SerialCommunicationService.SendCommand(HSTS2_HPVINV10.Command, 40);
+            HSTS2_HPVINV10.AnalyseStringToElement(receive);
+
+
+            //发送HBMS1指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token); // 等待暂停或取消信号
+            receive = SerialCommunicationService.SendCommand(HBMS1_VQ.Command, 70);
+            HBMS1_VQ.AnalysisStringToElement(receive);
+
+
+            //发送HEEP1指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token); // 等待暂停或取消信号
+            receive = SerialCommunicationService.SendCommand(HEEP1_HPVINV02.Command, 80);
+            HEEP1_HPVINV02.AnalyseStringToElement(receive);
+
+
+            //发送HEEP2指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token); // 等待暂停或取消信号
+            receive = SerialCommunicationService.SendCommand(HEEP2.Command, 80);
+            HEEP2.AnalyseStringToElement(receive);
+
+
+            //发送HEEP3_PDF指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token); // 等待暂停或取消信号
+            receive = SerialCommunicationService.SendCommand(HEEP3_PDF.Command, 80);
+            HEEP3_PDF.AnalysisStringToElement(receive);
+
+            //发送HOP指令
+            Thread.Sleep(100);
+            // 等待暂停或取消信号
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HOP_PDF.Command, 50);
+            //解析返回命令
+            HOP_PDF.AnalysisStringToElement(receive);
+            //逆变百分比
+            InvTotalPwr = StringToIntConversion(HOP_PDF.LoadPercent);
+
+            //发送HPV指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HPV_HPVINV10.Command, 50);
+            HPV_HPVINV10.AnalysisStringToElement(receive);
+            //MPPTA百分比
+            MPPTTotalPwr = CountPercent(HPV_HPVINV10.PVAPwr, HIGSG2_PDF.MPPTTotalPwr);
+
+            //发送HGRID指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HGRID_GB.Command, 50);
+            //解析返回命令
+            HGRID_GB.AnalyseStringToElement(receive);
+            //显示
+            ACPowerVM = StringToIntConversion(HGRID_GB.ACPower);
+            //市电百分比
+            ACTotalPwr = CountPercent(HGRID_GB.ACPower, HIGSG2_PDF.ACTotalPwr);
+
+
+            //发送HTEMP指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HTEMP_HPVINV10.Command, 50);
+            HTEMP_HPVINV10.AnalysisStringToElement(receive);
+
+
+            //发送HBAT指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HBAT_HPVINV10.Command, 50);
+            HBAT_HPVINV10.AnalysisStringToElement(receive);
+            BattPercent = StringToIntConversion(HBAT_HPVINV10.BattCapacity);
+
+
+            //发送HIMSG1指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HIMSG1.Command, 21);
+            HIMSG1.AnalysisStringToElement(receive);
+
+
+            //发送HGEN指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HGEN.Command, 60);
+            HGEN.AnalyseStringToElement(receive);
+
+
+            //发送HSTS指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HSTS_GB.Command, 40);
+            HSTS_GB.AnalyseStringToElement(receive);
+
+
+            //发送HPV指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HPV_HPVINV10.Command, 50);
+            HPV_HPVINV10.AnalysisStringToElement(receive);
+
+
+            //发送HCTMSG1指令
+            Thread.Sleep(100);
+            _pauseEvent.Wait(token);
+            receive = SerialCommunicationService.SendCommand(HCTMSG1_PDF.Command, 80);
+            HCTMSG1_PDF.AnalysisStringToElement(receive);
+            ShowError(receive, "HCTMSG1");
+
+
+            //机器型号
+            MachineModel = StringToIntConversion(HOP_PDF.RatedPwr) + StringToIntConversion(HBAT_HPVINV10.BattCells) * 12;
+
+            //数据
+            var Common_Data = new Common_Data
+            {
+                DataNow = DateTime.Now,//日期
+
+                MainsVoltage = HGRID_GB.MainsVoltage,//市电电压
+                MainsFrequency = HGRID_GB.MainsFrequency,//市电频率
+                ACPower = HGRID_GB.ACPower,//市电功率
+
+                OutVolt = HOP_PDF.OutVolt,//输出电压
+                OutFreq = HOP_PDF.OutFreq,//输出频率
+                ApparentPwr = HOP_PDF.ApparentPwr,//视在功率
+                ActivePwr = HOP_PDF.ActivePwr,//有功功率
+                LoadPercent = HOP_PDF.LoadPercent,//负载百分比
+                ZeroAdjPwr = HEEP3_PDF.ZeroAdjPwr,//调零功率
+                CTCurr = HCTMSG1_PDF.CTCurr,//CT电流
+                CTPwr = HCTMSG1_PDF.CTPwr,//CT功率
+
+                PVVolt = HPV_HPVINV10.PVAVolt,//PVA路电压
+                PVPwr = HPV_HPVINV10.PVAPwr,//PVA路功率
+                PVCurr = HPV_HPVINV10.PVACurr,//PVA路电流
+                PVVolt2 = HPV_HPVINV10.PVBVolt,//PVB路电压
+                PVPwr2 = HPV_HPVINV10.PVBPwr,//PVB路功率
+                PVCurr2 = HPV_HPVINV10.PVBCurr,//PVB路电流
+                TotalGen = HGEN.TotalGen,//总发电量
+                DailyGen = HGEN.DailyGen,//日发电量
+                MonthlyGen = HGEN.MonthlyGen,//月发电量
+                AnnualGen = HGEN.AnnualGen,//年发电量
+
+                BattVolt = HBAT_HPVINV10.BattVolt,//电池电压
+                BatCurr = HBAT_HPVINV10.BatCurr, //电池电流
+                BattCells = HBAT_HPVINV10.BattCells,//电池节数
+                BattCapacity = HBAT_HPVINV10.BattCapacity,//电池容量
+                BatPwr = HBAT_HPVINV10.BatPwr,//电池功率
+                BusVolt = HBAT_HPVINV10.BusVolt, //母线电压
+
+                ProtocolType = HBMS1_VQ.ProtocolType,//协议类型
+                BMS_ComOK = HBMS1_VQ.BMS_ComOK,//BMS通信正常
+                BMS_LowBattAlarm = HBMS1_VQ.BMS_LowBattAlarm,//BMS低电报警
+                BMS_LowBattFault = HBMS1_VQ.BMS_LowBattFault,//BMS低电故障
+                BMS_ChgEnable = HBMS1_VQ.BMS_ChgEnable,//BMS允许充电
+                BMS_DisEnable = HBMS1_VQ.BMS_DisEnable,//BMS允许放电
+                BMS_ChgOC = HBMS1_VQ.BMS_ChgOC,//BMS充电过流
+                BMS_DisOC = HBMS1_VQ.BMS_DisOC,//BMS放电过流
+                BMS_UnderTemp = HBMS1_VQ.BMS_UnderTemp,//BMS温度过低
+                BMS_OverTemp = HBMS1_VQ.BMS_OverTemp,//BMS温度过高
+                BMS_AvgTemp = HBMS1_VQ.BMS_AvgTemp,//BMS平均温度
+                BMS_ChgCurrLimit = HBMS1_VQ.BMS_ChgCurrLimit,//BMS充电电流限制
+                BMS_SOC = HBMS1_VQ.BMS_SOC,//BMS当前SOC
+                BMS_ChgVoltLimit = HBMS1_VQ.BMS_ChgVoltLimit,//BMS充电电压限制
+                BMS_DisVoltLimit = HBMS1_VQ.BMS_DisVoltLimit,//BMS放电电压限制
+
+                FaultCode = HSTS_GB.FaultCode,//故障代码
+                PVTemp = HTEMP_HPVINV10.PVTemp,//PV温度
+                InvTemp = HTEMP_HPVINV10.InvTemp,//逆变温度
+                BoostTemp = HTEMP_HPVINV10.BoostTemp,//升压温度
+                RectificationTemp = HTEMP_HPVINV10.RectificationTemp,//整流温度
+                XfmrTemp = HTEMP_HPVINV10.XfmrTemp,//变压器温度
+                MaxTemp = HTEMP_HPVINV10.MaxTemp,//当前最高温度
+                FanSpeed = HTEMP_HPVINV10.FanSpeed,//风扇转速
+                FanEnable = HTEMP_HPVINV10.Fan1Enable,//风扇1使能
+                Fan2Enable = HTEMP_HPVINV10.Fan2Enable,//风扇2使能
+                Mode = HSTS_GB.Mode,//模式
+                PVToLoadAC = HSTS_GB.PVToLoadAC,//AC状态下PV馈能到负载
+                OutputStatus = HSTS_GB.OutputStatus,//机器是否有输出
+                BattLowAlarm = HSTS_GB.BattLowAlarm,//电池低电报警
+                BattDisconnected = HSTS_GB.BattDisconnected,//电池未接
+                OutputOverload = HSTS_GB.OutputOverload,//输出过载
+                OverTemp = HSTS_GB.OverTemp,//机器过温
+                PVLowPwrFault = HSTS_GB.PVLowPwrFault,//PV功率过低异常
+                InputOV = HSTS_GB.InputOV,//输入电压过高
+                BattOV = HSTS_GB.BattOV,//电池电压过高
+                FanSpeedFault = HSTS_GB.FanSpeedFault,//风扇转速异常
+                ParallelUnits = HSTS_GB.ParallelUnits,//并机系统里机器的总数
+                GridTieFlag = HSTS_GB.GridTieFlag,//并网标志
+                ParallelRole = HSTS_GB.ParallelRole,//并机系统中角色
+                MainRelayStat = HSTS_GB.MainRelayStat,//主输出继电器状态
+                SecOutStat = HSTS_GB.SecOutStat,//第二输出当前状态
+                BMS_ComFault = HSTS_GB.BMS_ComFault,//BMS通讯异常
+                TempSensorFault = HSTS_GB.TempSensorFault,//温度传感器异常
+                ACLED = HSTS_GB.ACLED,//市电灯状态
+                InvLED = HSTS_GB.InvLED,//逆变灯状态
+                ChgLED = HSTS_GB.ChgLED,//充电灯状态
+                AlarmLED = HSTS_GB.AlarmLED,//报警灯状态
+                InvStatus = HSTS2_HPVINV10.InvStatus,//逆变器工作状态
+                PVVoltStatus = HSTS2_HPVINV10.PVVoltStatus,//A路PV电压状态
+                InvBridgeStatus = HSTS2_HPVINV10.InvBridgeStatus,//逆变桥状态
+                MPPTStatus = HSTS2_HPVINV10.MPPTStatus,//A路MPPT状态
+                PLLStatus = HSTS2_HPVINV10.PLLStatus,//锁相环状态
+                ChargeCurrentLimitFlag = HSTS2_HPVINV10.ChargeCurrentLimitFlag,//充电电流限制标志
+                ACCouplingCurrentLimitFlag = HSTS2_HPVINV10.ACCouplingCurrentLimitFlag,//市电耦合电流限制标志
+                MPPTCurrentLimitFlag = HSTS2_HPVINV10.MPPTCurrentLimitFlag,//MPPT限制标志
+                BatteryDischargeCurrentLimitFlag = HSTS2_HPVINV10.BatteryDischargeCurrentLimitFlag,//电池放电限流标志
+                BPhotovoltaicVoltageStatus = HSTS2_HPVINV10.BPhotovoltaicVoltageStatus,//B路PV电压状态
+                BMPPTStatus = HSTS2_HPVINV10.BMPPTStatus,//B路MPPT状态
+                CurrentSecondOutputRemoteControlStatus = HSTS2_HPVINV10.CurrentSecondOutputRemoteControlStatus,//当前第二输出远程控制状态
+                CurrentALLOutputRemoteControlStatus = HSTS2_HPVINV10.CurrentALLOutputRemoteControlStatus,//当前所有输出远程控制状态
+            };
+
+            // 最新在最前
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+
+                if (DR_Monitor.IsSaving && DR_Monitor._savePath != null)
+                {
+                    DR_Monitor.SaveToExcel(Common_Data);
+                }
+
+            });
+        }
+        #endregion
+
         #region GB6042通讯(HPVINV06)
         /// <summary>
         /// GB6042通讯(HPVINV06)
@@ -3624,7 +4570,6 @@ namespace WpfApp1.ViewModels
         /// <param name="token"></param>
         private void CommunicationWithBMS02(CancellationToken token)
         {
-
             byte[] receive; // 接收到的原始字节数据
             short[] data; // 解析后的寄存器数据（16位整数数组）
 
@@ -3736,7 +4681,7 @@ namespace WpfApp1.ViewModels
                 _pauseEvent.Wait(token);
                 //读写入的参数设置值
                 Thread.Sleep(300);
-                // 读取系统设置（寄存器297，6个寄存器）
+                // 读取蓝牙地址（寄存器297，6个寄存器）
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 297, 6), 17);
                 data = ModbusRTU.ParseRead03Response(receive);
                 BMS_Setting.ReadBuleTooth(data);
@@ -3800,7 +4745,7 @@ namespace WpfApp1.ViewModels
                 _pauseEvent.Wait(token);
                 //读写入的参数设置值
                 Thread.Sleep(300);
-                // 读取系统设置（寄存器297，6个寄存器）
+                // 读取蓝牙地址（寄存器297，6个寄存器）
                 receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 297, 6), 17);
                 data = ModbusRTU.ParseRead03Response(receive);
                 BMS_Setting.ReadBuleTooth(data);
@@ -3821,7 +4766,6 @@ namespace WpfApp1.ViewModels
                 }
                 Thread.Sleep(500);
             }
-
             // 模式5：实时监控模式（读取数据并保存到列表和Excel）
             else if (SelectedMode == BatteryMode .Mode5)     //实时监控
             {
@@ -3960,7 +4904,6 @@ namespace WpfApp1.ViewModels
                         RT_Monitor.SaveToExcel(polling);
                 });
             }
-
         }
         #endregion
 
@@ -3983,9 +4926,12 @@ namespace WpfApp1.ViewModels
                 //发送查询机器指令
                 string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
                 if (receive_MachineType != null && receive_MachineType.Length == 10)
+                {
                     MachineType = receive_MachineType.Substring(1, 8);
-                //解析指令
-                SerialCommunicationService.MachineType = receive_MachineType;
+                    //解析指令
+                    SerialCommunicationService.MachineType = receive_MachineType;
+                }
+
 
                 //首界面设置状态显示
                 // 等待暂停或取消信号
@@ -4316,7 +5262,7 @@ namespace WpfApp1.ViewModels
 
         #region BMS03通讯
         /// <summary>
-        /// BMS01通讯
+        /// BMS03通讯
         /// </summary>
         /// <param name="token"></param>
         private void CommunicationWithBMS03(CancellationToken token)
@@ -4333,9 +5279,12 @@ namespace WpfApp1.ViewModels
                 //发送查询机器指令
                 string receive_MachineType = SerialCommunicationService.SendCommand(SpecialCommand.QueryMachineType, 10);
                 if (receive_MachineType != null && receive_MachineType.Length == 10)
+                {
                     MachineType = receive_MachineType.Substring(1, 8);
-                //解析指令
-                SerialCommunicationService.MachineType = receive_MachineType;
+                    //解析指令
+                    SerialCommunicationService.MachineType = receive_MachineType;
+                }
+
 
                 //首界面设置状态显示
                 // 等待暂停或取消信号
@@ -4711,6 +5660,672 @@ namespace WpfApp1.ViewModels
             _cts.Cancel();
             AddLog("后台通信停止请求已发送");
         }
+        #endregion
+
+        #region 蓝牙后台通讯线程
+        //定义蓝牙命令
+        public ICommand StartBluetoothBackgroundCommand { get; }
+        public ICommand OpenBluetoothScan { get; }
+        public ICommand OpenBluetooth { get; }
+        //状态栏更新
+        public void UpdateBluetoothState(string state)
+        {
+            BlueToothSettings.StatusMessage = state;
+        }
+
+        /// <summary>
+        /// 自动获取机型(蓝牙)
+        /// </summary>
+        private async Task<(bool success, string machine)> AutoBluetoothSelectedMachineType()
+        {
+            string receive_MachineType = await BlueToothSettings.SendBluetoothData(SpecialCommand.QueryMachineType, 10);
+            if (receive_MachineType.Length >= 2 && receive_MachineType.StartsWith("-1"))
+            {
+                //判断抗干扰是否打开
+                if (IsChecked)
+                {
+                    IsChecked = false;
+                    OnceOpenCRC = false;
+                    SerialCommunicationService.OpenReceiveCRC(false);
+                    receive_MachineType = await BlueToothSettings.SendBluetoothData(SpecialCommand.QueryMachineType, 10);
+                }
+            }
+
+            SerialCommunicationService.MachineType = receive_MachineType;
+            if (receive_MachineType.Length >= 9 && (receive_MachineType.Substring(0, 9) == "(BMS00002"))
+            {
+                SwitchViewToVQorGB("BMS02");
+                //返回机器类型
+                return (true, receive_MachineType);
+            }
+            else
+            {
+                return (false, receive_MachineType);
+            }
+        }
+
+        /// <summary>
+        /// 启动蓝牙后台通信线程
+        /// </summary>
+        private void StartBluetoothBackgroundThread()
+        {
+
+            if (!BlueToothSettings.IsConnected())
+            {
+                MessageBox.Show(App.GetText("请先连接蓝牙设备!"), "提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            if (IsRunning) { return; }
+
+            IsRunning = true;
+            _cts = new CancellationTokenSource();
+            UpdateBluetoothState("正在通信");
+            Task.Run(() => BluetoothBackgroundWorker(_cts.Token), _cts.Token);
+            AddLog("后台通信线程已启动");
+        }
+
+        private async Task BluetoothBackgroundWorker(CancellationToken token)
+        {
+            flag = 0;//初始设置值
+            try
+            {
+                if (SelectedMachineItem == "BMS01")
+                {
+                    //补丁，BMS01时单位稍作修改
+                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings("default2.xml"));
+                }
+                else if (SelectedMachineItem == "BMS03")
+                {
+                    //补丁，BMS03时单位稍作修改
+                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings("default3.xml"));
+                }
+                else
+                    ModbusRTU.FirstSetReceive_Enum(BMS_Setting.SendingCommands, BMS_Setting.LoadSettings("default.xml"));
+                //COM通讯
+                while (!token.IsCancellationRequested)//检查是否请求取消
+                {
+                    if (SelectedMachineItem == "BMS02")
+                    {
+                        //唤醒休眠
+                        if (BMS_Setting.isSleeping == 0 && BMS_Setting.SettingStatue[4] == 1)
+                        {
+                            await Task.Delay(1000, token);
+                            byte[] rec = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead20Frame(1, 10, 0), 8);
+                            if (rec.Length == 8)
+                            {
+                                BMS_Setting.SettingStatue[4] = 0;
+                            }
+                            continue;
+                        }
+                        //BMS02通讯
+                         await BlueToothCommunicationWithBMS02(token);
+                    }
+                    // 模拟常规通信
+                    await Task.Delay(100, token);
+                    AddLog($"[后台] 常规通信: {DateTime.Now:HH:mm:ss.fff}");
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                AddLog("后台通信已终止");
+                UpdateBluetoothState("已停止通信!");
+                IsRunning = false;
+            }
+            catch (Exception ex)
+            {
+                string mes = ex.ToString();
+                AddLog($"后台通信异常{mes}");
+                UpdateBluetoothState("异常!");
+                //关闭蓝牙
+                await BlueToothSettings.DisconnectAsync();
+            }
+            finally
+            {
+                IsRunning = false;
+                ChangeBluetoothIcon(false);
+                bluetoothStateColor(false);
+                BlueToothSettings.IsBusy = false;
+            }
+
+        }
+        #endregion
+
+        #region 蓝牙通讯实现方法
+
+        #region BMS02通讯
+
+        /// <summary>
+        /// BMS02通讯
+        /// </summary>
+        /// <param name="token"></param>
+        private async Task BlueToothCommunicationWithBMS02(CancellationToken token)
+        {
+            byte[] receive; // 接收到的原始字节数据
+            short[] data; // 解析后的寄存器数据（16位整数数组）
+            // 模式1：读取BMS基本信息和状态
+            if (SelectedMode == BatteryMode.Mode1)
+            {
+                // 等待暂停或取消信号（支持暂停/恢复机制）
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                // 发送查询机器类型指令
+                try
+                {
+                    string receive_MachineType = await BlueToothSettings.SendBluetoothData(SpecialCommand.QueryMachineType, 10);
+                    if (receive_MachineType != null && receive_MachineType.Length == 10)
+                    {
+                        MachineType = receive_MachineType.Substring(1, 8);
+                        SerialCommunicationService.MachineType = receive_MachineType;
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+
+                //首界面设置状态显示
+                // 等待暂停或取消信号 
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                //读写入的参数设置值(充电MOS、放电MOS、关机、休眠)
+                try
+                {
+                    // 构建读取指令：从站地址=1, 读取寄存器120-121（强制开关和强制均衡）
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 120, 2), 9);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    if (data != null && data.Length >= 2)
+                    {
+                        // 将16位寄存器值转换为位数组（每个位代表一个状态标志）
+                        BMS_Setting.SettingStatue = ModbusRTU.GetBits(data[0]);// 设置状态
+                        BMS_Setting.JunHen = ModbusRTU.GetBits(data[1]); // 均衡状态
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                // 等待暂停或取消信号 
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                //读取电芯数量和温度传感器数量
+                try
+                {
+                    // 读取寄存器250-251（电芯数量和NTC数量）
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 250, 2), 9);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    if (data != null && data.Length == 2)
+                    {
+                        BMS_Setting.CellNum = data[0];// 电芯数量
+                        BMS_Setting.NtcNum = data[1];// 温度传感器数量
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+
+                // 等待暂停或取消信号 
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                //读取16个电芯的电压
+                try
+                {
+                    //读取寄存器2-17 查16个电芯的电压
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 2, 16), 37);
+                    //解析返回的报文
+                    BMS_VM.MOD_CELL1_VOL_1_16(ModbusRTU.ParseRead03Response(receive));
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                // 等待暂停或取消信号 
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                //读取状态码(83)
+                try
+                {
+                    // 读取寄存器80-84
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 80, 5), 15);
+                    //解析返回的报文
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    if (data != null)
+                    {
+                        // 第4个寄存器（索引3）为设备状态，转换为位数组
+                        BMS_VM.MOD_INST_STATE_Set(ModbusRTU.GetBits(data[3]));
+
+                        //查告警(80)、保护(81)、硬件错误(82)信息
+                        BMS_VM.MOD_WARN_STATE_Set(ModbusRTU.GetBits(data[0]));
+                        BMS_VM.MOD_PROT_STATE_Set(ModbusRTU.GetBits(data[1]));
+                        BMS_VM.MOD_ERROR_STATE_Set(ModbusRTU.GetBits(data[2]));
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await Task.Delay(200, token);
+                await _semaphore.WaitAsync(token);
+                //查电压，温度，电流
+                try
+                {
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 18, 18), 41);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    // 在 UI 线程更新
+                    BMS_VM.OverViewSet(data);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await Task.Delay(200, token);
+                await _semaphore.WaitAsync(token);
+                //读取寄存器283 - 296
+                try
+                {
+                    //读取版本号等信息
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 283, 14), 33);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    // 在 UI 线程更新
+                    BMS_VM.SystemInfoSet(data);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await Task.Delay(200, token);
+                await _semaphore.WaitAsync(token);
+                //AFE_Protect
+                try
+                {
+                    // 读取寄存器86（AFE保护状态）
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 86, 1), 7);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    // 在 UI 线程更新
+                    if (data != null)
+                    {
+                        BMS_VM.AFE_Protect = ModbusRTU.GetBits(data[0]);// AFE保护状态位
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await Task.Delay(200, token);
+                await _semaphore.WaitAsync(token);
+                try
+                {
+                    // 读取蓝牙地址（寄存器297，6个寄存器）
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 297, 6), 17);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    // 在 UI 线程更新
+                    BMS_Setting.ReadBuleTooth(data);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+            }
+            // 模式2：读取设置项并进行初始化设置
+            else if (SelectedMode == BatteryMode.Mode2)
+            {
+                // 等待暂停或取消信号（支持暂停/恢复机制）
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                //发送03功能码(查是91个设置项的电压)
+                try
+                {
+                    // 读取112个设置项（寄存器130-241）
+                    receive = await ReadMultipleRegistersAsync(1, 130, 112, maxPerBatch: 25);
+                    ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+                // 首次运行时进行初始化设置
+                if (flag == 0)
+                {
+                    await _semaphore.WaitAsync(token);
+                    await Task.Delay(200, token);
+                    //发送03功能码(查是91个设置项的电压)
+                    //  再次读取设置项以确保数据准确
+                    //ReadMultipleRegistersAsync(1, 130, 112, maxPerBatch: 25)
+                    receive = await ReadMultipleRegistersAsync(1, 130, 112, maxPerBatch: 25);
+                    ModbusRTU.AnalyseSetReceive(ModbusRTU.ParseRead03Response(receive), BMS_Setting.SendingCommands);
+                   //初始化设置值
+                   ModbusRTU.FirstSetReceive(BMS_Setting.SendingCommands);
+                   flag = 1;// 标记已初始化
+                    _semaphore.Release();
+                }
+            }
+            // 模式6：读取前端芯片监控数据
+            else if (SelectedMode == BatteryMode.Mode6)
+            {
+                // 等待暂停或取消信号（支持暂停/恢复机制）
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                //查前端芯片
+                try
+                {
+                    // 读取前端芯片数据（寄存器320-355，36个寄存器）
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 320, 36), 77);
+                    BMS_Setting.SetFrontMonitor(ModbusRTU.ParseRead03Response(receive));
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+            }
+            // 模式3：读取系统设置和概览信息
+            else if (SelectedMode == BatteryMode.Mode3)
+            {
+                await Task.Delay(200, token);
+                await _semaphore.WaitAsync(token);
+                //读写入的参数设置值
+                try
+                {
+                    // 读取系统设置（寄存器252-255，4个寄存器）
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 252, 4), 13);
+                    BMS_Setting.setSystem(ModbusRTU.ParseRead03Response(receive));
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                try
+                {
+                    //查电压  //查当前电流 //查温度
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 18, 18), 41);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    BMS_VM.OverViewSet(data);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                try
+                {
+                    // 读取蓝牙地址（寄存器297，6个寄存器）
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 297, 6), 17);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    BMS_Setting.ReadBuleTooth(data);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+            }
+            // 模式4：仅读取电芯和温度传感器数量
+            else if (SelectedMode == BatteryMode.Mode4)
+            {
+                await _semaphore.WaitAsync(token);
+                try
+                {
+                    //读取电芯和温度传感器数量
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 250, 2), 9);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    if (data != null && data.Length == 2)
+                    {
+                        BMS_Setting.CellNum = data[0];
+                        BMS_Setting.NtcNum = data[1];
+                    }
+                    await Task.Delay(3000, token);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+            }
+            // 模式5：实时监控模式（读取数据并保存到列表和Excel）
+            else if (SelectedMode == BatteryMode.Mode5)     //实时监控
+            {
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                try
+                {
+                    //读写入的参数设置值(充电MOS、放电MOS、关机、休眠)
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 120, 2), 9);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    if (data != null && data.Length >= 2)
+                    {
+                        BMS_Setting.SettingStatue = ModbusRTU.GetBits(data[0]);
+                        BMS_Setting.JunHen = ModbusRTU.GetBits(data[1]);
+                    }
+
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                try
+                {
+
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 250, 2), 9);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    if (data != null && data.Length == 2)
+                    {
+                        BMS_Setting.CellNum = data[0];
+                        BMS_Setting.NtcNum = data[1];
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                try
+                {
+                    //发送03功能码(查是16个电芯的电压)
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 2, 16), 37);
+                    BMS_VM.MOD_CELL1_VOL_1_16(ModbusRTU.ParseRead03Response(receive));
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                try
+                {
+                    //查五个状态码(83)
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 80, 5), 15);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    if (data != null)
+                    {
+                        BMS_VM.MOD_INST_STATE_Set(ModbusRTU.GetBits(data[3]));
+
+                        //查告警(80)、保护(81)、硬件错误(82)信息
+                        BMS_VM.MOD_WARN_STATE_Set(ModbusRTU.GetBits(data[0]));
+                        BMS_VM.MOD_PROT_STATE_Set(ModbusRTU.GetBits(data[1]));
+                        BMS_VM.MOD_ERROR_STATE_Set(ModbusRTU.GetBits(data[2]));
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                try
+                {
+                    //查电压  //查当前电流 //查温度
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 18, 18), 41);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    BMS_VM.OverViewSet(data);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                try
+                {
+                    //查电压  //查当前电流 //查温度
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 283, 14), 33);
+                    data = ModbusRTU.ParseRead03Response(receive);
+                    BMS_VM.SystemInfoSet(data);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                await _semaphore.WaitAsync(token);
+                await Task.Delay(200, token);
+                try
+                {
+                    //AFE_Protect
+                    receive = await BlueToothSettings.SendBluetoothBMS(ModbusRTU.BuildRead03Frame(1, 86, 1), 7);
+                    if (receive != null && receive.Length > 1)
+                    {
+                        data = ModbusRTU.ParseRead03Response(receive);
+                        if (data != null)
+                        {
+                            BMS_VM.AFE_Protect = ModbusRTU.GetBits(data[0]);
+                        }
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+
+                var polling = new PollingData
+                {
+                    Date = DateTime.Now,                                       //日期
+                    TotalVolt = BMS_VM.MOD_AFECOL_PACKVOL,                     //总电压
+                    Current = BMS_VM.MOD_AFECOL_CUR,                           //电流
+                    SOC = BMS_VM.MOD_SOC.ToString(),                           //SOC
+                    SOH = BMS_VM.MOD_SOH.ToString(),                           //SOH
+                    FullCap = (BMS_VM.MOD_FULL_CAP / 100.0).ToString("F2"),                             //满充容量
+                    FullRemainCap = (BMS_VM.MOD_RES_CAP / 100.0).ToString("F2"),                        //剩余容量
+                    CycleCount = BMS_VM.MOD_CYCLECNT,                          //循环次数
+                    Cell1 = BMS_VM.MOD_CELL1_VOL,                              //电芯1
+                    Cell2 = BMS_VM.MOD_CELL2_VOL,
+                    Cell3 = BMS_VM.MOD_CELL3_VOL,
+                    Cell4 = BMS_VM.MOD_CELL4_VOL,
+                    AvgVolt = BMS_VM.MOD_CELL_VOLDIFF,                         //最大电芯压差
+                    MaxVolt = BMS_VM.MOD_MAXCELL_VOL,                          //最高电压
+                    MinVolt = BMS_VM.MOD_MINCELL_VOL,                          //最低电压
+                    Temp1 = BMS_VM.MOD_GROUD1_TEMP,                            //电芯温度1
+                    Chg_MOS = BMS_VM.MOD_INST_STATE[0].ToString(),             //充电MOS
+                    Dis_MOS = BMS_VM.MOD_INST_STATE[1].ToString(),             //放电MOS
+                    Chg_Statues = BMS_VM.MOD_INST_STATE[4].ToString(),         //充电
+                    Dis_Statues = BMS_VM.MOD_INST_STATE[5].ToString(),         //放电
+                    AFE_OverChg_Pro = BMS_VM.AFE_Protect[3].ToString(),        //AFE过充保护
+                    AFE_OverDis_Pro = BMS_VM.AFE_Protect[4].ToString(),        //AFE过放保护
+                    Chg_Current_Pro = BMS_VM.AFE_Protect[5].ToString(),        //充电过流保护
+                    Dis_Current_Pro = BMS_VM.AFE_Protect[6].ToString(),        //放电过流保护
+                    AFE_Interrupt = BMS_VM.AFE_Protect[2].ToString(),          //前端芯片中断
+                    ShortProtect = BMS_VM.AFE_Protect[7].ToString(),           //短路保护
+                    AFE_TriggerProt = BMS_VM.AFE_Protect[0].ToString(),        //前端芯片触发保护
+                    AFE_AlertPull = BMS_VM.AFE_Protect[1].ToString(),          //前端芯片告警下拉
+                    BalanceStatus = BMS_Setting.JunHen[0].ToString()
+                    + ";" + BMS_Setting.JunHen[1].ToString() + ";"
+                    + BMS_Setting.JunHen[2].ToString() + ";"
+                    + BMS_Setting.JunHen[3].ToString(),                        //均衡状态
+                    AlarmStatus = BMS_VM.MOD_WARN_STATE,                      //告警信息
+                    ProtectStatus = BMS_VM.MOD_PROT_STATE,                     //保护信息
+                    ErrorStatus = BMS_VM.MOD_ERROR_STATE,                      //错误信息
+                };
+
+
+                // 最新在最前
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+
+                    // 添加到界面
+                    RT_Monitor.PollingList.Insert(0, polling);
+
+                    // 保证最多 100 条
+                    if (RT_Monitor.PollingList.Count > 100)
+                        RT_Monitor.PollingList.RemoveAt(RT_Monitor.PollingList.Count - 1);
+
+                    // 保存
+                    if (RT_Monitor._isSaving && RT_Monitor._savePath != null)
+                        RT_Monitor.SaveToExcel(polling);
+                });
+            }
+        }
+
+
+        #endregion
+
+        #region 分批读取
+        /// <summary>
+        /// 分批读取保持寄存器（03功能码），自动处理超过设备限制的情况
+        /// </summary>
+        /// <param name="slaveAddr">从站地址</param>
+        /// <param name="startAddr">起始寄存器地址</param>
+        /// <param name="totalRegs">要读取的寄存器总数</param>
+        /// <param name="maxPerBatch">每次最多读取的寄存器数（默认25）</param>
+        /// <returns>合并后的完整响应数据（格式同单次03响应）</returns>
+        public async Task<byte[]> ReadMultipleRegistersAsync(byte slaveAddr, ushort startAddr, ushort totalRegs, ushort maxPerBatch = 25)
+        {
+            var allData = new List<byte>();
+
+            for (int offset = 0; offset < totalRegs; offset += maxPerBatch)
+            {
+                ushort currentCount = (ushort)Math.Min(maxPerBatch, (ushort)(totalRegs - offset));
+                ushort currentAddr = (ushort)(startAddr + offset);
+
+                // 期望响应长度 = 地址(1) + 功能码(1) + 字节数(1) + 数据(currentCount*2) + CRC(2)
+                int expectedLen = 3 + currentCount * 2 + 2;
+
+                byte[] cmd = ModbusRTU.BuildRead03Frame(slaveAddr, currentAddr, currentCount);
+                byte[] chunk = await BlueToothSettings.SendBluetoothBMS(cmd, expectedLen);
+
+                // 提取数据部分（跳过地址、功能码、字节计数器）
+                if (chunk.Length >= expectedLen)
+                {
+                    byte[] dataPart = new byte[currentCount * 2];
+                    Array.Copy(chunk, 3, dataPart, 0, dataPart.Length);
+                    allData.AddRange(dataPart);
+                }
+                else
+                {
+                    // 某批次失败，返回空数组或抛出异常
+                    return Array.Empty<byte>();
+                }
+            }
+
+            // 组装成完整的03响应格式：地址 + 功能码 + 字节数 + 数据 + CRC
+            var result = new List<byte>();
+            result.Add(slaveAddr);
+            result.Add(0x03);
+            result.Add((byte)(allData.Count)); // 字节数
+            result.AddRange(allData);
+            byte[] crcBytes = BitConverter.GetBytes(ModbusRTU.CRC16(result.ToArray(), result.Count));
+            result.AddRange(crcBytes);
+
+            return result.ToArray();
+        }
+        #endregion
         #endregion
 
         #region 消息框

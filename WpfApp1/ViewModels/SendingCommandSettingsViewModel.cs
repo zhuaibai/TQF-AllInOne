@@ -1,12 +1,18 @@
-﻿using System;
+﻿using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.Win32;
+using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,15 +20,12 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Xml.Serialization;
-using System.Globalization;
-using DocumentFormat.OpenXml.Bibliography;
-using Microsoft.Win32;
 using WpfApp1.Command;
 using WpfApp1.Command.BMS;
 using WpfApp1.Convert;
 using WpfApp1.Models;
 using WpfApp1.Services;
-using System.Text.RegularExpressions;
+using static WpfApp1.ViewModels.MainWindowVM;
 
 namespace WpfApp1.ViewModels
 {
@@ -39,15 +42,16 @@ namespace WpfApp1.ViewModels
         SemaphoreSlim _semaphore;        //异步竞争，资源锁
         Action<string> AddLog;           //添加日志委托
         Action<string> UpdateState;      //更新状态日志
+        Action<string> UpdateBLState;      //更新蓝牙状态日志
 
 
-
-        public SendingCommandSettingsViewModel(ManualResetEventSlim pauseEvent, SemaphoreSlim semaphore, Action<string> addLog, Action<string> _updateState)
+        public SendingCommandSettingsViewModel(ManualResetEventSlim pauseEvent, SemaphoreSlim semaphore, Action<string> addLog, Action<string> _updateState, Action<string> _updateBLState)
         {
             _pauseEvent = pauseEvent;
             _semaphore = semaphore;
             AddLog = addLog;
             UpdateState = _updateState;
+            UpdateBLState = _updateBLState;
 
             SendingCommands = LoadSettings("default.xml");
             SaveCommand = new DelegateCommand(SaveSettings);
@@ -250,7 +254,7 @@ namespace WpfApp1.ViewModels
             //DoubleClickCommand = new RelayCommand(OnDoubleClick);
             //初始化串口
             SerialPort1 = new SerialPortSettingViewModel();
-
+          
             #region 初始化命令
             //导出到Excel
             ExportExcel = new RelayCommand(() =>
@@ -540,7 +544,6 @@ namespace WpfApp1.ViewModels
             #endregion
 
         }
-
         public void setSystem(short[] data)
         {
             if (data == null || data.Length < 4)
@@ -850,7 +853,7 @@ namespace WpfApp1.ViewModels
         public RelayCommand HistoryReadCommandBMS03 { get; }
         private bool stopReadFlag;
         private bool stopReadFlag_isWorking;
-
+        private CancellationTokenSource? _historyCts;
         /// <summary>
         /// BMS02点击设置
         /// </summary>
@@ -858,6 +861,7 @@ namespace WpfApp1.ViewModels
         {
             try
             {
+                //System.Diagnostics.Debug.WriteLine($"进入历史读取，ReadCounts = {ReadCounts}");
                 HistoryRead_IsWorking = true;
                 stopReadFlag = false;
                 // 禁用按钮
@@ -865,7 +869,6 @@ namespace WpfApp1.ViewModels
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在读取历史记录");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -875,34 +878,76 @@ namespace WpfApp1.ViewModels
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
-                {
-                    for (int i = ReadCounts; ; i++)
+
+                    if (AppServices.CurrentBlueTooth.IsConnected())
                     {
-                        //读取指令
-                        Thread.Sleep(100);//没有这个延时会报错
-                        short[] data = ModbusRTU.ParseRead20Response(SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 4, (ushort)i), 133));
-                        if (data.Length == 64)
-                        {
-                            var model = new HistoryLodModel(data, cellNum);
-                            Application.Current.Dispatcher.Invoke(() =>
-                            {
-                                HistoryLods.Add(model);
-                            });
-                        }
-                        else
-                        {
-                            break;
-                        }
+                    _historyCts = new CancellationTokenSource();
+                    UpdateBLState("正在读取历史记录");
+                    AddLog("正在读取历史记录");
+                    for (int i = ReadCounts;; i++)
+                    {
                         if (stopReadFlag)
                         {
+                            UpdateBLState("停止读取历史记录");
+                            AddLog("停止读取历史记录");
+                            _historyCts.Cancel();
                             break;
                         }
-                        //HistoryLods.Add(new HistoryLodModel(data));
-                    }
 
-                })
-                , timeoutCts.Token);
+                        await Task.Delay(100);
+
+                        byte[] receive = await AppServices.CurrentBlueTooth.SendBluetoothBMS(
+                            ModbusRTU.BuildRead20Frame(1, 4, (ushort)i), 133,_historyCts.Token);
+
+                        short[] data = ModbusRTU.ParseRead20Response(receive);
+
+                        if (data.Length != 64)
+                            break;
+
+                        var model = new HistoryLodModel(data, cellNum);
+
+                        await Application.Current.Dispatcher.BeginInvoke(() =>
+                        {
+                            HistoryLods.Add(model);
+                        });
+
+                        UpdateBLState("历史记录读取完成");
+                    }
+                }
+
+                    if (SerialCommunicationService.IsOpen())
+                    {
+                    UpdateState("正在读取历史记录");
+                    await Task.Run(new Action(() =>
+                    {
+                        for (int i = ReadCounts; ; i++)
+                        {
+                            //读取指令
+                            Thread.Sleep(100);//没有这个延时会报错
+                            short[] data = ModbusRTU.ParseRead20Response(SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 4, (ushort)i), 133));
+                            if (data.Length == 64)
+                            {
+                                var model = new HistoryLodModel(data, cellNum, 1);
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    HistoryLods.Add(model);
+                                });
+                            }
+                            else
+                            {
+                                break;
+                            }
+                            if (stopReadFlag)
+                            {
+                                break;
+                            }
+                            UpdateState("历史记录读取完成");
+                        }
+
+                    }), timeoutCts.Token);
+                }
+
+
             }
             catch (OperationCanceledException)
             {
@@ -920,7 +965,6 @@ namespace WpfApp1.ViewModels
                 // 确保释放锁
                 _semaphore.Release();
                 stopReadFlag = true;
-                UpdateState("历史记录读取完成");
             }
         }
 
@@ -1070,7 +1114,6 @@ namespace WpfApp1.ViewModels
             }
         }
 
-
         /// <summary>
         /// 停止读取历史记录
         /// </summary>
@@ -1088,7 +1131,7 @@ namespace WpfApp1.ViewModels
                 await Task.Run(new Action(() =>
                 {
                     stopReadFlag = true;
-
+                    _historyCts?.Cancel();
                 })
                 , timeoutCts.Token);
             }
@@ -1103,7 +1146,6 @@ namespace WpfApp1.ViewModels
                 //Status = "就绪";
                 // 重新启用按钮
                 StopReadComamnd.RaiseCanExecuteChanged();
-
 
             }
         }
@@ -1434,30 +1476,52 @@ namespace WpfApp1.ViewModels
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
-                //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
                 _pauseEvent.Reset();
                 AddLog("已暂停后台通信");
-
+                byte[] receive = new byte[0];
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
                 await Task.Run(new Action(() =>
                 {
                     //执行设置指令
                     Thread.Sleep(2000);//没有这个延时会报错
-                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 252, (int)getDoubleValue(DesignCap_Inputs) * 100), 8);
-                    if (receive.Length != 8)
+                    if (AppServices.CurrentBlueTooth.IsConnected())
                     {
-
-                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8);
-                        if (receive.Length == 8)
+                        UpdateBLState("正在执行设置命令");
+                        receive = AppServices.CurrentBlueTooth.SendBluetoothBMS(
+                            ModbusRTU.BuildWriteSingleRegisterFrame(1, 252, (int)getDoubleValue(DesignCap_Inputs) * 100), 8).Result;
+                        if (receive.Length != 8)
                         {
-                            OutIndex = receive[5];
-                            MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                            
+                            receive = AppServices.CurrentBlueTooth.SendBluetoothBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8).Result;
+                            if (receive.Length == 8)
+                            {
+                                OutIndex = receive[5];
+                                MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
                         }
+                        UpdateBLState("设置指令已经执行完");
                     }
+                    else if(SerialCommunicationService.IsOpen())
+                    {
+                        UpdateState("正在执行设置命令");
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 252, (int)getDoubleValue(DesignCap_Inputs) * 100), 8);
+                        if (receive.Length != 8)
+                        {
+
+                            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8);
+                            if (receive.Length == 8)
+                            {
+                                OutIndex = receive[5];
+                                MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                        }
+                        UpdateState("设置指令已经执行完");
+                    }
+                   
+
                 })
                 , timeoutCts.Token);
             }
@@ -1476,7 +1540,6 @@ namespace WpfApp1.ViewModels
                 Command_SetDesignCap.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
             }
         }
 
@@ -1522,6 +1585,7 @@ namespace WpfApp1.ViewModels
         /// </summary>
         private async void FullCapOperation()
         {
+            byte[] receive = new byte[0];
             try
             {
                 FullCap_IsWorking = true;
@@ -1530,7 +1594,6 @@ namespace WpfApp1.ViewModels
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -1543,18 +1606,39 @@ namespace WpfApp1.ViewModels
                 {
                     //执行设置指令
                     Thread.Sleep(2000);//没有这个延时会报错
-                    //string receive = SerialCommunicationService.SendSettingCommand("设置指令", FullCap_Inputs);
-                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 253, (int)getDoubleValue(FullCap_Inputs) * 100), 8);
-                    if (receive.Length != 8)
+                                      
+                    if (AppServices.CurrentBlueTooth.IsConnected())
                     {
-
-                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8);
-                        if (receive.Length == 8)
+                        receive = AppServices.CurrentBlueTooth.SendBluetoothBMS(
+                            ModbusRTU.BuildWriteSingleRegisterFrame(1, 253, (int)getDoubleValue(FullCap_Inputs) * 100), 8).Result;
+                        if (receive.Length != 8)
                         {
-                            OutIndex = receive[5];
-                            MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                            receive = AppServices.CurrentBlueTooth.SendBluetoothBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8).Result;
+                            if (receive.Length == 8)
+                            {
+                                OutIndex = receive[5];
+                                MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
                         }
+                        UpdateBLState("设置指令已经执行完");
                     }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 253, (int)getDoubleValue(FullCap_Inputs) * 100), 8);
+                        if (receive.Length != 8)
+                        {
+
+                            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8);
+                            if (receive.Length == 8)
+                            {
+                                OutIndex = receive[5];
+                                MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                        }
+                        UpdateState("设置指令已经执行完");
+                    }
+                    
                 })
                 , timeoutCts.Token);
             }
@@ -1573,7 +1657,7 @@ namespace WpfApp1.ViewModels
                 Command_SetFullCap.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+               
             }
         }
 
@@ -1619,6 +1703,7 @@ namespace WpfApp1.ViewModels
         /// </summary>
         private async void RemainCapOperation()
         {
+            byte[] receive = new byte[0];
             try
             {
                 RemainCap_IsWorking = true;
@@ -1627,7 +1712,6 @@ namespace WpfApp1.ViewModels
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -1640,18 +1724,38 @@ namespace WpfApp1.ViewModels
                 {
                     //执行设置指令
                     Thread.Sleep(2000);//没有这个延时会报错
-                    //string receive = SerialCommunicationService.SendSettingCommand("设置指令", RemainCap_Inputs);
-                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 254, (int)getDoubleValue(RemainCap_Inputs) * 100), 8);
-                    if (receive.Length != 8)
+                    if (AppServices.CurrentBlueTooth.IsConnected())
                     {
-
-                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8);
-                        if (receive.Length == 8)
+                        receive = AppServices.CurrentBlueTooth.SendBluetoothBMS(
+                            ModbusRTU.BuildWriteSingleRegisterFrame(1, 254, (int)getDoubleValue(RemainCap_Inputs) * 100), 8).Result;
+                        if (receive.Length != 8)
                         {
-                            OutIndex = receive[5];
-                            MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                            receive = AppServices.CurrentBlueTooth.SendBluetoothBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8).Result;
+                            if (receive.Length == 8)
+                            {
+                                OutIndex = receive[5];
+                                MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
                         }
+                        UpdateBLState("设置指令已经执行完");
                     }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 254, (int)getDoubleValue(RemainCap_Inputs) * 100), 8);
+                        if (receive.Length != 8)
+                        {
+
+                            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8);
+                            if (receive.Length == 8)
+                            {
+                                OutIndex = receive[5];
+                                MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                        }
+                        UpdateState("设置指令已经执行完");
+                    }
+                    
                 })
                 , timeoutCts.Token);
             }
@@ -1670,7 +1774,6 @@ namespace WpfApp1.ViewModels
                 Command_SetRemainCap.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
             }
         }
 
@@ -1717,6 +1820,7 @@ namespace WpfApp1.ViewModels
         /// </summary>
         private async void CycleCountOperation()
         {
+            byte[] receive = new byte[0];
             try
             {
                 CycleCount_IsWorking = true;
@@ -1725,7 +1829,6 @@ namespace WpfApp1.ViewModels
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -1738,18 +1841,38 @@ namespace WpfApp1.ViewModels
                 {
                     //执行设置指令
                     Thread.Sleep(2000);//没有这个延时会报错
-                    //string receive = SerialCommunicationService.SendSettingCommand("设置指令", CycleCount_Inputs);
-                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 255, (int)getDoubleValue(CycleCount_Inputs)), 8);
-                    if (receive.Length != 8)
+                    if (AppServices.CurrentBlueTooth.IsConnected())
                     {
-
-                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8);
-                        if (receive.Length == 8)
+                        receive = AppServices.CurrentBlueTooth.SendBluetoothBMS(
+                            ModbusRTU.BuildWriteSingleRegisterFrame(1, 255, (int)getDoubleValue(CycleCount_Inputs)), 8).Result;
+                        if (receive.Length != 8)
                         {
-                            OutIndex = receive[5];
-                            MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                            receive = AppServices.CurrentBlueTooth.SendBluetoothBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8).Result;
+                            if (receive.Length == 8)
+                            {
+                                OutIndex = receive[5];
+                                MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
                         }
+                        UpdateBLState("设置指令已经执行完");
                     }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 255, (int)getDoubleValue(CycleCount_Inputs)), 8);
+                        if (receive.Length != 8)
+                        {
+
+                            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8);
+                            if (receive.Length == 8)
+                            {
+                                OutIndex = receive[5];
+                                MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                        }
+                        UpdateState("设置指令已经执行完");
+                    }
+                   
                 })
                 , timeoutCts.Token);
             }
@@ -1768,14 +1891,13 @@ namespace WpfApp1.ViewModels
                 Command_SetCycleCount.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
             }
         }
 
         #endregion
 
         #region 蓝牙地址
-
+        
         private string _BuleTooth;
         public string BuleTooth
         {
@@ -1838,6 +1960,7 @@ namespace WpfApp1.ViewModels
         /// </summary>
         private async void BuleToothOperation()
         {
+            byte[] receive = new byte[0];
             try
             {
                 BuleTooth_IsWorking = true;
@@ -1856,14 +1979,12 @@ namespace WpfApp1.ViewModels
                 {
                     // 解析失败，弹出提示框
                     MessageBox.Show(
-                        "蓝牙地址格式不正确\n例如：00:1A:7D:DA:71:13",
+                        "蓝牙地址格式不正确\n",
                         "输入错误",
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
                     return;
                 }
-
-                UpdateState("正在执行设置命令");
 
                 // 执行特殊操作
                 using var timeoutCts = new CancellationTokenSource(5000);
@@ -1877,10 +1998,37 @@ namespace WpfApp1.ViewModels
                     {
                         BuleToothres[i] = bluetoothBytes[bluetoothBytes.Length - 1 - i] << 8;
                     }
-                    
-                    byte[] receive = SerialCommunicationService.SendCommandToBMS(
-                        ModbusRTU.BuildWriteMultiRegisterFrame(1, 297, BuleToothres), 8);
-                   
+                    if (AppServices.CurrentBlueTooth.IsConnected())
+                    {
+                        receive = AppServices.CurrentBlueTooth.SendBluetoothBMS(
+                            ModbusRTU.BuildWriteMultiRegisterFrame(1, 297, BuleToothres), 8).Result;
+                        if (receive.Length != 8)
+                        {
+
+                            receive = AppServices.CurrentBlueTooth.SendBluetoothBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8).Result;
+                            if (receive.Length == 8)
+                            {
+                                OutIndex = receive[5];
+                                MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                        }
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteMultiRegisterFrame(1, 297, BuleToothres), 8);
+                        if (receive.Length != 8)
+                        {
+
+                            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 10, 1), 8);
+                            if (receive.Length == 8)
+                            {
+                                OutIndex = receive[5];
+                                MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                        }
+                        UpdateState("设置指令已经执行完");
+                    }
                 }, timeoutCts.Token);
             }
             catch (OperationCanceledException)
@@ -1898,7 +2046,6 @@ namespace WpfApp1.ViewModels
                 Command_SetBuleTooth.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
             }
         }
 
@@ -2160,6 +2307,7 @@ namespace WpfApp1.ViewModels
 
         private async void ChgCalibFactorReadOperation()
         {
+            byte[] receive = new byte[0];
             try
             {
                 ChgCalibFactorRead_IsWorking = true;
@@ -2168,7 +2316,6 @@ namespace WpfApp1.ViewModels
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -2181,9 +2328,20 @@ namespace WpfApp1.ViewModels
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "ChgCalibFactorInc_Inputs");
-                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 273, 1), 7);
-                    ChgCalibFactor = ModbusRTU.ParseRead03Response(receive)[0];
+
+                    if (AppServices.CurrentBlueTooth.IsConnected())
+                    {
+                        receive = AppServices.CurrentBlueTooth.SendBluetoothBMS(
+                            ModbusRTU.BuildRead03Frame(1, 273, 1), 7).Result;
+                        ChgCalibFactor = ModbusRTU.ParseRead03Response(receive)[0];
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 273, 1), 7);
+                        ChgCalibFactor = ModbusRTU.ParseRead03Response(receive)[0];
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -2202,7 +2360,6 @@ namespace WpfApp1.ViewModels
                 Command_SetChgCalibFactorRead.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
             }
         }
 
@@ -2212,6 +2369,7 @@ namespace WpfApp1.ViewModels
 
         private async void ChgCalibFactorWriteOperation()
         {
+            
             try
             {
                 ChgCalibFactorWrite_IsWorking = true;
@@ -2220,7 +2378,6 @@ namespace WpfApp1.ViewModels
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -2233,9 +2390,19 @@ namespace WpfApp1.ViewModels
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "ChgCalibFactorInc_Inputs");
-                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 273, ChgCalibFactor), 8);
+                    byte[] receive = new byte[0];
+                    if (AppServices.CurrentBlueTooth.IsConnected())
+                    {
+                        receive = AppServices.CurrentBlueTooth.SendBluetoothBMS(
+                            ModbusRTU.BuildWriteSingleRegisterFrame(1, 273, ChgCalibFactor), 8).Result;
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 273, ChgCalibFactor), 8);
 
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -2254,7 +2421,6 @@ namespace WpfApp1.ViewModels
                 Command_SetChgCalibFactorWrite.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
             }
         }
 
@@ -2376,7 +2542,6 @@ namespace WpfApp1.ViewModels
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -2389,10 +2554,21 @@ namespace WpfApp1.ViewModels
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "DisCalibFactorDec_Inputs");
-                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 274, 1), 7);
-                    DisCalibFactor = ModbusRTU.ParseRead03Response(receive)[0];
 
+                    byte[] receive = new byte[0];
+                    if (AppServices.CurrentBlueTooth.IsConnected())
+                    {
+                        receive = AppServices.CurrentBlueTooth.SendBluetoothBMS(
+                            ModbusRTU.BuildRead03Frame(1, 274, 1), 7).Result;
+                        DisCalibFactor = ModbusRTU.ParseRead03Response(receive)[0];
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead03Frame(1, 274, 1), 7);
+                        DisCalibFactor = ModbusRTU.ParseRead03Response(receive)[0];
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -2411,7 +2587,6 @@ namespace WpfApp1.ViewModels
                 Command_SetDisCalibFactorRead.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
             }
         }
 
@@ -2447,7 +2622,19 @@ namespace WpfApp1.ViewModels
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
                     //string receive = SerialCommunicationService.SendSettingCommand("设置指令", "DisCalibFactorDec_Inputs");
-                    byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 274, DisCalibFactor), 8);
+                   // byte[] receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 274, DisCalibFactor), 8);
+                    byte[] receive = new byte[0];
+                    if (AppServices.CurrentBlueTooth.IsConnected())
+                    {
+                        receive = AppServices.CurrentBlueTooth.SendBluetoothBMS(
+                            ModbusRTU.BuildWriteSingleRegisterFrame(1, 274, DisCalibFactor), 8).Result;
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildWriteSingleRegisterFrame(1, 274, DisCalibFactor), 8);
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -4524,6 +4711,7 @@ namespace WpfApp1.ViewModels
         public Action<string, int> ShowBoubleWithTime;
         //命令
         public RelayCommand WriteCommand { get; }
+        public RelayCommand WriteBlueToothCommand { get; }
         public RelayCommand WriteCommandByBMS01 { get; }
 
         //异步执行写入操作
@@ -4534,7 +4722,6 @@ namespace WpfApp1.ViewModels
                 // 更新按钮状态为"写入中"且不可点击
                 ButtonText = "ing...";
                 IsButtonEnabled = false;
-                //Debug.WriteLine($"ButtonText 设置为: {ButtonText}");
 
                 // 通知命令状态已更改
                 WriteCommand.RaiseCanExecuteChanged();
@@ -4546,22 +4733,42 @@ namespace WpfApp1.ViewModels
                 await Task.Run(() =>
                 {
                     // 模拟耗时操作，例如写入文件或网络请求
-                    System.Threading.Thread.Sleep(1000);
-                    receive = SerialCommunicationService.SendCommandToBMS(sendBuffer, 8);
-                    if (receive.Length != 8)
+                    Thread.Sleep(1000);
+                    if (AppServices.CurrentBlueTooth.IsConnected())
                     {
-                        Thread.Sleep(500);
-                        receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 8, 1), 8);
-                        if (receive.Length == 8)
+                        UpdateBLState("正在执行设置命令");
+                        receive = AppServices.CurrentBlueTooth.SendBluetoothBMS(sendBuffer, 8).Result;
+                        if (receive.Length != 8)
                         {
-                            OutIndex = receive[5];
-                            MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                            Thread.Sleep(500);
+                            receive = AppServices.CurrentBlueTooth.SendBluetoothBMS(ModbusRTU.BuildRead20Frame(1, 8, 1), 8).Result;
+                            if (receive.Length == 8)
+                            {
+                                OutIndex = receive[5];
+                                MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
                         }
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        UpdateState("正在执行设置命令");
+                        receive = SerialCommunicationService.SendCommandToBMS(sendBuffer, 8);
+                        if (receive.Length != 8)
+                        {
+                            Thread.Sleep(500);
+                            receive = SerialCommunicationService.SendCommandToBMS(ModbusRTU.BuildRead20Frame(1, 8, 1), 8);
+                            if (receive.Length == 8)
+                            {
+                                OutIndex = receive[5];
+                                MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                        }
+                        UpdateState("设置指令已经执行完");
                     }
                 });
 
                 ButtonText = receive.Length == 8 ? "成功" : "失败";
-                //ShowBoubleWithTime($"{ButtonText}", 1500);
 
                 await Task.Delay(500); // 短暂显示"完成"状态
                 ButtonText = "写入";
@@ -4576,8 +4783,58 @@ namespace WpfApp1.ViewModels
                 // 恢复按钮可点击状态
                 IsButtonEnabled = true;
                 WriteCommand.RaiseCanExecuteChanged();
-                //关闭串口
-                //SerialCommunicationService.CloseCom();
+            }
+        }
+
+        //异步执行写入操作
+        private async Task ExecuteWriteBlueToothAsync()
+        {
+            try
+            {
+                // 更新按钮状态为"写入中"且不可点击
+                ButtonText = "ing...";
+                IsButtonEnabled = false;
+
+                // 通知命令状态已更改
+                WriteBlueToothCommand.RaiseCanExecuteChanged();
+
+                //组装报文
+                byte[] sendBuffer = ModbusRTU.GetSendBytes(SelectedMachineItem, SendingCommands);
+                byte[] receive = new byte[] { 0 };
+                // 模拟耗时操作（实际应用中替换为真实的写入逻辑）
+                await Task.Run(async () =>
+                {
+                    // 模拟耗时操作，例如写入文件或网络请求
+                   // System.Threading.Thread.Sleep(1000);
+                    await Task.Delay(1000);
+                    receive = await AppServices.CurrentBlueTooth.SendBluetoothBMS(sendBuffer, 8);
+                    if (receive.Length != 8)
+                    {
+                        await Task.Delay(500);
+                        receive = await AppServices.CurrentBlueTooth.SendBluetoothBMS(ModbusRTU.BuildRead20Frame(1, 8, 1), 8);
+                        if (receive.Length == 8)
+                        {
+                            OutIndex = receive[5];
+                            MessageBox.Show($"写入失败，超出数据范围，索引：{OutIndex}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                });
+
+                ButtonText = receive.Length == 8 ? "成功" : "失败";
+
+                await Task.Delay(500); // 短暂显示"完成"状态
+                ButtonText = "写入";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"{ex.Message}");
+                ButtonText = "写入";
+            }
+            finally
+            {
+                // 恢复按钮可点击状态
+                IsButtonEnabled = true;
+                WriteBlueToothCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -4658,7 +4915,7 @@ namespace WpfApp1.ViewModels
         #region 配置
 
         public SerialPortSettingViewModel SerialPort1 { get; set; }
-
+       // public BlueToothSettings BlueTooth { get; set; }
         //密码
         private string password;
 
