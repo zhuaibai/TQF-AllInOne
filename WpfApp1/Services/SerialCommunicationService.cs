@@ -620,6 +620,9 @@ namespace WpfApp1.Services
             return receive;
         }
 
+
+
+
         /// <summary>
         /// CRC校验
         /// </summary>

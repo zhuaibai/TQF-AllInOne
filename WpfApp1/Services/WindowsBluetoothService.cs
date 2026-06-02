@@ -782,7 +782,84 @@ namespace WpfApp1.Services
 
         #endregion
 
+        public async Task<string> SendBLCommand(byte[] command, int returnCount)
+        {
+            int totalBytesRead = 0;
 
+            _pauseEvent.Wait();
+            await _sendLock.WaitAsync();
+            try
+            {
+                //计算期望接收的总字节数
+                int expectedTotal = returnCount + (Receive_CRC_Check ? 2 : 0);
+                byte[] cmdBytes = command;
+                //将基于事件的响应转换为可等待的 Task
+                var responseTcs = new TaskCompletionSource<byte[]>();
+                //数据累积缓冲区
+                var receivedData = new List<byte>();
+                //超时取消
+                using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMilliseconds(1000));
+                //原始数据接收事件的处理委托
+                Action<byte[]> onDataReceived = null;
+                onDataReceived = (data) =>
+                {
+                    lock (receivedData)// 加锁保护缓冲区
+                    {
+                        receivedData.AddRange(data);
+                        if (receivedData.Count >= expectedTotal)
+                        {
+                            byte[] result = receivedData.Take(expectedTotal).ToArray();
+                            responseTcs.TrySetResult(result);
+                        }
+                    }
+                };
+                // 订阅原始数据接收事件
+                RawDataReceived += onDataReceived;
+                try
+                {
+                    // 发送命令
+                    bool sent = await SendByteAsync(cmdBytes);
+                    if (!sent) return string.Empty;
+
+                    await Task.Delay(100); // 等待设备处理命令
+                    var completed = await Task.WhenAny(responseTcs.Task,
+                        Task.Delay(Timeout.Infinite, timeoutCts.Token));
+                    if (completed != responseTcs.Task) return string.Empty; // 超时
+
+                    // 获取接收到的字节数据
+                    byte[] buffer = await responseTcs.Task;
+                    if (buffer.Length == 0) return string.Empty;
+
+                    //CRC 校验（如果启用）
+                    if (Receive_CRC_Check)
+                    {
+                        byte[] origin = buffer;
+                        byte[] crcori;
+                        byte[] build;
+                        bool CRC_Pass = CheckReceive_CRC(buffer, out crcori, out build);
+                        if (!CRC_Pass)
+                        {
+                            //CRC校验不通过
+                            return "-1   " + Encoding.ASCII.GetString(origin) + $"接收长度{origin.Length},期待长度{returnCount};\r收到的CRC:{crcori[0]},{crcori[1]};校验值:{build[0]},{build[1]}";
+
+                        }
+                    }
+                    return Encoding.ASCII.GetString(buffer);
+                }
+                catch { return string.Empty; }
+                finally
+                {
+                    // 无论成功或异常，都要取消事件订阅，避免内存泄漏和干扰下次调用
+                    RawDataReceived -= onDataReceived;
+                }
+            }
+            finally
+            {
+                _sendLock.Release();
+            }
+
+
+        }
     }
 }
 

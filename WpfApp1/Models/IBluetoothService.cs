@@ -21,6 +21,7 @@ namespace WpfApp1.Models
         Task<bool> SendDataAsync(string data);// 发送数据
         Task<bool> SendByteAsync(byte[] data);
         Task<string> SendBluetoothAscllcmd(string command, int returnCount);
+        Task<string> SendBLCommand(byte[] command, int returnCount);
         Task<byte[]> SendBluetoothToBMS(byte[] command, int returnCount, CancellationToken cancellationToken = default);
         bool IsConnected { get; }// 连接状态属性
         bool IsScanning { get; }// 扫描状态属性

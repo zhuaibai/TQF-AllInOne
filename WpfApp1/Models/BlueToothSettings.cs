@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Input;
 using Windows.Devices.Bluetooth;
 using WpfApp1.Command;
+using WpfApp1.Services;
 using WpfApp1.ViewModels;
 
 namespace WpfApp1.Models
@@ -177,6 +178,7 @@ namespace WpfApp1.Models
         {
             return _bluetoothService.IsScanning;
         }
+
         /// <summary>
         /// 判断蓝牙连接是否打开
         /// </summary>
@@ -185,6 +187,7 @@ namespace WpfApp1.Models
         {
             return _bluetoothService.IsConnected;
         }
+
         /// <summary>
         /// 获取蓝牙名称
         /// </summary>
@@ -215,7 +218,35 @@ namespace WpfApp1.Models
         {
             return await _bluetoothService.SendBluetoothToBMS(command, count, default);
         }
+
+
+
+        /// <summary>
+        /// 发送蓝牙设置指令
+        /// </summary>
+        /// <param name="frontCommand"></param>
+        /// <param name="setValue"></param>
+        /// <returns></returns>
+        public async Task<string> SendBLSettingCommand(string frontCommand, string setValue)
+        {
+            //指令与设置值结合
+            string Command = frontCommand + setValue;
+            //转成字节
+            byte[] bytes = Encoding.ASCII.GetBytes(Command);
+            //获取CRC校验字节
+            byte[] CRC = SerialCommunicationService.getCRC(bytes);
+            //拼接
+            byte[] buffer = bytes.Concat(CRC).ToArray();
+            //末尾的字节
+            byte[] endCommand = Encoding.ASCII.GetBytes("\r");
+            //完成指令
+            byte[] sendCommand = buffer.Concat(endCommand).ToArray();
+            //发送指令
+            string receive = await _bluetoothService.SendBLCommand(sendCommand, 7);
+            return receive;
+        }
         #endregion
 
     }
 }
+//
