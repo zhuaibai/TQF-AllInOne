@@ -2261,7 +2261,7 @@
                                 Grid.Row="5"
                                 Grid.Column="1"
                                 Style="{StaticResource ContentText}"
-                                Text="{Binding HEEP1_HPVINV02.StrongChargeVoltage}" />
+                                Text="{Binding HEEP1_HPVIN}" />
                             <TextBox
                                 Grid.Row="5"
                                 Grid.Column="2"

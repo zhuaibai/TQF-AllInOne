@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using WpfApp1.Convert;
 using WpfApp1.Services;
 using WpfApp1.ViewModels;
+using static WpfApp1.ViewModels.MainWindowVM;
 
 namespace WpfApp1.Command.Command_PDF3024
 {
@@ -23,13 +24,14 @@ namespace WpfApp1.Command.Command_PDF3024
         SemaphoreSlim _semaphore;        //异步竞争，资源锁
         Action<string> AddLog;           //添加日志委托
         Action<string> UpdateState;      //更新状态日志
-        public HEEP1_HPVINV02_ViewModel(ManualResetEventSlim pauseEvent, SemaphoreSlim semaphore, Action<string> addLog, Action<string> _updateState)
+        Action<string> UpdateBLState;      //更新蓝牙状态日志
+        public HEEP1_HPVINV02_ViewModel(ManualResetEventSlim pauseEvent, SemaphoreSlim semaphore, Action<string> addLog, Action<string> _updateState, Action<string> updateBLState)
         {
             _pauseEvent = pauseEvent;
             _semaphore = semaphore;
             AddLog = addLog;
             UpdateState = _updateState;
-
+            UpdateBLState = updateBLState;
             #region 初始化命令
             //设置工作模式
             Command_SetWorkingMode = new RelayCommand(
@@ -281,13 +283,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 _WorkingModeIsWorking = true;
                 // 禁用按钮
                 Command_SetWorkingMode.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState($"正在执行设置命令");
+                //UpdateState($"正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -296,12 +299,21 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async() =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);
-                    string receive = SerialCommunicationService.SendSettingCommand("POP", getSelectedToCommad(nameof(WorkingModeSelectedOption)));
-
+                    //string receive = SerialCommunicationService.SendSettingCommand("POP", getSelectedToCommad(nameof(WorkingModeSelectedOption)));
+                    if (AppServices.CurrentBlueTooth!.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("POP", getSelectedToCommad(nameof(WorkingModeSelectedOption)),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("POP", getSelectedToCommad(nameof(WorkingModeSelectedOption)));
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -320,7 +332,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetWorkingMode.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                //UpdateState("设置指令已经执行完");
             }
         }
 
@@ -368,13 +380,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 _LowPowerLockIsWorking = true;
                 // 禁用按钮
                 Command_SetLowPowerLock.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState($"正在执行设置命令");
+                //UpdateState($"正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -383,12 +396,20 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async () =>
                 {
                     //执行设置指令
-                    //Thread.Sleep(2000);
-                    string receive = SerialCommunicationService.SendSettingCommand("PSDV", Tools.FormatToXxx(LowPowerLock_Inputs));
-
+                    Thread.Sleep(1000);//没有这个延时会报错
+                    if (AppServices.CurrentBlueTooth.IsConnected())
+                    {
+                        receive =  await AppServices.CurrentBlueTooth.SendBLSettingCommand("PSDV", Tools.FormatToXxx(LowPowerLock_Inputs),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("PSDV", Tools.FormatToXxx(LowPowerLock_Inputs));
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -407,7 +428,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetLowPowerLock.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                //UpdateState("设置指令已经执行完");
             }
         }
 
@@ -479,13 +500,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 _BatteryIsWorking = true;
                 // 禁用按钮
                 Command_SetBatteryType.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState($"正在执行设置命令");
+                //UpdateState($"正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -494,12 +516,21 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async() =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);
-                    string receive = SerialCommunicationService.SendSettingCommand("PBT", getSelectedToCommad(nameof(BatteryTypeSelectedOption)));
-
+                    //string receive = SerialCommunicationService.SendSettingCommand("PBT", getSelectedToCommad(nameof(BatteryTypeSelectedOption)));
+                    if (AppServices.CurrentBlueTooth!.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("PBT", getSelectedToCommad(nameof(BatteryTypeSelectedOption)),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("PBT", getSelectedToCommad(nameof(BatteryTypeSelectedOption)));
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -518,7 +549,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetBatteryType.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                //UpdateState("设置指令已经执行完");
             }
         }
 
@@ -567,13 +598,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 StrongChargeVoltage_IsWorking = true;
                 // 禁用按钮
                 Command_SetStrongChargeVoltage.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+               // UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -582,11 +614,21 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async () =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);
-                    string receive = SerialCommunicationService.SendSettingCommand("PCVV",Tools.FormatToXxx(StrongChargeVoltage_Inputs));
+                    if (AppServices.CurrentBlueTooth.IsConnected())
+                    {
+                        await AppServices.CurrentBlueTooth.SendBLSettingCommand("PCVV", Tools.FormatToXxx(StrongChargeVoltage_Inputs),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("PCVV", Tools.FormatToXxx(StrongChargeVoltage_Inputs));
+                        UpdateState("设置指令已经执行完");
+                    }
+
 
                 })
                 , timeoutCts.Token);
@@ -606,7 +648,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetStrongChargeVoltage.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+               
             }
         }
 
@@ -656,13 +698,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 FloatChargeVolage_IsWorking = true;
                 // 禁用按钮
                 Command_SetFloatChargeVolage.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+               // UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -671,11 +714,22 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async () =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);
-                    string receive = SerialCommunicationService.SendSettingCommand("PBFT", Tools.FormatToXxx(FloatChargeVolage_Inputs));
+                    if (AppServices.CurrentBlueTooth.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("PBFT", Tools.FormatToXxx(FloatChargeVolage_Inputs),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("PBFT", Tools.FormatToXxx(FloatChargeVolage_Inputs));
+                        UpdateState("设置指令已经执行完");
+                    }
+
+                    
 
                 })
                 , timeoutCts.Token);
@@ -695,7 +749,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetFloatChargeVolage.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                
             }
         }
 
@@ -744,13 +798,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 TotalChargeCurrent_IsWorking = true;
                 // 禁用按钮
                 Command_SetTotalChargeCurrent.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState($"正在执行设置命令");
+                //  UpdateState($"正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -759,12 +814,21 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async () =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);
-                    string receive = SerialCommunicationService.SendSettingCommand("MNCHGC",Tools.PadToThreeDigits(TotalChargeCurrent_Inputs));
-                    string dsad = receive;
+                    if (AppServices.CurrentBlueTooth!.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("MNCHGC", Tools.PadToThreeDigits(TotalChargeCurrent_Inputs),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("MNCHGC", Tools.PadToThreeDigits(TotalChargeCurrent_Inputs));
+                        //string dsad = receive;
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -783,8 +847,8 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetTotalChargeCurrent.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
-            }
+               
+            }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
         }
 
 
@@ -833,13 +897,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 AC_ChargingCurrent_IsWorking = true;
                 // 禁用按钮
                 Command_SetAC_ChargingCurrent.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+               // UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -848,14 +913,23 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+
+                await Task.Run(new Action(async () =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);
-                    string receive = SerialCommunicationService.SendSettingCommand("MUCHGC",Tools.PadToThreeDigits(AC_ChargingCurrent_Inputs));
-
-                })
-                , timeoutCts.Token);
+                    if (AppServices.CurrentBlueTooth!.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("MUCHGC", Tools.PadToThreeDigits(AC_ChargingCurrent_Inputs),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService .IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("MUCHGC", Tools.PadToThreeDigits(AC_ChargingCurrent_Inputs));
+                        //string dsad = receive;
+                        UpdateState("设置指令已经执行完");
+                    }
+                }), timeoutCts.Token);
             }
             catch (OperationCanceledException)
             {
@@ -872,7 +946,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetAC_ChargingCurrent.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                //UpdateState("设置指令已经执行完");
             }
         }
 
@@ -946,13 +1020,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 BuzzerStatus_IsWorking = true;
                 // 禁用按钮
                 Command_SetBuzzerStatus.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+                //UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -961,12 +1036,21 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async() =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);
-                    string receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(BuzzerStatus_Inputs)));
-
+                    //string receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(BuzzerStatus_Inputs)));
+                    if (AppServices.CurrentBlueTooth!.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("", getSelectedToCommad(nameof(BuzzerStatus_Inputs)),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(BuzzerStatus_Inputs)));
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -985,7 +1069,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetBuzzerStatus.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                //UpdateState("设置指令已经执行完");
             }
         }
 
@@ -1056,13 +1140,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 OverloadRestart_IsWorking = true;
                 // 禁用按钮
                 Command_SetOverloadRestart.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+                //UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -1071,12 +1156,21 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async() =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(OverloadRestart_Inputs)));
-
+                    //string receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(OverloadRestart_Inputs)));
+                    if (AppServices.CurrentBlueTooth!.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("", getSelectedToCommad(nameof(OverloadRestart_Inputs)),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(OverloadRestart_Inputs)));
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -1095,7 +1189,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetOverloadRestart.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                //UpdateState("设置指令已经执行完");
             }
         }
 
@@ -1166,13 +1260,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 InputPrompt_IsWorking = true;
                 // 禁用按钮
                 Command_SetInputPrompt.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+                //UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -1181,12 +1276,21 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async() =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("",getSelectedToCommad(nameof(InputPrompt_Inputs)));
-
+                    //string receive = SerialCommunicationService.SendSettingCommand("",getSelectedToCommad(nameof(InputPrompt_Inputs)));
+                    if (AppServices.CurrentBlueTooth!.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("", getSelectedToCommad(nameof(InputPrompt_Inputs)),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(InputPrompt_Inputs)));
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -1205,7 +1309,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetInputPrompt.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                //UpdateState("设置指令已经执行完");
             }
         }
 
@@ -1276,13 +1380,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 OverTemperatureRestart_IsWorking = true;
                 // 禁用按钮
                 Command_SetOverTemperatureRestart.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+                //UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -1291,12 +1396,21 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async() =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(OverTemperatureRestart_Inputs)));
-
+                    //string receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(OverTemperatureRestart_Inputs)));
+                    if (AppServices.CurrentBlueTooth!.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("", getSelectedToCommad(nameof(OverTemperatureRestart_Inputs)),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(OverTemperatureRestart_Inputs)));
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -1315,7 +1429,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetOverTemperatureRestart.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                //UpdateState("设置指令已经执行完");
             }
         }
 
@@ -1387,13 +1501,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 LCD_Backlight_IsWorking = true;
                 // 禁用按钮
                 Command_SetLCD_Backlight.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+                //UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -1402,12 +1517,21 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async() =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(LCD_Backlight_Inputs)));
-
+                    //string receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(LCD_Backlight_Inputs)));
+                    if (AppServices.CurrentBlueTooth!.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("", getSelectedToCommad(nameof(LCD_Backlight_Inputs)),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(LCD_Backlight_Inputs)));
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -1426,7 +1550,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetLCD_Backlight.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                //UpdateState("设置指令已经执行完");
             }
         }
 
@@ -1614,13 +1738,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 BMS_CommunicationControlFunction_IsWorking = true;
                 // 禁用按钮
                 Command_SetBMS_CommunicationControlFunction.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+               // UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -1629,12 +1754,21 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async() =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("BMSC", getSelectedToCommad(nameof(BMS_CommunicationControlFunction_Inputs)));
-
+                    //string receive = SerialCommunicationService.SendSettingCommand("BMSC", getSelectedToCommad(nameof(BMS_CommunicationControlFunction_Inputs)));
+                    if (AppServices.CurrentBlueTooth!.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("BMSC", getSelectedToCommad(nameof(BMS_CommunicationControlFunction_Inputs)),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("BMSC", getSelectedToCommad(nameof(BMS_CommunicationControlFunction_Inputs)));
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -1653,7 +1787,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetBMS_CommunicationControlFunction.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                //UpdateState("设置指令已经执行完");
             }
         }
 
@@ -1724,13 +1858,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string receive = null;
                 AC_InputRange_IsWorking = true;
                 // 禁用按钮
                 Command_SetAC_InputRange.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+                //UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -1739,12 +1874,21 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async() =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("PGR", getSelectedToCommad(nameof(AC_InputRange_Inputs)));
-
+                    //string receive = SerialCommunicationService.SendSettingCommand("PGR", getSelectedToCommad(nameof(AC_InputRange_Inputs)));
+                    if (AppServices.CurrentBlueTooth!.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("PGR", getSelectedToCommad(nameof(AC_InputRange_Inputs)),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("PGR", getSelectedToCommad(nameof(AC_InputRange_Inputs)));
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -1763,7 +1907,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetAC_InputRange.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                //UpdateState("设置指令已经执行完");
             }
         }
 
@@ -1876,13 +2020,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 ChargingPriority_IsWorking = true;
                 // 禁用按钮
                 Command_SetChargingPriority.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+                //UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -1891,12 +2036,21 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async() =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("PCP", getSelectedToCommad(nameof(ChargingPriority_Inputs)));
-
+                    //string receive = SerialCommunicationService.SendSettingCommand("PCP", getSelectedToCommad(nameof(ChargingPriority_Inputs)));
+                    if (AppServices.CurrentBlueTooth!.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("PCP", getSelectedToCommad(nameof(ChargingPriority_Inputs)),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("PCP", getSelectedToCommad(nameof(ChargingPriority_Inputs)));
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -1915,7 +2069,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetChargingPriority.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                //UpdateState("设置指令已经执行完");
             }
         }
 
@@ -1964,13 +2118,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 BMS_LowPower_SOC_IsWorking = true;
                 // 禁用按钮
                 Command_SetBMS_LowPower_SOC.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+                //UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -1979,12 +2134,20 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async () =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("BMSSDC",Tools.PadToThreeDigits(BMS_LowPower_SOC_Inputs));
-
+                    if (AppServices.CurrentBlueTooth.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("BMSSDC", Tools.PadToThreeDigits(BMS_LowPower_SOC_Inputs),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("BMSSDC", Tools.PadToThreeDigits(BMS_LowPower_SOC_Inputs));
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -2053,13 +2216,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 BMSreturns_to_AC_mode_SOC_IsWorking = true;
                 // 禁用按钮
                 Command_SetBMSreturns_to_AC_mode_SOC.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+                //UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -2068,12 +2232,21 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async () =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("BMSB2UC", Tools.PadToThreeDigits(BMSreturns_to_AC_mode_SOC_Inputs));
-
+                    //string receive = SerialCommunicationService.SendSettingCommand("BMSB2UC", Tools.PadToThreeDigits(BMSreturns_to_AC_mode_SOC_Inputs));
+                    if (AppServices.CurrentBlueTooth.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("BMSB2UC", Tools.PadToThreeDigits(BMSreturns_to_AC_mode_SOC_Inputs),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("BMSB2UC", Tools.PadToThreeDigits(BMSreturns_to_AC_mode_SOC_Inputs));
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -2092,7 +2265,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetBMSreturns_to_AC_mode_SOC.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+               // UpdateState("设置指令已经执行完");
             }
         }
 
@@ -2141,13 +2314,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 BMS_returns_to_battery_mode_SOC_IsWorking = true;
                 // 禁用按钮
                 Command_SetBMS_returns_to_battery_mode_SOC.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+               // UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -2156,12 +2330,21 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async () =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("BMSU2BC", Tools.PadToThreeDigits(BMS_returns_to_battery_mode_SOC_Inputs));
-
+                   // string receive = SerialCommunicationService.SendSettingCommand("BMSU2BC", Tools.PadToThreeDigits(BMS_returns_to_battery_mode_SOC_Inputs));
+                    if (AppServices.CurrentBlueTooth.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("BMSU2BC", Tools.PadToThreeDigits(BMS_returns_to_battery_mode_SOC_Inputs),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("BMSU2BC", Tools.PadToThreeDigits(BMS_returns_to_battery_mode_SOC_Inputs));
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -2180,7 +2363,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetBMS_returns_to_battery_mode_SOC.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+               // UpdateState("设置指令已经执行完");
             }
         }
 
@@ -2230,13 +2413,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 BMS_automatically_turns_on_after_low_power_SOC_IsWorking = true;
                 // 禁用按钮
                 Command_SetBMS_automatically_turns_on_after_low_power_SOC.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+                //UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -2245,12 +2429,22 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async () =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("BMSSRC", Tools.PadToThreeDigits(BMS_automatically_turns_on_after_low_power_SOC_Inputs));
+                    // = SerialCommunicationService.SendSettingCommand("BMSSRC", Tools.PadToThreeDigits(BMS_automatically_turns_on_after_low_power_SOC_Inputs));
 
+                    if (AppServices.CurrentBlueTooth.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("BMSSRC", Tools.PadToThreeDigits(BMS_automatically_turns_on_after_low_power_SOC_Inputs),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("BMSSRC", Tools.PadToThreeDigits(BMS_automatically_turns_on_after_low_power_SOC_Inputs));
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -2269,7 +2463,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetBMS_automatically_turns_on_after_low_power_SOC.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                //UpdateState("设置指令已经执行完");
             }
         }
 
@@ -2467,13 +2661,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 OutputSettingFrequency_IsWorking = true;
                 // 禁用按钮
                 Command_SetOutputSettingFrequency.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+                //UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -2482,12 +2677,21 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async() =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("F", OutputSettingFrequency_Inputs);
-
+                    //string receive = SerialCommunicationService.SendSettingCommand("F", OutputSettingFrequency_Inputs);
+                    if (AppServices.CurrentBlueTooth!.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("F", OutputSettingFrequency_Inputs,7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("F", OutputSettingFrequency_Inputs);
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -2506,7 +2710,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetOutputSettingFrequency.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                //UpdateState("设置指令已经执行完");
             }
         }
 
@@ -2576,13 +2780,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 AutoReturnHome_IsWorking = true;
                 // 禁用按钮
                 Command_SetAutoReturnHome.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+                //UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -2591,12 +2796,21 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async() =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("",getSelectedToCommad(nameof(AutoReturnHome_Inputs)));
-
+                   // string receive = SerialCommunicationService.SendSettingCommand("",getSelectedToCommad(nameof(AutoReturnHome_Inputs)));
+                    if (AppServices.CurrentBlueTooth!.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("", getSelectedToCommad(nameof(AutoReturnHome_Inputs)),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("", getSelectedToCommad(nameof(AutoReturnHome_Inputs)));
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -2615,7 +2829,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetAutoReturnHome.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                //UpdateState("设置指令已经执行完");
             }
         }
 
@@ -2891,13 +3105,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 PV_GridConnectionProtocol_IsWorking = true;
                 // 禁用按钮
                 Command_SetPV_GridConnectionProtocol.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+                //UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -2906,12 +3121,21 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async() =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("^S???RS", getSelectedToCommad(nameof(PV_GridConnectionProtocol_Inputs)));
-
+                    //string receive = SerialCommunicationService.SendSettingCommand("^S???RS", getSelectedToCommad(nameof(PV_GridConnectionProtocol_Inputs)));
+                    if (AppServices.CurrentBlueTooth!.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("^S???RS", getSelectedToCommad(nameof(PV_GridConnectionProtocol_Inputs)),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("^S???RS", getSelectedToCommad(nameof(PV_GridConnectionProtocol_Inputs)));
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -2930,7 +3154,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetPV_GridConnectionProtocol.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                //UpdateState("设置指令已经执行完");
             }
         }
         #endregion
@@ -3206,7 +3430,7 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+               // UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -3215,11 +3439,22 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async () =>
                 {
+
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("V", Tools.PadToThreeDigits(OutSetVolt_Inputs));
+                    if (AppServices.CurrentBlueTooth.IsConnected())
+                    {
+                        await AppServices.CurrentBlueTooth.SendBLSettingCommand("V", Tools.PadToThreeDigits(OutSetVolt_Inputs),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        string receive = SerialCommunicationService.SendSettingCommand("V", Tools.PadToThreeDigits(OutSetVolt_Inputs));
+                        UpdateState("设置指令已经执行完");
+                    }
+
 
                 })
                 , timeoutCts.Token);
@@ -3239,7 +3474,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetOutSetVolt.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                
             }
         }
 

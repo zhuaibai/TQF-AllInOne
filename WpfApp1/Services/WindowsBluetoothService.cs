@@ -91,7 +91,7 @@ namespace WpfApp1.Services
             // 先检查广播名称，不符合的直接丢弃，不开 Task
             string broadcastName = args.Advertisement.LocalName;
             if (!string.IsNullOrEmpty(broadcastName) &&
-                broadcastName.StartsWith("tb", StringComparison.OrdinalIgnoreCase))
+                broadcastName.StartsWith("pg", StringComparison.OrdinalIgnoreCase))
             {
                 // 只有名称符合的设备才开 Task 获取详细信息
                 _ = Task.Run(async () =>
@@ -784,9 +784,9 @@ namespace WpfApp1.Services
 
         public async Task<string> SendBLCommand(byte[] command, int returnCount)
         {
-            int totalBytesRead = 0;
+           // int? totalBytesRead = 0;
 
-            _pauseEvent.Wait();
+            //_pauseEvent.Wait();
             await _sendLock.WaitAsync();
             try
             {

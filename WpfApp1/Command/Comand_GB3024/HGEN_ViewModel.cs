@@ -7,6 +7,7 @@ using WpfApp1.Command;
 using WpfApp1.Convert;
 using WpfApp1.Services;
 using WpfApp1.ViewModels;
+using static WpfApp1.ViewModels.MainWindowVM;
 
 namespace WpfApp1.Command.Comand_GB3024
 {
@@ -20,12 +21,14 @@ namespace WpfApp1.Command.Comand_GB3024
         SemaphoreSlim _semaphore;        //异步竞争，资源锁
         Action<string> AddLog;           //添加日志委托
         Action<string> UpdateState;      //更新状态日志
-        public HGEN_ViewModel(ManualResetEventSlim pauseEvent, SemaphoreSlim semaphore, Action<string> addLog, Action<string> _updateState)
+        Action<string> UpdateBLState;      //更新状态日志
+        public HGEN_ViewModel(ManualResetEventSlim pauseEvent, SemaphoreSlim semaphore, Action<string> addLog, Action<string> _updateState, Action<string> _updateBLState)
         {
             _pauseEvent = pauseEvent;
             _semaphore = semaphore;
             AddLog = addLog;
             UpdateState = _updateState;
+            UpdateBLState = _updateBLState;
             //设置系统时间
             Command_SetSystemTime = new RelayCommand(
                 execute: () => SystemTimeOperation(),
@@ -77,13 +80,14 @@ namespace WpfApp1.Command.Comand_GB3024
         {
             try
             {
+                string? receive = null;
                 SystemTime_IsWorking = true;
                 // 禁用按钮
                 Command_SetSystemTime.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+                //UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -92,12 +96,21 @@ namespace WpfApp1.Command.Comand_GB3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async() =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("^S???DAT", GetTimeNow());
-
+                    //string receive = SerialCommunicationService.SendSettingCommand("^S???DAT", GetTimeNow());
+                    if (AppServices.CurrentBlueTooth!.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("^S???DAT", GetTimeNow(),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("^S???DAT", GetTimeNow());
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -116,7 +129,7 @@ namespace WpfApp1.Command.Comand_GB3024
                 Command_SetSystemTime.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+               // UpdateState("设置指令已经执行完");
             }
         }
 

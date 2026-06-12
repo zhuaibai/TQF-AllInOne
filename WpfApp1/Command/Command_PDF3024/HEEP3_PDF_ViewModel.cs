@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using WpfApp1.Convert;
 using WpfApp1.Services;
 using WpfApp1.ViewModels;
+using static WpfApp1.ViewModels.MainWindowVM;
 
 namespace WpfApp1.Command.Command_PDF3024
 {
@@ -19,14 +20,14 @@ namespace WpfApp1.Command.Command_PDF3024
         SemaphoreSlim _semaphore;        //异步竞争，资源锁
         Action<string> AddLog;           //添加日志委托
         Action<string> UpdateState;      //更新状态日志
-
-        public HEEP3_PDF_ViewModel(ManualResetEventSlim pauseEvent, SemaphoreSlim semaphore, Action<string> addLog, Action<string> updateState)
+        Action<string> UpdateBLState;      //更新状态日志
+        public HEEP3_PDF_ViewModel(ManualResetEventSlim pauseEvent, SemaphoreSlim semaphore, Action<string> addLog, Action<string> updateState, Action<string> updateBLState)
         {
             _pauseEvent = pauseEvent;
             _semaphore = semaphore;
             AddLog = addLog;
             UpdateState = updateState;
-
+            UpdateBLState = updateBLState;
             #region 初始化指令
 
 
@@ -102,13 +103,14 @@ namespace WpfApp1.Command.Command_PDF3024
         {
             try
             {
+                string? receive = null;
                 ZeroAdjPwr_IsWorking = true;
                 // 禁用按钮
                 Command_SetZeroAdjPwr.RaiseCanExecuteChanged();
 
                 // 异步等待锁
                 await _semaphore.WaitAsync();
-                UpdateState("正在执行设置命令");
+               // UpdateState("正在执行设置命令");
                 //Status = "正在执行特殊操作...";
 
                 // 暂停后台线程
@@ -117,12 +119,21 @@ namespace WpfApp1.Command.Command_PDF3024
 
                 // 执行特殊操作（带超时保护）
                 using var timeoutCts = new CancellationTokenSource(5000);
-                await Task.Run(new Action(() =>
+                await Task.Run(new Action(async() =>
                 {
                     //执行设置指令
                     Thread.Sleep(1000);//没有这个延时会报错
-                    string receive = SerialCommunicationService.SendSettingCommand("EZCTP", Tools.PadToFourDigits(ZeroAdjPwr_Inputs));
-
+                    //string receive = SerialCommunicationService.SendSettingCommand("EZCTP", Tools.PadToFourDigits(ZeroAdjPwr_Inputs));
+                    if (AppServices.CurrentBlueTooth!.IsConnected())
+                    {
+                        receive = await AppServices.CurrentBlueTooth.SendBLSettingCommand("EZCTP", Tools.PadToFourDigits(ZeroAdjPwr_Inputs),7);
+                        UpdateBLState("设置指令已经执行完");
+                    }
+                    else if (SerialCommunicationService.IsOpen())
+                    {
+                        receive = SerialCommunicationService.SendSettingCommand("EZCTP", Tools.PadToFourDigits(ZeroAdjPwr_Inputs));
+                        UpdateState("设置指令已经执行完");
+                    }
                 })
                 , timeoutCts.Token);
             }
@@ -141,7 +152,7 @@ namespace WpfApp1.Command.Command_PDF3024
                 Command_SetZeroAdjPwr.RaiseCanExecuteChanged();
                 // 确保释放锁
                 _semaphore.Release();
-                UpdateState("设置指令已经执行完");
+                //UpdateState("设置指令已经执行完");
             }
         }
 

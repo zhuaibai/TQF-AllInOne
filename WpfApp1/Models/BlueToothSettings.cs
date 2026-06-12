@@ -227,7 +227,7 @@ namespace WpfApp1.Models
         /// <param name="frontCommand"></param>
         /// <param name="setValue"></param>
         /// <returns></returns>
-        public async Task<string> SendBLSettingCommand(string frontCommand, string setValue)
+        public async Task<string> SendBLSettingCommand(string frontCommand, string setValue, int returnCount)
         {
             //指令与设置值结合
             string Command = frontCommand + setValue;
@@ -242,9 +242,11 @@ namespace WpfApp1.Models
             //完成指令
             byte[] sendCommand = buffer.Concat(endCommand).ToArray();
             //发送指令
-            string receive = await _bluetoothService.SendBLCommand(sendCommand, 7);
+            string receive = await _bluetoothService.SendBLCommand(sendCommand, returnCount);
             return receive;
         }
+
+       
         #endregion
 
     }

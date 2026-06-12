@@ -1,5 +1,4 @@
-﻿
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -79,12 +78,12 @@ namespace WpfApp1.ViewModels
             //初始化  GB   ViewModel
             hopVm = new HOPViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             hEEP1_ViewModel = new HEEP1_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            _HEEP1_HPVIN02 = new HEEP1_HPVINV02_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            hEEP2_ViewModel = new HEEP2_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            _HGEN = new HGEN_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HEEP1_HPVIN02 = new HEEP1_HPVINV02_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState, UpdateBluetoothState);
+            hEEP2_ViewModel = new HEEP2_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState, UpdateBluetoothState);
+            _HGEN = new HGEN_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState, UpdateBluetoothState);
             _HGRID_GB = new HGRID_GB_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             _HSTS_GB = new HSTS_GB_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            special_Command = new Special_Command(_pauseEvent, _semaphore, AddLog, UpdateState);
+            special_Command = new Special_Command(_pauseEvent, _semaphore, AddLog, UpdateState, UpdateBluetoothState);
             _HPVB_GB = new HPVB_GB_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             _HSTS2_HPVINV08 = new HSTS2_HPVINV08_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
 
@@ -101,9 +100,9 @@ namespace WpfApp1.ViewModels
             _HCTMSG1_PDF = new HCTMSG1_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             _HGRID_PDF = new HGRID_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             _HEEP1_PDF = new HEEP1_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            _HEEP3_PDF = new HEEP3_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HEEP3_PDF = new HEEP3_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState, UpdateBluetoothState);
             _HIMSG1 = new HIMSG1_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
-            _HOP_PDF = new HOP_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
+            _HOP_PDF = new HOP_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState,UpdateBluetoothState);
             _HPV_PDF = new HPV_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             _HTEMP_PDF = new HTEMP_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
             _HIGSG2_PDF = new HIMSG2_PDF_ViewModel(_pauseEvent, _semaphore, AddLog, UpdateState);
@@ -6497,14 +6496,14 @@ namespace WpfApp1.ViewModels
             {
                 //发送HOSTCRCEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN", 8);
                 ShowError(receive, "HOSTCRC");
             }
             else if (OnceOpenCRC)
             {
                 //发送HOSTCRDEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN", 8);
                 OnceOpenCRC = false;
                 IsChecked = false;
                 SerialCommunicationService.OpenReceiveCRC(false);
@@ -6887,14 +6886,14 @@ namespace WpfApp1.ViewModels
             {
                 //发送HOSTCRCEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN",8);
                 ShowError(receive, "HOSTCRC");
             }
             else if (OnceOpenCRC)
             {
                 //发送HOSTCRDEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN",8);
                 OnceOpenCRC = false;
                 IsChecked = false;
                 SerialCommunicationService.OpenReceiveCRC(false);
@@ -7181,14 +7180,14 @@ namespace WpfApp1.ViewModels
             {
                 //发送HOSTCRCEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN",8);
                 ShowError(receive, "HOSTCRC");
             }
             else if (OnceOpenCRC)
             {
                 //发送HOSTCRDEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN",8);
                 OnceOpenCRC = false;
                 IsChecked = false;
                 SerialCommunicationService.OpenReceiveCRC(false);
@@ -7407,14 +7406,14 @@ namespace WpfApp1.ViewModels
             {
                 //发送HOSTCRCEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN",8);
                 ShowError(receive, "HOSTCRC");
             }
             else if (OnceOpenCRC)
             {
                 //发送HOSTCRDEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN",8);
                 OnceOpenCRC = false;
                 IsChecked = false;
                 SerialCommunicationService.OpenReceiveCRC(false);
@@ -7443,7 +7442,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HSTS2_HPVINV08.Command, 40);
+                receive = await BlueToothSettings.SendBluetoothData(HSTS2_HPVINV08.Command, 40);
                 HSTS2_HPVINV08.AnalyseStringToElement(receive);
             }
             finally
@@ -7457,7 +7456,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HBMS1_VQ.Command, 70);
+                receive = await BlueToothSettings.SendBluetoothData(HBMS1_VQ.Command, 70);
                 HBMS1_VQ.AnalysisStringToElement(receive);
             }
             finally
@@ -7471,7 +7470,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP1_HPVINV02.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP1_HPVINV02.Command, 80);
                 HEEP1_HPVINV02.AnalyseStringToElement(receive);
             }
             finally
@@ -7485,7 +7484,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP2.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP2.Command, 80);
                 HEEP2.AnalyseStringToElement(receive);
             }
             finally
@@ -7499,7 +7498,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP3_PDF.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP3_PDF.Command, 80);
                 HEEP3_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -7512,7 +7511,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HOP_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HOP_PDF.Command, 50);
                 //解析返回命令
                 HOP_PDF.AnalysisStringToElement(receive);
                 //逆变百分比
@@ -7528,7 +7527,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
+                 receive = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
                 //解析返回命令
                 HPV_PDF.AnalysisStringToElement(receive);
                 //MPPT百分比
@@ -7544,7 +7543,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HIGSG2_PDF.Command, 50);
+                 receive = await BlueToothSettings.SendBluetoothData(HIGSG2_PDF.Command, 50);
                 HIGSG2_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -7558,7 +7557,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HGRID_GB.Command, 50);
+                 receive = await BlueToothSettings.SendBluetoothData(HGRID_GB.Command, 50);
                 //解析返回命令
                 HGRID_GB.AnalyseStringToElement(receive);
                 //显示
@@ -7576,7 +7575,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HTEMP_PDF.Command, 50);
+                 receive = await BlueToothSettings.SendBluetoothData(HTEMP_PDF.Command, 50);
                 HTEMP_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -7590,7 +7589,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HBAT_VQ.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HBAT_VQ.Command, 50);
                 HBAT_VQ.AnalysisStringToElement(receive);
                 BattPercent = StringToIntConversion(HBAT_VQ.BattCapacity);
             }
@@ -7605,7 +7604,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HIMSG1.Command, 21);
+                 receive = await BlueToothSettings.SendBluetoothData(HIMSG1.Command, 21);
                 HIMSG1.AnalysisStringToElement(receive);
             }
             finally
@@ -7619,7 +7618,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HGEN.Command, 60);
+                receive = await BlueToothSettings.SendBluetoothData(HGEN.Command, 60);
                 HGEN.AnalyseStringToElement(receive);
             }
             finally
@@ -7633,7 +7632,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HSTS_GB.Command, 40);
+                receive = await BlueToothSettings.SendBluetoothData(HSTS_GB.Command, 40);
                 HSTS_GB.AnalyseStringToElement(receive);
             }
             finally
@@ -7647,7 +7646,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
                 HPV_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -7661,7 +7660,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPVB_GB.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPVB_GB.Command, 50);
                 HPVB_GB.AnalysisStringToElement(receive);
             }
             finally
@@ -7674,7 +7673,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HCTMSG1_PDF.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HCTMSG1_PDF.Command, 80);
                 HCTMSG1_PDF.AnalysisStringToElement(receive);
                 ShowError(receive, "HCTMSG1");
             }
@@ -7797,14 +7796,14 @@ namespace WpfApp1.ViewModels
             {
                 //发送HOSTCRCEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN", 8);
                 ShowError(receive, "HOSTCRC");
             }
             else if (OnceOpenCRC)
             {
                 //发送HOSTCRDEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN", 8);
                 OnceOpenCRC = false;
                 IsChecked = false;
                 SerialCommunicationService.OpenReceiveCRC(false);
@@ -7833,7 +7832,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HSTS2_HPVINV08.Command, 40);
+                receive = await BlueToothSettings.SendBluetoothData(HSTS2_HPVINV08.Command, 40);
                 HSTS2_HPVINV08.AnalyseStringToElement(receive);
             }
             finally
@@ -7847,7 +7846,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HBMS1_VQ.Command, 70);
+                 receive = await BlueToothSettings.SendBluetoothData(HBMS1_VQ.Command, 70);
                 HBMS1_VQ.AnalysisStringToElement(receive);
             }
             finally
@@ -7861,7 +7860,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP1_HPVINV02.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP1_HPVINV02.Command, 80);
                 HEEP1_HPVINV02.AnalyseStringToElement(receive);
             }
             finally
@@ -7875,7 +7874,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP2.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP2.Command, 80);
                 HEEP2.AnalyseStringToElement(receive);
             }
             finally
@@ -7889,7 +7888,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP3_PDF.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP3_PDF.Command, 80);
                 HEEP3_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -7902,7 +7901,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HOP_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HOP_PDF.Command, 50);
                 //解析返回命令
                 HOP_PDF.AnalysisStringToElement(receive);
                 //逆变百分比
@@ -7918,7 +7917,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
                 //解析返回命令
                 HPV_PDF.AnalysisStringToElement(receive);
                 //MPPT百分比
@@ -7934,7 +7933,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HIGSG2_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HIGSG2_PDF.Command, 50);
                 HIGSG2_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -7948,7 +7947,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HGRID_GB.Command, 50);
+                 receive = await BlueToothSettings.SendBluetoothData(HGRID_GB.Command, 50);
                 //解析返回命令
                 HGRID_GB.AnalyseStringToElement(receive);
                 //显示
@@ -7966,7 +7965,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HTEMP_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HTEMP_PDF.Command, 50);
                 HTEMP_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -7980,7 +7979,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HBAT_VQ.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HBAT_VQ.Command, 50);
                 HBAT_VQ.AnalysisStringToElement(receive);
                 BattPercent = StringToIntConversion(HBAT_VQ.BattCapacity);
             }
@@ -7995,7 +7994,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HIMSG1.Command, 21);
+                receive = await BlueToothSettings.SendBluetoothData(HIMSG1.Command, 21);
                 HIMSG1.AnalysisStringToElement(receive);
             }
             finally
@@ -8009,7 +8008,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HGEN.Command, 60);
+                receive = await BlueToothSettings.SendBluetoothData(HGEN.Command, 60);
                 HGEN.AnalyseStringToElement(receive);
             }
             finally
@@ -8023,7 +8022,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HSTS_GB.Command, 40);
+                receive = await BlueToothSettings.SendBluetoothData(HSTS_GB.Command, 40);
                 HSTS_GB.AnalyseStringToElement(receive);
             }
             finally
@@ -8037,7 +8036,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
+               receive = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
                 HPV_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -8051,7 +8050,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPVB_GB.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPVB_GB.Command, 50);
                 HPVB_GB.AnalysisStringToElement(receive);
             }
             finally
@@ -8064,7 +8063,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HCTMSG1_PDF.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HCTMSG1_PDF.Command, 80);
                 HCTMSG1_PDF.AnalysisStringToElement(receive);
                 ShowError(receive, "HCTMSG1");
             }
@@ -8187,14 +8186,14 @@ namespace WpfApp1.ViewModels
             {
                 //发送HOSTCRCEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN",8);
                 ShowError(receive, "HOSTCRC");
             }
             else if (OnceOpenCRC)
             {
                 //发送HOSTCRDEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN",8);
                 OnceOpenCRC = false;
                 IsChecked = false;
                 SerialCommunicationService.OpenReceiveCRC(false);
@@ -8237,7 +8236,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HBMS1_VQ.Command, 70);
+                receive = await BlueToothSettings.SendBluetoothData(HBMS1_VQ.Command, 70);
                 HBMS1_VQ.AnalysisStringToElement(receive);
             }
             finally
@@ -8251,7 +8250,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP1_HPVINV02.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP1_HPVINV02.Command, 80);
                 HEEP1_HPVINV02.AnalyseStringToElement(receive);
             }
             finally
@@ -8265,7 +8264,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP2.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP2.Command, 80);
                 HEEP2.AnalyseStringToElement(receive);
             }
             finally
@@ -8279,7 +8278,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP3_PDF.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP3_PDF.Command, 80);
                 HEEP3_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -8292,7 +8291,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HOP_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HOP_PDF.Command, 50);
                 //解析返回命令
                 HOP_PDF.AnalysisStringToElement(receive);
                 //逆变百分比
@@ -8308,7 +8307,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
                 //解析返回命令
                 HPV_PDF.AnalysisStringToElement(receive);
                 //MPPT百分比
@@ -8324,7 +8323,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HIGSG2_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HIGSG2_PDF.Command, 50);
                 HIGSG2_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -8338,7 +8337,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HGRID_GB.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HGRID_GB.Command, 50);
                 //解析返回命令
                 HGRID_GB.AnalyseStringToElement(receive);
                 //显示
@@ -8356,7 +8355,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HTEMP_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HTEMP_PDF.Command, 50);
                 HTEMP_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -8370,7 +8369,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HBAT_VQ.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HBAT_VQ.Command, 50);
                 HBAT_VQ.AnalysisStringToElement(receive);
                 BattPercent = StringToIntConversion(HBAT_VQ.BattCapacity);
             }
@@ -8385,7 +8384,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HIMSG1.Command, 21);
+                receive = await BlueToothSettings.SendBluetoothData(HIMSG1.Command, 21);
                 HIMSG1.AnalysisStringToElement(receive);
             }
             finally
@@ -8399,7 +8398,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HGEN.Command, 60);
+                receive = await BlueToothSettings.SendBluetoothData(HGEN.Command, 60);
                 HGEN.AnalyseStringToElement(receive);
             }
             finally
@@ -8413,7 +8412,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HSTS_GB.Command, 40);
+                receive = await BlueToothSettings.SendBluetoothData(HSTS_GB.Command, 40);
                 HSTS_GB.AnalyseStringToElement(receive);
             }
             finally
@@ -8427,7 +8426,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
                 HPV_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -8441,7 +8440,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPVB_GB.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPVB_GB.Command, 50);
                 HPVB_GB.AnalysisStringToElement(receive);
             }
             finally
@@ -8454,7 +8453,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HCTMSG1_PDF.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HCTMSG1_PDF.Command, 80);
                 HCTMSG1_PDF.AnalysisStringToElement(receive);
                 ShowError(receive, "HCTMSG1");
             }
@@ -8577,14 +8576,14 @@ namespace WpfApp1.ViewModels
             {
                 //发送HOSTCRCEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN", 8);
                 ShowError(receive, "HOSTCRC");
             }
             else if (OnceOpenCRC)
             {
                 //发送HOSTCRDEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN", 8);
                 OnceOpenCRC = false;
                 IsChecked = false;
                 SerialCommunicationService.OpenReceiveCRC(false);
@@ -8613,7 +8612,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HSTS2_HPVINV08.Command, 40);
+                receive = await BlueToothSettings.SendBluetoothData(HSTS2_HPVINV08.Command, 40);
                 HSTS2_HPVINV08.AnalyseStringToElement(receive);
             }
             finally
@@ -8627,7 +8626,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HBMS1_VQ.Command, 70);
+                receive = await BlueToothSettings.SendBluetoothData(HBMS1_VQ.Command, 70);
                 HBMS1_VQ.AnalysisStringToElement(receive);
             }
             finally
@@ -8641,7 +8640,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP1_HPVINV02.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP1_HPVINV02.Command, 80);
                 HEEP1_HPVINV02.AnalyseStringToElement(receive);
             }
             finally
@@ -8655,7 +8654,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP2.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP2.Command, 80);
                 HEEP2.AnalyseStringToElement(receive);
             }
             finally
@@ -8669,7 +8668,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP3_PDF.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP3_PDF.Command, 80);
                 HEEP3_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -8682,7 +8681,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HOP_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HOP_PDF.Command, 50);
                 //解析返回命令
                 HOP_PDF.AnalysisStringToElement(receive);
                 //逆变百分比
@@ -8698,7 +8697,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
                 //解析返回命令
                 HPV_PDF.AnalysisStringToElement(receive);
                 //MPPT百分比
@@ -8714,7 +8713,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HIGSG2_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HIGSG2_PDF.Command, 50);
                 HIGSG2_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -8728,7 +8727,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HGRID_GB.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HGRID_GB.Command, 50);
                 //解析返回命令
                 HGRID_GB.AnalyseStringToElement(receive);
                 //显示
@@ -8746,7 +8745,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HTEMP_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HTEMP_PDF.Command, 50);
                 HTEMP_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -8760,7 +8759,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HBAT_VQ.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HBAT_VQ.Command, 50);
                 HBAT_VQ.AnalysisStringToElement(receive);
                 BattPercent = StringToIntConversion(HBAT_VQ.BattCapacity);
             }
@@ -8775,7 +8774,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HIMSG1.Command, 21);
+                receive = await BlueToothSettings.SendBluetoothData(HIMSG1.Command, 21);
                 HIMSG1.AnalysisStringToElement(receive);
             }
             finally
@@ -8789,7 +8788,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HGEN.Command, 60);
+                receive = await BlueToothSettings.SendBluetoothData(HGEN.Command, 60);
                 HGEN.AnalyseStringToElement(receive);
             }
             finally
@@ -8803,7 +8802,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HSTS_GB.Command, 40);
+                receive = await BlueToothSettings.SendBluetoothData(HSTS_GB.Command, 40);
                 HSTS_GB.AnalyseStringToElement(receive);
             }
             finally
@@ -8817,7 +8816,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
                 HPV_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -8831,7 +8830,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPVB_GB.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPVB_GB.Command, 50);
                 HPVB_GB.AnalysisStringToElement(receive);
             }
             finally
@@ -8844,7 +8843,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HCTMSG1_PDF.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HCTMSG1_PDF.Command, 80);
                 HCTMSG1_PDF.AnalysisStringToElement(receive);
                 ShowError(receive, "HCTMSG1");
             }
@@ -8955,7 +8954,7 @@ namespace WpfApp1.ViewModels
         }
         #endregion
 
-        #region HPVIN06通讯
+         #region HPVIN06通讯
         private async Task BlueToothCommunicationWithHPVINV06(CancellationToken token)
         {
 
@@ -8967,14 +8966,14 @@ namespace WpfApp1.ViewModels
             {
                 //发送HOSTCRCEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN",8);
                 ShowError(receive, "HOSTCRC");
             }
             else if (OnceOpenCRC)
             {
                 //发送HOSTCRDEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN",8);
                 OnceOpenCRC = false;
                 IsChecked = false;
                 SerialCommunicationService.OpenReceiveCRC(false);
@@ -9003,7 +9002,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HSTS2_HPVINV08.Command, 40);
+                receive = await BlueToothSettings.SendBluetoothData(HSTS2_HPVINV08.Command, 40);
                 HSTS2_HPVINV08.AnalyseStringToElement(receive);
             }
             finally
@@ -9017,7 +9016,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HBMS1_VQ.Command, 70);
+                receive = await BlueToothSettings.SendBluetoothData(HBMS1_VQ.Command, 70);
                 HBMS1_VQ.AnalysisStringToElement(receive);
             }
             finally
@@ -9031,7 +9030,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP1_HPVINV02.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP1_HPVINV02.Command, 80);
                 HEEP1_HPVINV02.AnalyseStringToElement(receive);
             }
             finally
@@ -9045,7 +9044,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP2.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP2.Command, 80);
                 HEEP2.AnalyseStringToElement(receive);
             }
             finally
@@ -9059,7 +9058,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP3_PDF.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP3_PDF.Command, 80);
                 HEEP3_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -9072,7 +9071,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HOP_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HOP_PDF.Command, 50);
                 //解析返回命令
                 HOP_PDF.AnalysisStringToElement(receive);
                 //逆变百分比
@@ -9088,7 +9087,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
                 //解析返回命令
                 HPV_PDF.AnalysisStringToElement(receive);
                 //MPPT百分比
@@ -9104,7 +9103,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HIGSG2_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HIGSG2_PDF.Command, 50);
                 HIGSG2_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -9118,7 +9117,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HGRID_GB.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HGRID_GB.Command, 50);
                 //解析返回命令
                 HGRID_GB.AnalyseStringToElement(receive);
                 //显示
@@ -9136,7 +9135,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HTEMP_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HTEMP_PDF.Command, 50);
                 HTEMP_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -9150,7 +9149,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HBAT_VQ.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HBAT_VQ.Command, 50);
                 HBAT_VQ.AnalysisStringToElement(receive);
                 BattPercent = StringToIntConversion(HBAT_VQ.BattCapacity);
             }
@@ -9165,7 +9164,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HIMSG1.Command, 21);
+                receive = await BlueToothSettings.SendBluetoothData(HIMSG1.Command, 21);
                 HIMSG1.AnalysisStringToElement(receive);
             }
             finally
@@ -9179,7 +9178,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HGEN.Command, 60);
+                receive = await BlueToothSettings.SendBluetoothData(HGEN.Command, 60);
                 HGEN.AnalyseStringToElement(receive);
             }
             finally
@@ -9193,7 +9192,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HSTS_GB.Command, 40);
+                receive = await BlueToothSettings.SendBluetoothData(HSTS_GB.Command, 40);
                 HSTS_GB.AnalyseStringToElement(receive);
             }
             finally
@@ -9207,7 +9206,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
                 HPV_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -9221,7 +9220,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPVB_GB.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPVB_GB.Command, 50);
                 HPVB_GB.AnalysisStringToElement(receive);
             }
             finally
@@ -9234,7 +9233,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HCTMSG1_PDF.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HCTMSG1_PDF.Command, 80);
                 HCTMSG1_PDF.AnalysisStringToElement(receive);
                 ShowError(receive, "HCTMSG1");
             }
@@ -9357,14 +9356,14 @@ namespace WpfApp1.ViewModels
             {
                 //发送HOSTCRCEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN",8);
                 ShowError(receive, "HOSTCRC");
             }
             else if (OnceOpenCRC)
             {
                 //发送HOSTCRDEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN",8);
                 OnceOpenCRC = false;
                 IsChecked = false;
                 SerialCommunicationService.OpenReceiveCRC(false);
@@ -9393,7 +9392,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HSTS2_HPVINV08.Command, 40);
+                receive = await BlueToothSettings.SendBluetoothData(HSTS2_HPVINV08.Command, 40);
                 HSTS2_HPVINV08.AnalyseStringToElement(receive);
             }
             finally
@@ -9407,7 +9406,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HBMS1_VQ.Command, 70);
+                receive = await BlueToothSettings.SendBluetoothData(HBMS1_VQ.Command, 70);
                 HBMS1_VQ.AnalysisStringToElement(receive);
             }
             finally
@@ -9421,7 +9420,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP1_HPVINV02.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP1_HPVINV02.Command, 80);
                 HEEP1_HPVINV02.AnalyseStringToElement(receive);
             }
             finally
@@ -9435,7 +9434,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP2.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP2.Command, 80);
                 HEEP2.AnalyseStringToElement(receive);
             }
             finally
@@ -9449,7 +9448,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP3_PDF.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP3_PDF.Command, 80);
                 HEEP3_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -9462,7 +9461,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HOP_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HOP_PDF.Command, 50);
                 //解析返回命令
                 HOP_PDF.AnalysisStringToElement(receive);
                 //逆变百分比
@@ -9478,7 +9477,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
                 //解析返回命令
                 HPV_PDF.AnalysisStringToElement(receive);
                 //MPPT百分比
@@ -9494,7 +9493,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HIGSG2_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HIGSG2_PDF.Command, 50);
                 HIGSG2_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -9508,7 +9507,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HGRID_GB.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HGRID_GB.Command, 50);
                 //解析返回命令
                 HGRID_GB.AnalyseStringToElement(receive);
                 //显示
@@ -9526,7 +9525,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HTEMP_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HTEMP_PDF.Command, 50);
                 HTEMP_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -9540,7 +9539,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HBAT_VQ.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HBAT_VQ.Command, 50);
                 HBAT_VQ.AnalysisStringToElement(receive);
                 BattPercent = StringToIntConversion(HBAT_VQ.BattCapacity);
             }
@@ -9555,7 +9554,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HIMSG1.Command, 21);
+                receive = await BlueToothSettings.SendBluetoothData(HIMSG1.Command, 21);
                 HIMSG1.AnalysisStringToElement(receive);
             }
             finally
@@ -9569,7 +9568,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HGEN.Command, 60);
+                receive = await BlueToothSettings.SendBluetoothData(HGEN.Command, 60);
                 HGEN.AnalyseStringToElement(receive);
             }
             finally
@@ -9583,7 +9582,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HSTS_GB.Command, 40);
+                receive = await BlueToothSettings.SendBluetoothData(HSTS_GB.Command, 40);
                 HSTS_GB.AnalyseStringToElement(receive);
             }
             finally
@@ -9597,7 +9596,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
                 HPV_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -9611,7 +9610,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPVB_GB.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPVB_GB.Command, 50);
                 HPVB_GB.AnalysisStringToElement(receive);
             }
             finally
@@ -9624,7 +9623,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HCTMSG1_PDF.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HCTMSG1_PDF.Command, 80);
                 HCTMSG1_PDF.AnalysisStringToElement(receive);
                 ShowError(receive, "HCTMSG1");
             }
@@ -9747,14 +9746,14 @@ namespace WpfApp1.ViewModels
             {
                 //发送HOSTCRCEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN",8);
                 ShowError(receive, "HOSTCRC");
             }
             else if (OnceOpenCRC)
             {
                 //发送HOSTCRDEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN",8);
                 OnceOpenCRC = false;
                 IsChecked = false;
                 SerialCommunicationService.OpenReceiveCRC(false);
@@ -9783,7 +9782,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HSTS2_HPVINV08.Command, 40);
+                receive = await BlueToothSettings.SendBluetoothData(HSTS2_HPVINV08.Command, 40);
                 HSTS2_HPVINV08.AnalyseStringToElement(receive);
             }
             finally
@@ -9797,7 +9796,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HBMS1_VQ.Command, 70);
+                receive = await BlueToothSettings.SendBluetoothData(HBMS1_VQ.Command, 70);
                 HBMS1_VQ.AnalysisStringToElement(receive);
             }
             finally
@@ -9811,7 +9810,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP1_HPVINV02.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP1_HPVINV02.Command, 80);
                 HEEP1_HPVINV02.AnalyseStringToElement(receive);
             }
             finally
@@ -9825,7 +9824,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP2.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP2.Command, 80);
                 HEEP2.AnalyseStringToElement(receive);
             }
             finally
@@ -9839,7 +9838,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP3_PDF.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP3_PDF.Command, 80);
                 HEEP3_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -9852,7 +9851,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HOP_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HOP_PDF.Command, 50);
                 //解析返回命令
                 HOP_PDF.AnalysisStringToElement(receive);
                 //逆变百分比
@@ -9868,7 +9867,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
                 //解析返回命令
                 HPV_PDF.AnalysisStringToElement(receive);
                 //MPPT百分比
@@ -9884,7 +9883,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HIGSG2_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HIGSG2_PDF.Command, 50);
                 HIGSG2_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -9898,7 +9897,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HGRID_GB.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HGRID_GB.Command, 50);
                 //解析返回命令
                 HGRID_GB.AnalyseStringToElement(receive);
                 //显示
@@ -9916,7 +9915,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HTEMP_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HTEMP_PDF.Command, 50);
                 HTEMP_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -9930,7 +9929,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HBAT_VQ.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HBAT_VQ.Command, 50);
                 HBAT_VQ.AnalysisStringToElement(receive);
                 BattPercent = StringToIntConversion(HBAT_VQ.BattCapacity);
             }
@@ -9945,7 +9944,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HIMSG1.Command, 21);
+                receive = await BlueToothSettings.SendBluetoothData(HIMSG1.Command, 21);
                 HIMSG1.AnalysisStringToElement(receive);
             }
             finally
@@ -9959,7 +9958,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HGEN.Command, 60);
+                receive = await BlueToothSettings.SendBluetoothData(HGEN.Command, 60);
                 HGEN.AnalyseStringToElement(receive);
             }
             finally
@@ -9973,7 +9972,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HSTS_GB.Command, 40);
+                receive = await BlueToothSettings.SendBluetoothData(HSTS_GB.Command, 40);
                 HSTS_GB.AnalyseStringToElement(receive);
             }
             finally
@@ -9987,7 +9986,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
                 HPV_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -10001,7 +10000,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPVB_GB.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPVB_GB.Command, 50);
                 HPVB_GB.AnalysisStringToElement(receive);
             }
             finally
@@ -10014,7 +10013,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HCTMSG1_PDF.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HCTMSG1_PDF.Command, 80);
                 HCTMSG1_PDF.AnalysisStringToElement(receive);
                 ShowError(receive, "HCTMSG1");
             }
@@ -10137,14 +10136,14 @@ namespace WpfApp1.ViewModels
             {
                 //发送HOSTCRCEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "EN",8);
                 ShowError(receive, "HOSTCRC");
             }
             else if (OnceOpenCRC)
             {
                 //发送HOSTCRDEN指令
                 _pauseEvent.Wait(token);
-                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN");
+                receive = await BlueToothSettings.SendBLSettingCommand("HOSTCRC", "DN",8);
                 OnceOpenCRC = false;
                 IsChecked = false;
                 SerialCommunicationService.OpenReceiveCRC(false);
@@ -10173,7 +10172,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HSTS2_HPVINV08.Command, 40);
+                receive = await BlueToothSettings.SendBluetoothData(HSTS2_HPVINV08.Command, 40);
                 HSTS2_HPVINV08.AnalyseStringToElement(receive);
             }
             finally
@@ -10187,7 +10186,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HBMS1_VQ.Command, 70);
+                receive = await BlueToothSettings.SendBluetoothData(HBMS1_VQ.Command, 70);
                 HBMS1_VQ.AnalysisStringToElement(receive);
             }
             finally
@@ -10201,7 +10200,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP1_HPVINV02.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP1_HPVINV02.Command, 80);
                 HEEP1_HPVINV02.AnalyseStringToElement(receive);
             }
             finally
@@ -10215,7 +10214,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP2.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP2.Command, 80);
                 HEEP2.AnalyseStringToElement(receive);
             }
             finally
@@ -10229,7 +10228,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HEEP3_PDF.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HEEP3_PDF.Command, 80);
                 HEEP3_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -10242,7 +10241,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HOP_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HOP_PDF.Command, 50);
                 //解析返回命令
                 HOP_PDF.AnalysisStringToElement(receive);
                 //逆变百分比
@@ -10258,7 +10257,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
                 //解析返回命令
                 HPV_PDF.AnalysisStringToElement(receive);
                 //MPPT百分比
@@ -10274,7 +10273,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HIGSG2_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HIGSG2_PDF.Command, 50);
                 HIGSG2_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -10288,7 +10287,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HGRID_GB.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HGRID_GB.Command, 50);
                 //解析返回命令
                 HGRID_GB.AnalyseStringToElement(receive);
                 //显示
@@ -10306,7 +10305,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HTEMP_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HTEMP_PDF.Command, 50);
                 HTEMP_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -10320,7 +10319,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HBAT_VQ.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HBAT_VQ.Command, 50);
                 HBAT_VQ.AnalysisStringToElement(receive);
                 BattPercent = StringToIntConversion(HBAT_VQ.BattCapacity);
             }
@@ -10335,7 +10334,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HIMSG1.Command, 21);
+                receive = await BlueToothSettings.SendBluetoothData(HIMSG1.Command, 21);
                 HIMSG1.AnalysisStringToElement(receive);
             }
             finally
@@ -10349,7 +10348,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HGEN.Command, 60);
+                receive = await BlueToothSettings.SendBluetoothData(HGEN.Command, 60);
                 HGEN.AnalyseStringToElement(receive);
             }
             finally
@@ -10363,7 +10362,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HSTS_GB.Command, 40);
+                receive = await BlueToothSettings.SendBluetoothData(HSTS_GB.Command, 40);
                 HSTS_GB.AnalyseStringToElement(receive);
             }
             finally
@@ -10377,7 +10376,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPV_PDF.Command, 50);
                 HPV_PDF.AnalysisStringToElement(receive);
             }
             finally
@@ -10391,7 +10390,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HPVB_GB.Command, 50);
+                receive = await BlueToothSettings.SendBluetoothData(HPVB_GB.Command, 50);
                 HPVB_GB.AnalysisStringToElement(receive);
             }
             finally
@@ -10404,7 +10403,7 @@ namespace WpfApp1.ViewModels
             await _semaphore.WaitAsync(token);
             try
             {
-                string receive_MachineType = await BlueToothSettings.SendBluetoothData(HCTMSG1_PDF.Command, 80);
+                receive = await BlueToothSettings.SendBluetoothData(HCTMSG1_PDF.Command, 80);
                 HCTMSG1_PDF.AnalysisStringToElement(receive);
                 ShowError(receive, "HCTMSG1");
             }
